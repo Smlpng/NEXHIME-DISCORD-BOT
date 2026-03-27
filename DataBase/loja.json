@@ -1,0 +1,14 @@
+{
+	"Recursos": {
+		"Madeira": {
+			"Preço": 15,
+			"Descrição": "Um recurso básico para craft e construções.",
+			"resource": "wood"
+		},
+		"Ferro": {
+			"Preço": 150,
+			"Descrição": "Recurso mais raro usado em upgrades e forja.",
+			"resource": "iron"
+		}
+	}
+}

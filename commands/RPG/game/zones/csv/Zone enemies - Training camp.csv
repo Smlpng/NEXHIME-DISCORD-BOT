@@ -1,0 +1,6 @@
+Name,ID,Min-Level,Max-Level,Probability,Boss
+Totem do Bando,1,1,2,15,FALSE
+Sagui Saqueador,5,1,2,30,FALSE
+Mico Vigia,6,1,3,30,FALSE
+Larva da Copa,7,1,3,25,FALSE
+Rei do Poleiro de Banana,19,4,4,0,TRUE

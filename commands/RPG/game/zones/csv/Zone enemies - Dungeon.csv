@@ -1,0 +1,6 @@
+Name,ID,Min-Level,Max-Level,Probability,Boss
+Gosma de Banana,2,13,19,30,FALSE
+Macaco Ossudo,4,15,21,30,FALSE
+Sombra do Galho,8,15,21,15,FALSE
+Rato do Celeiro de Banana,9,13,21,25,FALSE
+Símio de Magma,3,23,23,0,TRUE

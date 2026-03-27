@@ -1,0 +1,5 @@
+Name,ID,Min-Level,Max-Level,Probability,Boss
+Sapo do Bananal Podre,18,40,45,35,FALSE
+Mutante do Pantano Símio,20,39,46,30,FALSE
+Soldados de Lama do Bando Caido,23,40,45,35,FALSE
+Xama da Lua Banana,24,50,50,0,TRUE

@@ -1,0 +1,66 @@
+{
+  "hero": [
+    {
+      "id": 1,
+      "user_id": 773954862223851560,
+      "class": null,
+      "level": 1,
+      "xp": 0,
+      "gold": 0,
+      "wood": 0,
+      "iron": 0,
+      "runes": 0,
+      "weapon_id": null,
+      "armor_id": null,
+      "zone_id": 1,
+      "active": 1,
+      "race": "Gorila",
+      "tribe": "Tribo do Vazio Estelar"
+    },
+    {
+      "id": 2,
+      "user_id": 859906494103158818,
+      "race": "Macaco-prego",
+      "tribe": null,
+      "class": 2,
+      "level": 1,
+      "xp": 0,
+      "gold": 0,
+      "wood": 0,
+      "iron": 0,
+      "runes": 0,
+      "weapon_id": null,
+      "armor_id": null,
+      "zone_id": 1,
+      "active": 1
+    }
+  ],
+  "inventory": [],
+  "advancements": [
+    {
+      "hero_id": 1,
+      "kills": 0,
+      "upgrades": 0,
+      "gold_spent": 0
+    },
+    {
+      "hero_id": 2,
+      "kills": 0,
+      "upgrades": 0,
+      "gold_spent": 0
+    }
+  ],
+  "dex": [],
+  "quest_log": {},
+  "bank": {
+    "773954862223851560": 0,
+    "859906494103158818": 0
+  },
+  "meta": {
+    "next_ids": {
+      "hero": 3,
+      "inventory": 1,
+      "dex": 1
+    }
+  }
+}

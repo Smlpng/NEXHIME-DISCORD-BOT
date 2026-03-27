@@ -1,0 +1,6 @@
+Name,ID,Min-Level,Max-Level,Probability,Boss
+Ancestral Enfaixado,14,26,34,30,FALSE
+Escorpiao da Casca,15,31,37,15,FALSE
+Guardiao de Areia do Cacho,16,28,36,25,FALSE
+Catadores do Sol,17,28,36,30,FALSE
+Ancestral das Dunas,22,37,37,0,TRUE

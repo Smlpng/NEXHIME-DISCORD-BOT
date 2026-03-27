@@ -1,0 +1,6 @@
+Name,ID,Min-Level,Max-Level,Probability,Boss
+Bugio de Presas,10,22,27,30,FALSE
+Gorila Saqueador,11,27,33,15,FALSE
+Urso das Bananeiras,12,20,30,25,FALSE
+Jiboia do Cipó,13,21,28,30,FALSE
+Guardiao do Dossel,21,32,32,0,TRUE
