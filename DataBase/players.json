@@ -3,10 +3,10 @@
     {
       "id": 1,
       "user_id": 773954862223851560,
-      "class": null,
+      "class": 1,
       "level": 1,
-      "xp": 0,
-      "gold": 0,
+      "xp": 2,
+      "gold": 1,
       "wood": 0,
       "iron": 0,
       "runes": 0,
@@ -39,7 +39,7 @@
   "advancements": [
     {
       "hero_id": 1,
-      "kills": 0,
+      "kills": 1,
       "upgrades": 0,
       "gold_spent": 0
     },
@@ -50,7 +50,13 @@
       "gold_spent": 0
     }
   ],
-  "dex": [],
+  "dex": [
+    {
+      "id": 1,
+      "hero_id": 1,
+      "enemy_id": 6
+    }
+  ],
   "quest_log": {},
   "bank": {
     "773954862223851560": 0,
@@ -60,7 +66,7 @@
     "next_ids": {
       "hero": 3,
       "inventory": 1,
-      "dex": 1
+      "dex": 2
     }
   }
 }

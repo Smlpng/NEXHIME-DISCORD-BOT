@@ -93,11 +93,14 @@ class Stats(commands.Cog):
         bank_balance = get_bank_balance(inte.user.id)
         embed = Embed(title=f"Menu de {inte.user.name}", color=discord.Color.blue())
         embed.add_field(name="💰 Economia", value=f"**Carteira:** {data['gold']}\n**Banco:** {bank_balance}", inline=False)
+        embed.add_field(name="\n", value="\u200b", inline=False) # Espaçamento entre seções
         embed.add_field(name="🎭 Classe", value=hero.classname, inline=True)
         embed.add_field(name="🧬 Raça", value=race, inline=True)
         embed.add_field(name="🏕️ Tribo", value=tribe, inline=True)
+        embed.add_field(name="\n", value="\u200b", inline=False) # Espaçamento entre seções
         embed.add_field(name="📈 Nível", value=hero.level, inline=True)
-        embed.add_field(name="🧪 XP", value=bar, inline=False)
+        embed.add_field(name="🧪 XP", value=bar, inline=True)
+        embed.add_field(name="\n", value="\u200b", inline=False) # Espaçamento entre seções
         embed.add_field(name="🌲 Madeira", value=data["wood"], inline=True)
         embed.add_field(name="⛏️ Ferro", value=data["iron"], inline=True)
         embed.add_field(name="🧿 Runas", value=data["runes"], inline=True)
