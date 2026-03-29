@@ -27,7 +27,7 @@ class EnemyTotemDoBando(BaseHero):
         }
         
         self.loot = Loot(
-            gold=10,
+            nex=10,
             wood=2,
             xp=10,
             equipment = WeaponKnife,
@@ -63,7 +63,7 @@ class EnemyGosmaDeBanana(BaseHero):
         }
         
         self.loot = Loot(
-           gold=1,
+           nex=1,
            wood=0,
            iron=1,
            runes=0,
@@ -99,7 +99,7 @@ class EnemySimioDeMagma(BaseHero):
         }
         
         self.loot = Loot(
-            gold=60,
+            nex=60,
             wood=5,
             iron=0,
             runes=0,
@@ -141,7 +141,7 @@ class EnemyMacacoOssudo(BaseHero):
         }
         
         self.loot = Loot(
-            gold=1,
+            nex=1,
             wood=0,
             iron=1,
             runes=0,
@@ -183,7 +183,7 @@ class EnemySaguiSaqueador(BaseHero):
         }
         
         self.loot = Loot(
-            gold=2,
+            nex=2,
             wood=0,
             iron=0,
             runes=0,
@@ -220,7 +220,7 @@ class EnemyMicoVigia(BaseHero):
         }
 
         self.loot = Loot(
-            gold=1,
+            nex=1,
             wood=0,
             iron=0,
             runes=0,
@@ -257,7 +257,7 @@ class EnemyLarvaDaCopa(BaseHero):
         }
 
         self.loot = Loot(
-            gold=0,
+            nex=0,
             wood=0,
             iron=0,
             runes=0,
@@ -294,7 +294,7 @@ class EnemySombraDoGalho(BaseHero):
         }
 
         self.loot = Loot(
-            gold=1,
+            nex=1,
             wood=0,
             iron=2,
             runes=0,
@@ -331,7 +331,7 @@ class EnemyRatoDoCeleiroDeBanana(BaseHero):
         }
 
         self.loot = Loot(
-            gold=2,
+            nex=2,
             wood=0,
             iron=0,
             runes=0,
@@ -368,7 +368,7 @@ class EnemyBugioDePresas(BaseHero):
         }
 
         self.loot = Loot(
-            gold=2,
+            nex=2,
             wood=1,
             iron=0,
             runes=0,
@@ -411,7 +411,7 @@ class EnemyGorilaSaqueador(BaseHero):
         }
 
         self.loot = Loot(
-            gold=6,
+            nex=6,
             wood=1,
             iron=0,
             runes=0,
@@ -448,7 +448,7 @@ class EnemyUrsoDasBananeiras(BaseHero):
         }
 
         self.loot = Loot(
-            gold=2,
+            nex=2,
             wood=3,
             iron=0,
             runes=0,
@@ -485,7 +485,7 @@ class EnemyJiboiaDoCipo(BaseHero):
         }
 
         self.loot = Loot(
-            gold=3,
+            nex=3,
             wood=1,
             iron=0,
             runes=0,
@@ -522,7 +522,7 @@ class EnemyAncestralEnfaixado(BaseHero):
         }
 
         self.loot = Loot(
-            gold=2,
+            nex=2,
             wood=1,
             iron=1,
             runes=0,
@@ -565,7 +565,7 @@ class EnemyEscorpiaoDaCasca(BaseHero):
         }
 
         self.loot = Loot(
-            gold=4,
+            nex=4,
             wood=0,
             iron=0,
             runes=0,
@@ -602,7 +602,7 @@ class EnemyGuardiaoDeAreiaDoCacho(BaseHero):
         }
 
         self.loot = Loot(
-            gold=3,
+            nex=3,
             wood=1,
             iron=2,
             runes=0,
@@ -639,7 +639,7 @@ class EnemyCatadoresDoSol(BaseHero):
         }
 
         self.loot = Loot(
-            gold=3,
+            nex=3,
             wood=0,
             iron=2,
             runes=0,
@@ -676,7 +676,7 @@ class EnemySapoDoBananalPodre(BaseHero):
         }
 
         self.loot = Loot(
-            gold=3,
+            nex=3,
             wood=3,
             iron=1,
             runes=0,
@@ -713,7 +713,7 @@ class EnemyReiDoPoleiroDeBanana(BaseHero):
         }
 
         self.loot = Loot(
-            gold=40,
+            nex=40,
             wood=2,
             iron=0,
             runes=0,
@@ -750,7 +750,7 @@ class EnemyMutanteDoPantanoSimio(BaseHero):
         }
 
         self.loot = Loot(
-            gold=2,
+            nex=2,
             wood=2,
             iron=0,
             runes=0,
@@ -787,7 +787,7 @@ class EnemyGuardiaoDoDossel(BaseHero):
         }
 
         self.loot = Loot(
-            gold=47,
+            nex=47,
             wood=4,
             iron=3,
             runes=1,
@@ -824,7 +824,7 @@ class EnemyAncestralDasDunas(BaseHero):
         }
 
         self.loot = Loot(
-            gold=45,
+            nex=45,
             wood=4,
             iron=4,
             runes=1,
@@ -861,7 +861,7 @@ class EnemySoldadoDeLamaDoBandoCaido(BaseHero):
         }
 
         self.loot = Loot(
-            gold=5,
+            nex=5,
             wood=2,
             iron=1,
             runes=0,
@@ -898,7 +898,7 @@ class EnemyXamaDaLuaBanana(BaseHero):
         }
 
         self.loot = Loot(
-            gold=60,
+            nex=60,
             wood=8,
             iron=3,
             runes=2,

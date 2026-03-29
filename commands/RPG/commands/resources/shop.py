@@ -7,7 +7,7 @@ from discord.ui import View
 from discord.ext import commands
 
 from commands.RPG.utils.database import get_active_hero, update_active_hero_resources
-from commands.RPG.utils.progress import add_gold_spent
+from commands.RPG.utils.progress import add_nex_spent
 from commands.RPG.utils.hero_check import economy_profile_created
 from commands.RPG.utils.command_adapter import CommandContextAdapter
 
@@ -99,7 +99,7 @@ class Shop(commands.Cog):
             for segmento, item_name, payload in _iter_items(loja):
                 preco = payload.get("Preço", payload.get("preco", 0))
                 desc = payload.get("Descrição", payload.get("descricao", ""))
-                line = f"🪙 **{preco}** → **{item_name}**"
+                line = f"**{item_name}**: **{preco}** 🪙"
                 if desc:
                     line += f"\n_{desc}_"
                 embed.add_field(name=str(segmento), value=line, inline=False)
@@ -145,32 +145,32 @@ class Shop(commands.Cog):
             return
 
         data = get_active_hero(inte.user.id)
-        user_gold = data["gold"]
+        user_nex = data["nex"]
 
         price = unit_price * amount
-        if price > user_gold:
-            await inte.response.send_message("Voce nao tem ouro suficiente.")
+        if price > user_nex:
+            await inte.response.send_message("Voce nao tem nex suficiente.")
             return
 
         # Mantém compatibilidade: se o JSON tiver um campo de recurso, use-o.
         # Caso não tenha, tenta mapear pelo nome do item (madeira/ferro etc.).
         resource_key = payload.get("resource") or payload.get("Recurso")
         if isinstance(resource_key, str) and resource_key.strip():
-            kwargs = {resource_key.strip(): amount, "gold": -price}
+            kwargs = {resource_key.strip(): amount, "nex": -price}
             update_active_hero_resources(inte.user.id, **kwargs)
         else:
             name_norm = _normalize_key(item_name)
             if "madeira" in name_norm or name_norm == "wood":
-                update_active_hero_resources(inte.user.id, gold=-price, wood=amount)
+                update_active_hero_resources(inte.user.id, nex=-price, wood=amount)
             elif "ferro" in name_norm or name_norm == "iron":
-                update_active_hero_resources(inte.user.id, gold=-price, iron=amount)
+                update_active_hero_resources(inte.user.id, nex=-price, iron=amount)
             else:
                 await inte.response.send_message(
                     "Este item não possui mapeamento de recurso. Adicione `resource` no loja.json (ex: 'wood', 'iron', etc.)."
                 )
                 return
         
-        add_gold_spent(inte.user.id, price)
+        add_nex_spent(inte.user.id, price)
         
         await inte.response.send_message(f"{amount} de {item_name} foi comprado com sucesso.")
 

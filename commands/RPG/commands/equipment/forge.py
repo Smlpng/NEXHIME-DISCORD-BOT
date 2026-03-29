@@ -42,12 +42,12 @@ class Forge(commands.Cog):
     
         embed.add_field(name=name, value=f"Nivel: {item['level']}", inline=False)
         embed.add_field(name="Custo", value="", inline=False)
-        embed.add_field(name="Ouro 💰", value=cost[0], inline=True)
+        embed.add_field(name="Nex 💰", value=cost[0], inline=True)
         embed.add_field(name="Madeira 🌲", value=cost[1], inline=True)
         embed.add_field(name="Ferro ⛏️", value=cost[2], inline=True)
         embed.add_field(name="Runas 🧿", value=cost[3], inline=True)
         embed.add_field(name="Inventario", value="", inline=False)
-        embed.add_field(name="Ouro 💰", value=user_data["gold"], inline=True)
+        embed.add_field(name="Nex 💰", value=user_data["nex"], inline=True)
         embed.add_field(name="Madeira 🌲", value=user_data["wood"], inline=True)
         embed.add_field(name="Ferro ⛏️", value=user_data["iron"], inline=True)
         embed.add_field(name="Runas 🧿", value=user_data["runes"], inline=True)
@@ -150,7 +150,7 @@ class Forge(commands.Cog):
         button_back.callback = lambda i, inte=inte : self.create_clean_start_message(inte, interaction=i)
         view.add_item(button_back)
         if cost:
-            if user_data["gold"] >= cost[0] and user_data["wood"] >= cost[1] and user_data["iron"] >= cost[2] and user_data["runes"] >= cost[3]:
+            if user_data["nex"] >= cost[0] and user_data["wood"] >= cost[1] and user_data["iron"] >= cost[2] and user_data["runes"] >= cost[3]:
                 upgrade_button = Button(label="Melhorar", style=ButtonStyle.primary)
                 upgrade_button.callback = lambda i, item_object=item_object, user_id=inte.user.id, item_dict=item, inte=inte:self.upgrade_item(i, item_object, user_id, item_dict, inte)
                 view.add_item(upgrade_button)

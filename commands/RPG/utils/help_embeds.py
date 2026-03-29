@@ -53,10 +53,10 @@ def get_help_embed(command_id: int):
         embed.add_field(name="/shop", value="Abre a loja para ver os itens disponiveis. 🛒", inline=False)
         embed.add_field(name="/buy [item] [amount]", value="Compra um item na loja. 🛍️", inline=False)
         embed.add_field(name="/trade [give_item] [give_amount] [receive_item] [receive_amount]", value="Troca recursos com outro jogador. 🤝", inline=False)
-        embed.add_field(name="/banco", value="Mostra quanto ouro esta na carteira e no banco. 🏦", inline=False)
-        embed.add_field(name="/depositar [quantidade]", value="Move ouro da carteira do heroi para o banco. 📥", inline=False)
-        embed.add_field(name="/sacar [quantidade]", value="Move ouro do banco para a carteira do heroi. 📤", inline=False)
-        embed.add_field(name="/transferir [jogador] [quantidade]", value="Envia ouro do seu banco para o banco de outro jogador. 💸", inline=False)
+        embed.add_field(name="/banco", value="Mostra quanto nex esta na carteira e no banco. 🏦", inline=False)
+        embed.add_field(name="/depositar [quantidade]", value="Move nex da carteira do heroi para o banco. 📥", inline=False)
+        embed.add_field(name="/sacar [quantidade]", value="Move nex do banco para a carteira do heroi. 📤", inline=False)
+        embed.add_field(name="/transferir [jogador] [quantidade]", value="Envia nex do seu banco para o banco de outro jogador. 💸", inline=False)
         embed.set_image(url="https://cdn.discordapp.com/attachments/474702643625984021/1272675246918336532/DALLE_2024-08-12_18.57.02_-_A_fantasy_RPG_style_image_of_logs_placed_side_by_side._The_logs_have_a_semi-realistic_appearance_with_rough_bark_and_visible_wood_grain_but_not_overl.webp?ex=66bbd6b0&is=66ba8530&hm=00f16d18e828e6543018165ae80d81276b5644c3d9c946934a8e62bc8dfa4300&")
         
     return embed

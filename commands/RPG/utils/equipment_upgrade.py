@@ -5,8 +5,8 @@ def equipment_upgrade_cost(level : int, rarity : int) -> tuple:
     if not (0 <= level <= 49 and level < rarity * 10):
         return False
     
-    # Gold
-    gold_cost = level * (100 * ((level // 10) + 1))
+    # Nex
+    nex_cost = level * (100 * ((level // 10) + 1))
     
     # Wood
     wood_cost = 10 + level ** 2 * 2
@@ -34,7 +34,7 @@ def equipment_upgrade_cost(level : int, rarity : int) -> tuple:
     else:
         rune_cost = 0
     
-    return (gold_cost, wood_cost, iron_cost, rune_cost)
+    return (nex_cost, wood_cost, iron_cost, rune_cost)
 
 
 def make_upgrade(user_id : int, item : object) -> bool:
@@ -46,8 +46,8 @@ def make_upgrade(user_id : int, item : object) -> bool:
     
     data = get_hero_resources_by_id(hero_id)
     
-    if data["gold"] >= cost[0] and data["wood"] >= cost[1] and data["iron"] >= cost[2] and data["runes"] >= cost[3]:
-        spend_hero_resources(hero_id, gold=cost[0], wood=cost[1], iron=cost[2], runes=cost[3])
+    if data["nex"] >= cost[0] and data["wood"] >= cost[1] and data["iron"] >= cost[2] and data["runes"] >= cost[3]:
+        spend_hero_resources(hero_id, nex=cost[0], wood=cost[1], iron=cost[2], runes=cost[3])
         increment_inventory_item_level(hero_id, item.id, item.type)
         
         add_upgrade(user_id)

@@ -8,7 +8,7 @@ import random
 class Wanted(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.template_path = "assets/wanted/wanted.png"
+        self.template_path = "assets/templates/wanted/wanted.png"
         self.font_path = "assets/fonts/timesbd.ttf"  # Times New Roman
 
     def draw_bold_text(self, draw, position, text, font, fill, thickness=1):

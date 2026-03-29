@@ -11,13 +11,13 @@ class Trade(commands.Cog):
         self.resource_emojis = {
             1: '🌲',  # Wood
             2: '⛏️',  # Iron
-            3: '🏆'   # Gold
+            3: '🏆'   # Nex
         }
 
         self.resource_names = {
             1: 'Madeira',
             2: 'Ferro',
-            3: 'Ouro'
+            3: 'Nex'
         }
 
     @commands.hybrid_command(name='trade')
@@ -25,12 +25,12 @@ class Trade(commands.Cog):
         give=[
             app_commands.Choice(name="Madeira", value=1),
             app_commands.Choice(name="Ferro", value=2),
-            app_commands.Choice(name="Ouro", value=3)
+            app_commands.Choice(name="Nex", value=3)
         ],
         receive=[
             app_commands.Choice(name="Madeira", value=1),
             app_commands.Choice(name="Ferro", value=2),
-            app_commands.Choice(name="Ouro", value=3)
+            app_commands.Choice(name="Nex", value=3)
         ]
     )
     async def trade(self, ctx, give : int, give_amount : int, receive : int, receive_amount : int):
@@ -49,8 +49,8 @@ class Trade(commands.Cog):
 
         data = get_active_hero(inte.user.id)
 
-        resource_column = self.resource_names[give].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('ouro', 'gold')
-        receive_column = self.resource_names[receive].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('ouro', 'gold')
+        resource_column = self.resource_names[give].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('nex', 'nex')
+        receive_column = self.resource_names[receive].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('nex', 'nex')
 
         if data[resource_column] < give_amount:
             return await inte.response.send_message("Voce nao tem recursos suficientes para essa troca.", ephemeral=True)
@@ -74,8 +74,8 @@ class Trade(commands.Cog):
         
         data = get_active_hero(interaction.user.id)
         
-        resource_column = self.resource_names[give].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('ouro', 'gold')
-        receive_column = self.resource_names[receive].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('ouro', 'gold')
+        resource_column = self.resource_names[give].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('nex', 'nex')
+        receive_column = self.resource_names[receive].lower().replace('madeira', 'wood').replace('ferro', 'iron').replace('nex', 'nex')
 
         if data[receive_column] < receive_amount:
             return await interaction.response.send_message("Voce nao tem recursos suficientes para aceitar essa troca.", ephemeral=True)
@@ -90,14 +90,14 @@ class Trade(commands.Cog):
         
         update_active_hero_resources(
             inte.user.id,
-            gold=(-give_amount if resource_column == "gold" else receive_amount if receive_column == "gold" else 0),
+            nex=(-give_amount if resource_column == "nex" else receive_amount if receive_column == "nex" else 0),
             wood=(-give_amount if resource_column == "wood" else receive_amount if receive_column == "wood" else 0),
             iron=(-give_amount if resource_column == "iron" else receive_amount if receive_column == "iron" else 0),
         )
 
         update_active_hero_resources(
             interaction.user.id,
-            gold=(give_amount if resource_column == "gold" else -receive_amount if receive_column == "gold" else 0),
+            nex=(give_amount if resource_column == "nex" else -receive_amount if receive_column == "nex" else 0),
             wood=(give_amount if resource_column == "wood" else -receive_amount if receive_column == "wood" else 0),
             iron=(give_amount if resource_column == "iron" else -receive_amount if receive_column == "iron" else 0),
         )

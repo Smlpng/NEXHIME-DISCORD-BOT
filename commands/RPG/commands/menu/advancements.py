@@ -28,7 +28,7 @@ class Advancements(commands.Cog):
         embed = Embed(title=f"Progresso de {inte.user.name}", color=Color.blue())
         embed.add_field(name=f'Derrote 100 monstros ({data["kills"]}/100)', value=create_bar(data["kills"],100), inline=False)
         embed.add_field(name=f'Melhore equipamentos 30 vezes ({data["upgrades"]}/30)', value=create_bar(data["upgrades"], 30), inline=False)
-        embed.add_field(name=f'Gaste 100.000 moedas ({data["gold_spent"]}/100000)', value=create_bar(data["gold_spent"], 100000), inline=False)
+        embed.add_field(name=f'Gaste 100.000 nex ({data["nex_spent"]}/100000)', value=create_bar(data["nex_spent"], 100000), inline=False)
         
         await inte.response.send_message(embed=embed)
 

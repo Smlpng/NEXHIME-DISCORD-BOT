@@ -60,6 +60,6 @@ def get_dungeon_from_zone(zone_id: int, bonus: float=None) -> list:
 
 def get_dungeon_loot_from_zone(zone_id: int) -> Loot:
     equipments = [None, WeaponCrossbow, ArmorScale, ArmorBearSkin, WeaponSpear, WeaponRelic]
-    loot = Loot(gold=20**zone_id,wood=3**zone_id,iron=3**zone_id,xp=100**zone_id,equipment=equipments[zone_id],drop_rate=1)
+    loot = Loot(nex=20**zone_id,wood=3**zone_id,iron=3**zone_id,xp=100**zone_id,equipment=equipments[zone_id],drop_rate=1)
     return loot
     

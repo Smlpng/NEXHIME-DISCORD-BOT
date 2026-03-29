@@ -4,8 +4,8 @@ from commands.RPG.utils.hero_actions import add_if_new
 
 
 class Loot():
-    def __init__(self, gold=0, wood=0, iron=0, runes=0, xp=0, equipment=None, drop_rate=0.1, level=1):
-        self.gold = gold 
+    def __init__(self, nex=0, wood=0, iron=0, runes=0, xp=0, equipment=None, drop_rate=0.1, level=1):
+        self.nex = nex 
         self.wood = wood
         self.iron = iron
         self.runes = runes
@@ -31,12 +31,12 @@ class Loot():
             level_up = 0
         
         # Load resources data
-        apply_loot_to_active_hero(user_id, level_up, int(final_xp), self.gold, self.wood, self.iron, self.runes)
+        apply_loot_to_active_hero(user_id, level_up, int(final_xp), self.nex, self.wood, self.iron, self.runes)
         
         # Create message
         message = "Recebeu"
-        if self.gold > 0:
-            message = message + f" {self.gold} de ouro"
+        if self.nex > 0:
+            message = message + f" {self.nex} nex"
         if self.wood > 0:
             message = message + f" {self.wood} de madeira"
         if self.iron > 0:

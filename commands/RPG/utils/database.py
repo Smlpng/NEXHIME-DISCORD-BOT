@@ -16,7 +16,7 @@ HERO_FIELDS = [
 	"class",
 	"level",
 	"xp",
-	"gold",
+	"nex",
 	"wood",
 	"iron",
 	"runes",
@@ -26,7 +26,7 @@ HERO_FIELDS = [
 	"active",
 ]
 INVENTORY_FIELDS = ["id", "hero_id", "type", "item_id", "level"]
-ADVANCEMENT_FIELDS = ["hero_id", "kills", "upgrades", "gold_spent"]
+ADVANCEMENT_FIELDS = ["hero_id", "kills", "upgrades", "nex_spent"]
 DEX_FIELDS = ["id", "hero_id", "enemy_id"]
 
 ITEM_TYPE_NAME_BY_ID = {
@@ -100,8 +100,20 @@ def _normalize_state(state: dict | None) -> dict:
 		normalized["meta"]["next_ids"].update(meta.get("next_ids", {}))
 
 	for hero in normalized["hero"]:
+		if "nex" not in hero and "gold" in hero:
+			hero["nex"] = hero.pop("gold")
+		else:
+			hero.setdefault("nex", 0)
+		hero.pop("gold", None)
 		hero.setdefault("race", None)
 		hero.setdefault("tribe", None)
+
+	for advancement in normalized["advancements"]:
+		if "nex_spent" not in advancement and "gold_spent" in advancement:
+			advancement["nex_spent"] = advancement.pop("gold_spent")
+		else:
+			advancement.setdefault("nex_spent", 0)
+		advancement.pop("gold_spent", None)
 
 	for hero_id, quest_data in list(normalized["quest_log"].items()):
 		if not isinstance(quest_data, dict):
@@ -109,6 +121,13 @@ def _normalize_state(state: dict | None) -> dict:
 			continue
 		quest_data.setdefault("active", {})
 		quest_data.setdefault("completed", [])
+		for active_data in quest_data["active"].values():
+			snapshot = active_data.get("snapshot")
+			if not isinstance(snapshot, dict):
+				continue
+			if "nex_spent" not in snapshot and "gold_spent" in snapshot:
+				snapshot["nex_spent"] = snapshot.pop("gold_spent")
+			snapshot.pop("gold_spent", None)
 
 	normalized["meta"]["next_ids"]["hero"] = max(
 		normalized["meta"]["next_ids"].get("hero", 1),
@@ -213,7 +232,7 @@ def _build_clean_hero_row(state: dict, hero: dict) -> dict:
 		"class": hero["class"],
 		"level": hero["level"],
 		"xp": hero["xp"],
-		"gold": hero["gold"],
+		"nex": hero["nex"],
 		"wood": hero["wood"],
 		"iron": hero["iron"],
 		"runes": hero["runes"],
@@ -250,7 +269,7 @@ def _build_hero(user_id: int, class_id: int | None, active: int, hero_id: int) -
 		"class": class_id,
 		"level": 1,
 		"xp": 0,
-		"gold": 0,
+		"nex": 0,
 		"wood": 0,
 		"iron": 0,
 		"runes": 0,
@@ -266,7 +285,7 @@ def _build_advancement(hero_id: int) -> dict:
 		"hero_id": hero_id,
 		"kills": 0,
 		"upgrades": 0,
-		"gold_spent": 0,
+		"nex_spent": 0,
 	}
 
 
@@ -403,7 +422,7 @@ def get_hero_resources_by_id(hero_id: int) -> dict | None:
 	hero = _get_hero_row_by_id(state, hero_id)
 	if hero is None:
 		return None
-	return {key: hero[key] for key in ("gold", "wood", "iron", "runes")}
+	return {key: hero[key] for key in ("nex", "wood", "iron", "runes")}
 
 
 def get_active_hero_clean(user_id: int) -> dict | None:
@@ -481,26 +500,26 @@ def equip_item(user_id: int, item_type_name: str, item_id: int) -> None:
 		_write_state_unlocked(state)
 
 
-def spend_hero_resources(hero_id: int, gold: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> None:
+def spend_hero_resources(hero_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> None:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_hero_row_by_id(state, hero_id)
 		if hero is None:
 			return
-		hero["gold"] -= gold
+		hero["nex"] -= nex
 		hero["wood"] -= wood
 		hero["iron"] -= iron
 		hero["runes"] -= runes
 		_write_state_unlocked(state)
 
 
-def update_active_hero_resources(user_id: int, gold: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> None:
+def update_active_hero_resources(user_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> None:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_active_hero_row(state, user_id)
 		if hero is None:
 			return
-		hero["gold"] += gold
+		hero["nex"] += nex
 		hero["wood"] += wood
 		hero["iron"] += iron
 		hero["runes"] += runes
@@ -512,22 +531,22 @@ def get_bank_balance(user_id: int) -> int:
 	return int(state.get("bank", {}).get(str(user_id), 0))
 
 
-def deposit_gold_to_bank(user_id: int, amount: int) -> bool:
+def deposit_nex_to_bank(user_id: int, amount: int) -> bool:
 	if amount <= 0:
 		return False
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_active_hero_row(state, user_id)
-		if hero is None or hero["gold"] < amount:
+		if hero is None or hero["nex"] < amount:
 			return False
-		hero["gold"] -= amount
+		hero["nex"] -= amount
 		state.setdefault("bank", {})
 		state["bank"][str(user_id)] = int(state["bank"].get(str(user_id), 0)) + amount
 		_write_state_unlocked(state)
 		return True
 
 
-def withdraw_gold_from_bank(user_id: int, amount: int) -> bool:
+def withdraw_nex_from_bank(user_id: int, amount: int) -> bool:
 	if amount <= 0:
 		return False
 	with LOCK:
@@ -537,12 +556,12 @@ def withdraw_gold_from_bank(user_id: int, amount: int) -> bool:
 		if hero is None or balance < amount:
 			return False
 		state["bank"][str(user_id)] = balance - amount
-		hero["gold"] += amount
+		hero["nex"] += amount
 		_write_state_unlocked(state)
 		return True
 
 
-def transfer_bank_gold(sender_user_id: int, target_user_id: int, amount: int) -> bool:
+def transfer_bank_nex(sender_user_id: int, target_user_id: int, amount: int) -> bool:
 	if amount <= 0 or sender_user_id == target_user_id:
 		return False
 	with LOCK:
@@ -557,11 +576,23 @@ def transfer_bank_gold(sender_user_id: int, target_user_id: int, amount: int) ->
 		return True
 
 
+def deposit_gold_to_bank(user_id: int, amount: int) -> bool:
+	return deposit_nex_to_bank(user_id, amount)
+
+
+def withdraw_gold_from_bank(user_id: int, amount: int) -> bool:
+	return withdraw_nex_from_bank(user_id, amount)
+
+
+def transfer_bank_gold(sender_user_id: int, target_user_id: int, amount: int) -> bool:
+	return transfer_bank_nex(sender_user_id, target_user_id, amount)
+
+
 def apply_loot_to_active_hero(
 	user_id: int,
 	level_delta: int,
 	xp: int,
-	gold: int,
+	nex: int,
 	wood: int,
 	iron: int,
 	runes: int,
@@ -573,7 +604,7 @@ def apply_loot_to_active_hero(
 			return
 		hero["level"] += level_delta
 		hero["xp"] = xp
-		hero["gold"] += gold
+		hero["nex"] += nex
 		hero["wood"] += wood
 		hero["iron"] += iron
 		hero["runes"] += runes

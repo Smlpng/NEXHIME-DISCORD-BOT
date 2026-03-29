@@ -5,12 +5,102 @@ from discord.ui import Button, Select, View
 from commands.RPG.utils.database import ensure_profile, get_active_hero, get_bank_balance, has_selected_class
 from commands.RPG.utils.hero_actions import load_hero
 from commands.RPG.game.characters.ability_info import abilities_embed
+from commands.RPG.game.zones.embeds import zones_data
 from commands.RPG.utils.command_adapter import CommandContextAdapter
 from commands.RPG.utils.create import create_hero
 
 class Stats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @staticmethod
+    def _format_timestamp(value):
+        if value is None:
+            return "Desconhecida"
+        return f"<t:{int(value.timestamp())}:F> (<t:{int(value.timestamp())}:R>)"
+
+    @staticmethod
+    def _resolve_zone_name(zone_id):
+        if isinstance(zone_id, int) and 0 <= zone_id < len(zones_data):
+            zone_name = zones_data[zone_id].get("name")
+            if zone_name:
+                return zone_name
+        return "Não definida"
+
+    @staticmethod
+    def _build_progress_bar(current: int, total: int, size: int = 10):
+        if total <= 0:
+            total = 1
+        progress = min(max(current / total, 0), 1)
+        filled = round(size * progress)
+        return "█" * filled + "░" * (size - filled)
+
+    def _build_status_embed(self, inte, *, data, class_name, level, xp_value, xp_needed, hp_text, energy_text, image_url,
+                            attack, defense, magic, magic_resistance, weapon_name, armor_name):
+        bank_balance = get_bank_balance(inte.user.id)
+        zone_name = self._resolve_zone_name(data.get("zone_id"))
+        created_at = self._format_timestamp(getattr(inte.user, "created_at", None))
+        joined_at = self._format_timestamp(getattr(inte.user, "joined_at", None))
+        progress_bar = self._build_progress_bar(xp_value, xp_needed)
+
+        embed = Embed(
+            title=f"Status de {inte.user.display_name}",
+            color=discord.Color.from_rgb(155, 89, 182),
+        )
+        embed.add_field(
+            name="💰 Economia",
+            value=f"**Carteira:** {data['nex']}\n**Banco:** {bank_balance}",
+            inline=False,
+        )
+        embed.add_field(name="🛡️ Classe", value=class_name, inline=True)
+        embed.add_field(name="🗺️ Local", value=zone_name, inline=True)
+        embed.add_field(
+            name="📈 Progresso",
+            value=f"**Nível:** {level}\n**XP:** {xp_value}/{xp_needed}\n`{progress_bar}`\n",
+            inline=False,
+        )
+        embed.add_field(name="❤️ HP", value=hp_text, inline=True)
+        embed.add_field(name="⚡ Energia", value=energy_text, inline=True)
+        embed.add_field(
+            name="📊 Atributos",
+            value=(
+                f"💪 **Força:** {attack}\u2003\u2003\u2003\u2003🛡️ **Defesa:** {defense}\n"
+                f"🔮 **Inteligência:** {magic}\u2003\u2003✨ **Res. mágica:** {magic_resistance}\n"
+            ),
+            inline=False,
+        )
+        embed.add_field(
+            name="🎒 Recursos",
+            value=(
+                f"🌲 **Madeira:** {data['wood']}\n"
+                f"⛏️ **Ferro:** {data['iron']}\n"
+                f"🧿 **Runas:** {data['runes']}"
+            ),
+            inline=True,
+        )
+        embed.add_field(
+            name="🧪 Equipamentos",
+            value=(
+                f"**Arma:** {weapon_name}\n"
+                f"**Armadura:** {armor_name}\n"
+                "**Acessório:** --"
+            ),
+            inline=True,
+        )
+        embed.add_field(
+            name="📅 Datas",
+            value=(
+                f"**Conta criada:** {created_at}\n"
+                f"**Entrou no servidor:** {joined_at}"
+            ),
+            inline=False,
+        )
+
+        thumbnail_url = image_url or getattr(inte.user.display_avatar, "url", None)
+        if thumbnail_url:
+            embed.set_thumbnail(url=thumbnail_url)
+        embed.set_footer(text=f"Perfil de {inte.user.display_name}")
+        return embed
 
     @commands.hybrid_command(
         name="escolher_classe",
@@ -76,64 +166,51 @@ class Stats(commands.Cog):
         
         
     def load_stats(self, data, inte):
-        race = data.get("race") or "Não escolhida"
-        tribe = data.get("tribe") or "Não escolhida"
         if not has_selected_class(inte.user.id):
             return self.load_profile_without_class(data, inte)
 
         hero = load_hero(inte.user.id, name=inte.user.name)
 
         xp_needed = round(6.5 * (1.5 ** hero.level))
-        progress = data["xp"] / xp_needed if xp_needed else 0
-        progress = min(max(progress, 0), 1)
-        filled_length = int(20 * progress)
-        bar = "█" * filled_length + "-" * (20 - filled_length)
-        bar = f"[{bar}] {data['xp']}/{xp_needed} XP"
-
-        bank_balance = get_bank_balance(inte.user.id)
-        embed = Embed(title=f"Menu de {inte.user.name}", color=discord.Color.blue())
-        embed.add_field(name="💰 Economia", value=f"**Carteira:** {data['gold']}\n**Banco:** {bank_balance}", inline=False)
-        embed.add_field(name="\n", value="\u200b", inline=False) # Espaçamento entre seções
-        embed.add_field(name="🎭 Classe", value=hero.classname, inline=True)
-        embed.add_field(name="🧬 Raça", value=race, inline=True)
-        embed.add_field(name="🏕️ Tribo", value=tribe, inline=True)
-        embed.add_field(name="\n", value="\u200b", inline=False) # Espaçamento entre seções
-        embed.add_field(name="📈 Nível", value=hero.level, inline=True)
-        embed.add_field(name="🧪 XP", value=bar, inline=True)
-        embed.add_field(name="\n", value="\u200b", inline=False) # Espaçamento entre seções
-        embed.add_field(name="🌲 Madeira", value=data["wood"], inline=True)
-        embed.add_field(name="⛏️ Ferro", value=data["iron"], inline=True)
-        embed.add_field(name="🧿 Runas", value=data["runes"], inline=True)
-        embed.add_field(name="❤️ Vida", value=hero.hp, inline=True)
-        embed.add_field(name="🔵 Mana", value=hero.mana, inline=True)
-        embed.add_field(name="⚔️ Ataque", value=hero.attack, inline=True)
-        embed.add_field(name="🔮 Magia", value=hero.magic, inline=True)
-        embed.add_field(name="🛡️ Defesa", value=hero.defense, inline=True)
-        embed.add_field(name="✨ Resistência mágica", value=hero.magic_resistance, inline=True)
-        embed.add_field(name="🗡️ Arma", value=hero.weapon.name if hero.weapon else "Nenhuma", inline=True)
-        embed.add_field(name="🛡️ Armadura", value=hero.armor.name if hero.armor else "Nenhuma", inline=True)
-
-        embed.set_image(url=hero.image)
-        embed.set_footer(text="Perfil do personagem")
-
-        return embed
+        max_hp = getattr(hero, "max_hp", hero.hp)
+        max_mana = getattr(hero, "max_mana", hero.mana)
+        return self._build_status_embed(
+            inte,
+            data=data,
+            class_name=hero.classname,
+            level=hero.level,
+            xp_value=data["xp"],
+            xp_needed=xp_needed,
+            hp_text=f"{hero.hp}/{max_hp}",
+            energy_text=f"{hero.mana}/{max_mana}",
+            image_url=getattr(hero, "image", None),
+            attack=hero.attack,
+            defense=hero.defense,
+            magic=hero.magic,
+            magic_resistance=hero.magic_resistance,
+            weapon_name=hero.weapon.name if hero.weapon else "--",
+            armor_name=hero.armor.name if hero.armor else "--",
+        )
 
 
     def load_profile_without_class(self, data, inte):
-        bank_balance = get_bank_balance(inte.user.id)
-        race = data.get("race") or "Não escolhida"
-        tribe = data.get("tribe") or "Não escolhida"
-        embed = Embed(title=f"Menu de {inte.user.name}", color=discord.Color.blue())
-        embed.add_field(name="Classe 🏹", value="Não escolhida", inline=True)
-        embed.add_field(name="Raça 🧬", value=race, inline=True)
-        embed.add_field(name="Tribo 🏕️", value=tribe, inline=True)
-        embed.add_field(name="Nível 📈", value=data["level"], inline=True)
-        embed.add_field(name="XP 🧪", value=f'{data["xp"]}/10', inline=False)
-        embed.add_field(name="Ouro na carteira 💰", value=data["gold"], inline=True)
-        embed.add_field(name="Ouro no banco 🏦", value=bank_balance, inline=True)
-        embed.add_field(name="Madeira 🌲", value=data["wood"], inline=True)
-        embed.add_field(name="Ferro ⛏️", value=data["iron"], inline=True)
-        embed.add_field(name="Runas 🧿", value=data["runes"], inline=True)
+        embed = self._build_status_embed(
+            inte,
+            data=data,
+            class_name="Não escolhida",
+            level=data["level"],
+            xp_value=data["xp"],
+            xp_needed=10,
+            hp_text="--",
+            energy_text="--",
+            image_url=None,
+            attack="--",
+            defense="--",
+            magic="--",
+            magic_resistance="--",
+            weapon_name="--",
+            armor_name="--",
+        )
         embed.add_field(
             name="Próximo passo",
             value="Escolher uma classe é opcional. Quando quiser, use o comando de escolher classe para definir como seu herói vai lutar.",

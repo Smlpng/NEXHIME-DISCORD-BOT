@@ -25,7 +25,7 @@ QUESTS = {
         "type": "kills",
         "goal": 5,
         "requirements": {"level": 1},
-        "rewards": {"gold": 60, "wood": 3},
+        "rewards": {"nex": 60, "wood": 3},
     },
     "ferreiro_aprendiz": {
         "name": "Ferreiro Aprendiz",
@@ -33,12 +33,12 @@ QUESTS = {
         "type": "upgrades",
         "goal": 1,
         "requirements": {"level": 1},
-        "rewards": {"gold": 40, "iron": 2},
+        "rewards": {"nex": 40, "iron": 2},
     },
     "mercador_do_bando": {
         "name": "Mercador do Bando",
-        "description": "Gaste 200 moedas com o seu heroi.",
-        "type": "gold_spent",
+        "description": "Gaste 200 nex com o seu heroi.",
+        "type": "nex_spent",
         "goal": 200,
         "requirements": {"level": 1},
         "rewards": {"wood": 4, "iron": 1, "runes": 1},
@@ -49,7 +49,7 @@ QUESTS = {
         "type": "inventory_count",
         "goal": 3,
         "requirements": {"level": 1},
-        "rewards": {"gold": 80, "runes": 1},
+        "rewards": {"nex": 80, "runes": 1},
     },
     "ruinas_cobertas": {
         "name": "Rumo as Ruinas",
@@ -57,7 +57,7 @@ QUESTS = {
         "type": "zone_reach",
         "goal": 2,
         "requirements": {"level": 10},
-        "rewards": {"gold": 120, "wood": 5, "iron": 3},
+        "rewards": {"nex": 120, "wood": 5, "iron": 3},
     },
 }
 
@@ -65,7 +65,7 @@ QUESTS = {
 PROGRESS_FIELDS = {
     "kills": "kills",
     "upgrades": "upgrades",
-    "gold_spent": "gold_spent",
+    "nex_spent": "nex_spent",
 }
 
 
@@ -95,7 +95,7 @@ def get_inventory_count(user_id: int) -> int:
 
 def get_progress_value(user_id: int, quest_type: str, active_data: dict) -> int:
     if quest_type in PROGRESS_FIELDS:
-        advancements = get_advancements(user_id) or {"kills": 0, "upgrades": 0, "gold_spent": 0}
+        advancements = get_advancements(user_id) or {"kills": 0, "upgrades": 0, "nex_spent": 0}
         baseline = int(active_data.get("snapshot", {}).get(PROGRESS_FIELDS[quest_type], 0))
         return max(0, int(advancements.get(PROGRESS_FIELDS[quest_type], 0)) - baseline)
     if quest_type == "inventory_count":
@@ -124,14 +124,14 @@ def grant_rewards(user_id: int, quest: dict) -> str:
     rewards = quest.get("rewards", {})
     update_active_hero_resources(
         user_id,
-        gold=int(rewards.get("gold", 0)),
+        nex=int(rewards.get("nex", 0)),
         wood=int(rewards.get("wood", 0)),
         iron=int(rewards.get("iron", 0)),
         runes=int(rewards.get("runes", 0)),
     )
     parts = []
-    if rewards.get("gold"):
-        parts.append(f"{rewards['gold']} ouro")
+    if rewards.get("nex"):
+        parts.append(f"{rewards['nex']} nex")
     if rewards.get("wood"):
         parts.append(f"{rewards['wood']} madeira")
     if rewards.get("iron"):
@@ -188,7 +188,7 @@ class Quests(commands.Cog):
 
             snapshot = {}
             if quest["type"] in PROGRESS_FIELDS:
-                advancements = get_advancements(inte.user.id) or {"kills": 0, "upgrades": 0, "gold_spent": 0}
+                advancements = get_advancements(inte.user.id) or {"kills": 0, "upgrades": 0, "nex_spent": 0}
                 snapshot[PROGRESS_FIELDS[quest["type"]]] = int(advancements.get(PROGRESS_FIELDS[quest["type"]], 0))
 
             quest_log["active"][quest_id] = {
@@ -286,8 +286,8 @@ class Quests(commands.Cog):
 def grant_rewards_preview(quest: dict) -> str:
     rewards = quest.get("rewards", {})
     parts = []
-    if rewards.get("gold"):
-        parts.append(f"{rewards['gold']} ouro")
+    if rewards.get("nex"):
+        parts.append(f"{rewards['nex']} nex")
     if rewards.get("wood"):
         parts.append(f"{rewards['wood']} madeira")
     if rewards.get("iron"):
