@@ -2,12 +2,19 @@ import discord
 from discord import Embed, SelectOption
 from discord.ext import commands
 from discord.ui import Button, Select, View
-from commands.RPG.utils.database import ensure_profile, get_active_hero, get_bank_balance, has_selected_class
+from commands.RPG.utils.database import ensure_profile, get_active_hero, get_bank_balance, has_selected_class, list_active_inventory
 from commands.RPG.utils.hero_actions import load_hero
 from commands.RPG.game.characters.ability_info import abilities_embed
-from commands.RPG.game.zones.embeds import zones_data
 from commands.RPG.utils.command_adapter import CommandContextAdapter
 from commands.RPG.utils.create import create_hero
+from commands.RPG.utils.presentation import (
+    RPG_PRIMARY_COLOR,
+    add_spacer,
+    build_inventory_embed,
+    build_progress_bar,
+    resolve_zone_name,
+)
+from commands.RPG.utils.progress import get_xp_required
 
 class Stats(commands.Cog):
     def __init__(self, bot):
@@ -19,48 +26,40 @@ class Stats(commands.Cog):
             return "Desconhecida"
         return f"<t:{int(value.timestamp())}:F> (<t:{int(value.timestamp())}:R>)"
 
-    @staticmethod
-    def _resolve_zone_name(zone_id):
-        if isinstance(zone_id, int) and 0 <= zone_id < len(zones_data):
-            zone_name = zones_data[zone_id].get("name")
-            if zone_name:
-                return zone_name
-        return "Não definida"
-
-    @staticmethod
-    def _build_progress_bar(current: int, total: int, size: int = 10):
-        if total <= 0:
-            total = 1
-        progress = min(max(current / total, 0), 1)
-        filled = round(size * progress)
-        return "█" * filled + "░" * (size - filled)
-
     def _build_status_embed(self, inte, *, data, class_name, level, xp_value, xp_needed, hp_text, energy_text, image_url,
                             attack, defense, magic, magic_resistance, weapon_name, armor_name):
         bank_balance = get_bank_balance(inte.user.id)
-        zone_name = self._resolve_zone_name(data.get("zone_id"))
+        zone_name = resolve_zone_name(data.get("zone_id"))
+        primate_race = data.get("race") or "Não definida"
+        tribe_name = data.get("tribe") or "Não definida"
         created_at = self._format_timestamp(getattr(inte.user, "created_at", None))
         joined_at = self._format_timestamp(getattr(inte.user, "joined_at", None))
-        progress_bar = self._build_progress_bar(xp_value, xp_needed)
+        progress_bar = build_progress_bar(xp_value, xp_needed)
 
         embed = Embed(
             title=f"Status de {inte.user.display_name}",
-            color=discord.Color.from_rgb(155, 89, 182),
+            color=RPG_PRIMARY_COLOR,
         )
         embed.add_field(
             name="💰 Economia",
             value=f"**Carteira:** {data['nex']}\n**Banco:** {bank_balance}",
             inline=False,
         )
+        add_spacer(embed)
         embed.add_field(name="🛡️ Classe", value=class_name, inline=True)
-        embed.add_field(name="🗺️ Local", value=zone_name, inline=True)
+        embed.add_field(name="🐒 Espécie", value=primate_race, inline=True)
+        embed.add_field(name="🏕️ Tribo", value=tribe_name, inline=True)
+        embed.add_field(name="🗺️ Local", value=zone_name, inline=False)
+        add_spacer(embed)
         embed.add_field(
             name="📈 Progresso",
             value=f"**Nível:** {level}\n**XP:** {xp_value}/{xp_needed}\n`{progress_bar}`\n",
             inline=False,
         )
+        add_spacer(embed)
         embed.add_field(name="❤️ HP", value=hp_text, inline=True)
         embed.add_field(name="⚡ Energia", value=energy_text, inline=True)
+        add_spacer(embed)
         embed.add_field(
             name="📊 Atributos",
             value=(
@@ -69,6 +68,7 @@ class Stats(commands.Cog):
             ),
             inline=False,
         )
+        add_spacer(embed)
         embed.add_field(
             name="🎒 Recursos",
             value=(
@@ -87,6 +87,7 @@ class Stats(commands.Cog):
             ),
             inline=True,
         )
+        add_spacer(embed)
         embed.add_field(
             name="📅 Datas",
             value=(
@@ -101,6 +102,42 @@ class Stats(commands.Cog):
             embed.set_thumbnail(url=thumbnail_url)
         embed.set_footer(text=f"Perfil de {inte.user.display_name}")
         return embed
+
+    def load_economy_page(self, data, inte):
+        bank_balance = get_bank_balance(inte.user.id)
+        total = data["nex"] + bank_balance
+        embed = Embed(title=f"Economia de {inte.user.display_name}", color=RPG_PRIMARY_COLOR)
+        embed.add_field(name="Carteira", value=f"{data['nex']} nex", inline=True)
+        embed.add_field(name="Banco", value=f"{bank_balance} nex", inline=True)
+        embed.add_field(name="Total", value=f"{total} nex", inline=False)
+        add_spacer(embed)
+        embed.add_field(
+            name="Recursos",
+            value=(
+                f"🌲 Madeira: {data['wood']}\n"
+                f"⛏️ Ferro: {data['iron']}\n"
+                f"🧿 Runas: {data['runes']}"
+            ),
+            inline=False,
+        )
+        embed.set_footer(text="Use banco, depositar, sacar, transferir e loja para gerenciar sua economia.")
+        return embed
+
+    def load_inventory_page(self, data, inte):
+        inventory_rows = list_active_inventory(inte.user.id)
+        embed = build_inventory_embed(inte.user.display_name, inventory_rows, data)
+        embed.set_footer(text="Use equip_weapon e equip_armor para trocar seus equipamentos.")
+        return embed
+
+    def load_menu_page(self, page_name: str, inte):
+        data = get_active_hero(inte.user.id)
+        if page_name == "economia":
+            return self.load_economy_page(data, inte)
+        if page_name == "inventario":
+            return self.load_inventory_page(data, inte)
+        if page_name == "habilidades":
+            return self.load_ability_info(inte)
+        return self.load_stats(data, inte)
 
     @commands.hybrid_command(
         name="escolher_classe",
@@ -125,8 +162,10 @@ class Stats(commands.Cog):
                 self.stats_obj = stats_obj
                 
                 options = [
-                    SelectOption(value=1, label="Perfil", emoji='🧪'),
-                    SelectOption(value=2, label="Habilidades", emoji='🌀')
+                    SelectOption(value="perfil", label="Perfil", emoji='🧪'),
+                    SelectOption(value="economia", label="Economia", emoji='💰'),
+                    SelectOption(value="inventario", label="Inventário", emoji='🎒'),
+                    SelectOption(value="habilidades", label="Habilidades", emoji='🌀')
                 ]
                 
                     
@@ -135,14 +174,10 @@ class Stats(commands.Cog):
         
             async def callback(self, interaction):
                 if interaction.user.id != inte.user.id:
+                    await interaction.response.send_message("Apenas quem abriu este menu pode trocar de página aqui.", ephemeral=True)
                     return
-                if self.values[0] == "1":
-                    embed = self.stats_obj.load_stats(data, inte)
-                elif self.values[0] == "2":
-                    embed = self.stats_obj.load_ability_info(inte)
-                message = await inte.original_response()
-                await message.edit(embed=embed)
-                await interaction.response.defer()
+                embed = self.stats_obj.load_menu_page(self.values[0], inte)
+                await interaction.response.edit_message(embed=embed, view=self.view)
         
         
         view = View()
@@ -159,7 +194,7 @@ class Stats(commands.Cog):
             escolher_classe_button.callback = escolher_classe_callback
             view.add_item(escolher_classe_button)
         
-        embed = self.load_stats(data, inte)
+        embed = self.load_menu_page("perfil", inte)
 
         await inte.response.send_message(embed=embed, view=view)
         
@@ -171,7 +206,7 @@ class Stats(commands.Cog):
 
         hero = load_hero(inte.user.id, name=inte.user.name)
 
-        xp_needed = round(6.5 * (1.5 ** hero.level))
+        xp_needed = get_xp_required(hero.level)
         max_hp = getattr(hero, "max_hp", hero.hp)
         max_mana = getattr(hero, "max_mana", hero.mana)
         return self._build_status_embed(

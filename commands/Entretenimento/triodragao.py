@@ -32,10 +32,10 @@ class TrioDragao(commands.Cog):
 
         # Carregando imagem base
         try:
-            base = Image.open("assets/tri_dragoes/trio_dragao_Template.png").convert("RGBA")
+            base = Image.open("assets/templates/trio_dragoes/trio_dragao_Template.png").convert("RGBA")
         except FileNotFoundError:
             await ctx.reply(
-                "❌ Imagem base não encontrada. Certifique-se de que `assets/dragoes/triodragao.png` existe.",
+                "❌ Imagem base não encontrada. Certifique-se de que `assets/templates/dragoes/triodragao.png` existe.",
                 mention_author=False,
             )
             return

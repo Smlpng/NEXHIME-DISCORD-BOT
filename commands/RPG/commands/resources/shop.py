@@ -10,6 +10,7 @@ from commands.RPG.utils.database import get_active_hero, update_active_hero_reso
 from commands.RPG.utils.progress import add_nex_spent
 from commands.RPG.utils.hero_check import economy_profile_created
 from commands.RPG.utils.command_adapter import CommandContextAdapter
+from commands.RPG.utils.presentation import RPG_PRIMARY_COLOR
 
 
 LOJA_FILE = Path("DataBase") / "loja.json"
@@ -72,6 +73,39 @@ def _find_item(loja: dict, item_key: str) -> tuple[str, str, dict] | None:
             return segmento, item_name, payload
     return None
 
+
+def _build_shop_embed(loja: dict) -> Embed:
+    embed = Embed(title="Loja", description="Itens disponíveis:", color=RPG_PRIMARY_COLOR)
+    if not loja:
+        embed.add_field(
+            name="Loja vazia",
+            value=(
+                "Não encontrei itens em `DataBase/loja.json`.\n"
+                "Edite o arquivo seguindo a estrutura esperada e tente novamente."
+            ),
+            inline=False,
+        )
+        return embed
+
+    grouped_lines: dict[str, list[str]] = {}
+    for segmento, item_name, payload in _iter_items(loja):
+        preco = payload.get("Preço", payload.get("preco", 0))
+        desc = payload.get("Descrição", payload.get("descricao", ""))
+        line = f"**{item_name}**: **{preco}** 🪙"
+        if desc:
+            line += f"\n_{desc}_"
+        grouped_lines.setdefault(str(segmento), []).append(line)
+
+    for segmento, lines in grouped_lines.items():
+        embed.add_field(name=segmento, value="\n\n".join(lines)[:1024], inline=False)
+
+    embed.add_field(
+        name="Como comprar",
+        value="Use `/comprar <item> <quantidade>` (ou `comprar` via prefixo).",
+        inline=False,
+    )
+    return embed
+
 class Shop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -83,32 +117,7 @@ class Shop(commands.Cog):
         await economy_profile_created(inte)
 
         loja = _load_loja()
-        embed = Embed(title="Loja", description="Itens disponíveis:", color=0x3498DB)
-
-        if not loja:
-            embed.add_field(
-                name="Loja vazia",
-                value=(
-                    "Não encontrei itens em `DataBase/loja.json`.\n"
-                    "Edite o arquivo seguindo a estrutura esperada e tente novamente."
-                ),
-                inline=False,
-            )
-        else:
-            # Mostra por segmento sem quebrar se houver campos extras
-            for segmento, item_name, payload in _iter_items(loja):
-                preco = payload.get("Preço", payload.get("preco", 0))
-                desc = payload.get("Descrição", payload.get("descricao", ""))
-                line = f"**{item_name}**: **{preco}** 🪙"
-                if desc:
-                    line += f"\n_{desc}_"
-                embed.add_field(name=str(segmento), value=line, inline=False)
-
-            embed.add_field(
-                name="Como comprar",
-                value="Use `/comprar <item> <quantidade>` (ou `comprar` via prefixo).",
-                inline=False,
-            )
+        embed = _build_shop_embed(loja)
         
         view = View()
         await inte.response.send_message(embed=embed, view=view)
@@ -149,30 +158,44 @@ class Shop(commands.Cog):
 
         price = unit_price * amount
         if price > user_nex:
-            await inte.response.send_message("Voce nao tem nex suficiente.")
+            await inte.response.send_message(f"Voce nao tem nex suficiente. Saldo atual: {user_nex} nex.")
             return
 
         # Mantém compatibilidade: se o JSON tiver um campo de recurso, use-o.
         # Caso não tenha, tenta mapear pelo nome do item (madeira/ferro etc.).
         resource_key = payload.get("resource") or payload.get("Recurso")
+        transaction_ok = False
+        resource_label = None
         if isinstance(resource_key, str) and resource_key.strip():
-            kwargs = {resource_key.strip(): amount, "nex": -price}
-            update_active_hero_resources(inte.user.id, **kwargs)
+            resource_label = resource_key.strip()
+            kwargs = {resource_label: amount, "nex": -price}
+            transaction_ok = update_active_hero_resources(inte.user.id, **kwargs)
         else:
             name_norm = _normalize_key(item_name)
             if "madeira" in name_norm or name_norm == "wood":
-                update_active_hero_resources(inte.user.id, nex=-price, wood=amount)
+                resource_label = "wood"
+                transaction_ok = update_active_hero_resources(inte.user.id, nex=-price, wood=amount)
             elif "ferro" in name_norm or name_norm == "iron":
-                update_active_hero_resources(inte.user.id, nex=-price, iron=amount)
+                resource_label = "iron"
+                transaction_ok = update_active_hero_resources(inte.user.id, nex=-price, iron=amount)
             else:
                 await inte.response.send_message(
                     "Este item não possui mapeamento de recurso. Adicione `resource` no loja.json (ex: 'wood', 'iron', etc.)."
                 )
                 return
+
+        if not transaction_ok:
+            await inte.response.send_message("A compra foi bloqueada para evitar saldo negativo ou recurso inválido.")
+            return
         
         add_nex_spent(inte.user.id, price)
+        updated_data = get_active_hero(inte.user.id)
+        resource_balance = updated_data.get(resource_label, "--") if isinstance(updated_data, dict) else "--"
         
-        await inte.response.send_message(f"{amount} de {item_name} foi comprado com sucesso.")
+        await inte.response.send_message(
+            f"Compra concluída: {amount}x {item_name} por {price} nex. "
+            f"Carteira atual: {updated_data['nex']} nex. Saldo de {resource_label}: {resource_balance}."
+        )
 
 
     @buy.autocomplete("item")

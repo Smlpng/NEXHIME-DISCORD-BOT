@@ -4,7 +4,9 @@ import re
 
 def get_prefixes_from_client(client: commands.Bot, guild: discord.Guild | None):
     default_prefix = getattr(client, "default_prefix", "n!")
-    prefixes = getattr(client, "prefixes_cache", {}) or {}
+    prefixes = getattr(client, "prefix_cache", None)
+    if prefixes is None:
+        prefixes = getattr(client, "prefixes_cache", {}) or {}
     effective_prefix = prefixes.get(str(guild.id), default_prefix) if guild else default_prefix
     return default_prefix, effective_prefix
 
@@ -39,6 +41,27 @@ def get_command_category(cmd: commands.Command) -> str:
 
     return "Outros"
 
+
+def get_command_mode(cmd: commands.Command) -> str:
+    if isinstance(cmd, commands.HybridCommand):
+        return "Slash + Prefixo"
+    return "Prefixo"
+
+
+def format_command_entry(cmd: commands.Command, prefix_label: str) -> str:
+    prefix_example = f"{prefix_label} {cmd.qualified_name}"
+    slash_example = f"/{cmd.qualified_name}" if isinstance(cmd, commands.HybridCommand) else "--"
+    aliases = ", ".join(cmd.aliases[:3]) if getattr(cmd, "aliases", None) else "Sem aliases"
+    description = cmd.description or getattr(cmd, "short_doc", "Sem descrição")
+    return (
+        f"**{cmd.qualified_name}**\n"
+        f"Tipo: {get_command_mode(cmd)}\n"
+        f"Prefixo: `{prefix_example}`\n"
+        f"Slash: `{slash_example}`\n"
+        f"Aliases: {aliases}\n"
+        f"Descrição: {description}"
+    )
+
 class HelpView(discord.ui.View):
     def __init__(self, ctx: commands.Context, grouped_commands: dict):
         super().__init__(timeout=120)
@@ -65,16 +88,19 @@ class HelpView(discord.ui.View):
                 return
             
             p_label = format_prefix_label(interaction.client, interaction.guild)
-            
-            desc = f"Aqui estão os comandos da categoria **{cat_name}**:\n\n"
-            for c in cmds:
-                desc += f"- `{p_label} {c.name}`: {c.description or getattr(c, 'short_doc', 'Sem descrição')}\n"
-                
+
             emb = discord.Embed(
                 title=f"Categoria: {cat_name}",
-                description=desc,
-                color=discord.Color.blue()
+                description=f"Comandos da categoria **{cat_name}**.",
+                color=discord.Color.blue(),
             )
+            emb.add_field(name="Prefixo atual", value=p_label, inline=True)
+            emb.add_field(name="Comandos", value=str(len(cmds)), inline=True)
+            emb.add_field(name="Uso", value="Prefira slash quando quiser autocomplete e prefixo quando quiser velocidade.", inline=False)
+            for command in cmds[:8]:
+                emb.add_field(name=command.qualified_name, value=format_command_entry(command, p_label), inline=False)
+            if len(cmds) > 8:
+                emb.set_footer(text=f"Mostrando 8 de {len(cmds)} comandos desta categoria.")
             await interaction.response.edit_message(embed=emb, view=self)
         return callback
 
@@ -100,26 +126,40 @@ class Help(commands.Cog):
 
         # Agrupa os comandos de acordo com a pasta (módulo) em que a Cog se encontra
         grouped_commands = {}
-        
-        for cmd in self.bot.commands:
-            # Pula comandos escondidos ou o próprio comando help de ser listado se quiser
+        unique_commands = {}
+
+        for cmd in self.bot.walk_commands():
             if cmd.hidden:
                 continue
-                
+            unique_commands.setdefault(cmd.qualified_name, cmd)
+
+        for cmd in unique_commands.values():
             category = get_command_category(cmd)
-            
-            if category not in grouped_commands:
-                grouped_commands[category] = []
-            grouped_commands[category].append(cmd)
+            grouped_commands.setdefault(category, []).append(cmd)
 
         # Ordena em ordem alfabética as categorias e os comandos dentro delas
         sorted_grouped = {k: sorted(v, key=lambda c: c.name) for k, v in sorted(grouped_commands.items())}
+        prefix_total = len(unique_commands)
+        slash_total = len({command.qualified_name for command in self.bot.tree.walk_commands()})
+        prefix_label = format_prefix_label(self.bot, ctx.guild)
 
         embed = discord.Embed(
-            title="Sessão de Comandos (Help)",
-            description="Escolha uma categoria acessando os botões abaixo para ver seus comandos:",
-            color=discord.Color.green()
+            title="Central de Comandos",
+            description=(
+                "Escolha uma categoria nos botões abaixo para ver detalhes de uso.\n"
+                f"Prefixo atual neste servidor: **{prefix_label}**"
+            ),
+            color=discord.Color.green(),
         )
+        embed.add_field(name="Prefixados", value=str(prefix_total), inline=True)
+        embed.add_field(name="Slash", value=str(slash_total), inline=True)
+        embed.add_field(name="Categorias", value=str(len(sorted_grouped)), inline=True)
+        categories_preview = "\n".join(
+            f"{EMOJIS_CATEGORIAS.get(category.capitalize(), '📁')} **{category}**: {len(commands_list)}"
+            for category, commands_list in sorted_grouped.items()
+        )
+        embed.add_field(name="Mapa rápido", value=categories_preview[:1024], inline=False)
+        embed.set_footer(text="Dica: comandos híbridos funcionam com slash e prefixo.")
 
         view = HelpView(ctx, sorted_grouped)
 

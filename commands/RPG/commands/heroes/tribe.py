@@ -56,13 +56,19 @@ class Tribe(commands.Cog):
         self.bot = bot
 
     def _is_role_sync_channel(self, channel: discord.abc.GuildChannel | discord.Thread | None) -> bool:
-        return channel is not None and getattr(channel, "id", None) in TRIBE_ROLE_CHANNEL_IDS
+        if channel is None:
+            return False
+        channel_id = getattr(channel, "id", None)
+        if channel_id in TRIBE_ROLE_CHANNEL_IDS:
+            return True
+        parent = getattr(channel, "parent", None)
+        return getattr(parent, "id", None) in TRIBE_ROLE_CHANNEL_IDS
 
     def _is_tribe_command_channel(self, channel: discord.abc.GuildChannel | discord.Thread | None) -> bool:
         return self._is_role_sync_channel(channel)
 
     async def _reject_wrong_channel(self, inte: CommandContextAdapter) -> bool:
-        channel = getattr(inte, "channel", None)
+        channel = inte.channel
         if self._is_tribe_command_channel(channel):
             return False
 

@@ -8,7 +8,7 @@ import os
 class PiseiNaMerda(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.template_path = "assets/pisei/namerda.png"  # imagem base do Pisei na Merda
+        self.template_path = "assets/templates/pisei/namerda.png"  # imagem base do Pisei na Merda
 
     @commands.hybrid_command(name="pisei", aliases=["steppedinshit"], description="Cria o meme 'pisei na merda' com uma imagem.")
     async def pisar(self, ctx: commands.Context, user: discord.User = None):

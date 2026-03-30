@@ -42,6 +42,8 @@ class CommandContextAdapter:
         self.ctx = ctx
         self.interaction = getattr(ctx, "interaction", None)
         self.user = ctx.author
+        self.guild = getattr(ctx, "guild", None)
+        self.channel = getattr(ctx, "channel", None)
         self.response = _ResponseProxy(self)
         self.followup = _FollowupProxy(self)
         self._original_message = None

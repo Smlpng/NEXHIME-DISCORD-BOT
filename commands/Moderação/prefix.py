@@ -47,7 +47,8 @@ class PrefixModeration(commands.Cog):
         prefixes = load_json(PREFIXES_FILE, {})
         prefixes[str(ctx.guild.id)] = novo_prefixo
         save_json(PREFIXES_FILE, prefixes)
-        self.bot.prefixes_cache = prefixes  # atualiza o cache em memória
+        self.bot.prefix_cache = prefixes
+        self.bot.prefixes_cache = self.bot.prefix_cache
         default_prefix = getattr(self.bot, "default_prefix", "e!")
         label = f"[{default_prefix}]" if novo_prefixo == default_prefix else f"[{default_prefix}] {novo_prefixo}"
         await ctx.reply(f"Prefixo atualizado. Agora aceitos: `{label}`")
@@ -61,7 +62,8 @@ class PrefixModeration(commands.Cog):
         default_prefix = getattr(self.bot, "default_prefix", "e!")
         prefixes[str(ctx.guild.id)] = default_prefix
         save_json(PREFIXES_FILE, prefixes)
-        self.bot.prefixes_cache = prefixes
+        self.bot.prefix_cache = prefixes
+        self.bot.prefixes_cache = self.bot.prefix_cache
         await ctx.reply(f"Prefixo restaurado. Agora aceitos: `[{default_prefix}]`")
 
     @commands.hybrid_command(name="show_prefix", description="Mostra o prefixo atual e o padrão.")

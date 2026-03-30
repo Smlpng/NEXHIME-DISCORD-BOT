@@ -1,6 +1,7 @@
 from random import random
 from commands.RPG.utils.database import apply_loot_to_active_hero, get_active_hero_level_and_xp
 from commands.RPG.utils.hero_actions import add_if_new
+from commands.RPG.utils.progress import MAX_LEVEL, get_xp_required
 
 
 class Loot():
@@ -18,8 +19,8 @@ class Loot():
         data = get_active_hero_level_and_xp(user_id)
         
         # Update xp and level if level < 50
-        if data["level"] < 50:
-            xp_needed = round(6.5 * (1.5 ** data["level"]))
+        if data["level"] < MAX_LEVEL:
+            xp_needed = get_xp_required(data["level"])
             if xp_needed <= data["xp"] + self.xp:
                 final_xp = data["xp"] + self.xp - xp_needed
                 level_up = 1

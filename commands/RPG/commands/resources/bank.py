@@ -10,11 +10,22 @@ from commands.RPG.utils.database import (
     withdraw_nex_from_bank,
 )
 from commands.RPG.utils.hero_check import economy_profile_created
+from commands.RPG.utils.presentation import RPG_PRIMARY_COLOR, add_spacer
 
 
 class Bank(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @staticmethod
+    def _build_bank_embed(display_name: str, wallet: int, bank_balance: int):
+        embed = discord.Embed(title=f"Banco de {display_name}", color=RPG_PRIMARY_COLOR)
+        embed.add_field(name="Carteira", value=f"{wallet} nex", inline=True)
+        embed.add_field(name="Banco", value=f"{bank_balance} nex", inline=True)
+        embed.add_field(name="Total", value=f"{wallet + bank_balance} nex", inline=False)
+        add_spacer(embed)
+        embed.add_field(name="Movimentações", value="Use depositar, sacar e transferir para mover seu nex com segurança.", inline=False)
+        return embed
 
     @commands.hybrid_command(name="banco")
     async def banco(self, ctx):
@@ -26,11 +37,8 @@ class Bank(commands.Cog):
         bank_balance = get_bank_balance(inte.user.id)
         wallet = hero["nex"] if hero else 0
 
-        embed = discord.Embed(title="Banco do Bando", color=discord.Color.gold())
-        embed.add_field(name="Carteira", value=f"{wallet} nex", inline=True)
-        embed.add_field(name="Banco", value=f"{bank_balance} nex", inline=True)
-        embed.add_field(name="Total", value=f"{wallet + bank_balance} nex", inline=False)
-        embed.set_footer(text="Use depositar, sacar e transferir para mover seu nex.")
+        embed = self._build_bank_embed(inte.user.display_name, wallet, bank_balance)
+        embed.set_footer(text="Resumo da sua economia atual.")
 
         await inte.response.send_message(embed=embed)
 
@@ -48,7 +56,10 @@ class Bank(commands.Cog):
         if not deposit_nex_to_bank(inte.user.id, amount):
             return await inte.response.send_message("Voce nao tem nex suficiente na carteira para esse deposito.")
 
-        await inte.response.send_message(f"Voce depositou {amount} nex no banco.")
+        hero = get_active_hero(inte.user.id)
+        embed = self._build_bank_embed(inte.user.display_name, hero["nex"], get_bank_balance(inte.user.id))
+        embed.description = f"Depósito concluído: {amount} nex foram enviados para o banco."
+        await inte.response.send_message(embed=embed)
 
     @commands.hybrid_command(name="sacar")
     async def sacar(self, ctx, amount: int):
@@ -64,7 +75,10 @@ class Bank(commands.Cog):
         if not withdraw_nex_from_bank(inte.user.id, amount):
             return await inte.response.send_message("Voce nao tem saldo suficiente em nex no banco para esse saque.")
 
-        await inte.response.send_message(f"Voce sacou {amount} nex do banco.")
+        hero = get_active_hero(inte.user.id)
+        embed = self._build_bank_embed(inte.user.display_name, hero["nex"], get_bank_balance(inte.user.id))
+        embed.description = f"Saque concluído: {amount} nex voltaram para a sua carteira."
+        await inte.response.send_message(embed=embed)
 
     @commands.hybrid_command(name="transferir")
     async def transferir(self, ctx, member: discord.Member, amount: int):
@@ -82,9 +96,11 @@ class Bank(commands.Cog):
         if not transfer_bank_nex(inte.user.id, member.id, amount):
             return await inte.response.send_message("Voce nao tem saldo suficiente em nex no banco para essa transferencia.")
 
-        await inte.response.send_message(
-            f"Voce transferiu {amount} nex para {member.display_name}. O valor foi enviado para o banco do jogador."
-        )
+        hero = get_active_hero(inte.user.id)
+        wallet = hero["nex"] if hero else 0
+        embed = self._build_bank_embed(inte.user.display_name, wallet, get_bank_balance(inte.user.id))
+        embed.description = f"Transferência concluída: {amount} nex foram enviados para o banco de {member.display_name}."
+        await inte.response.send_message(embed=embed)
 
 
 async def setup(bot):

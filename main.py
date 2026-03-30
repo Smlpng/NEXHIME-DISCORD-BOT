@@ -128,6 +128,7 @@ bot = commands.Bot(
 
 bot.default_prefix = DEFAULT_PREFIX
 bot.prefix_cache   = load_prefixes()
+bot.prefixes_cache = bot.prefix_cache
 
 # ==========================
 # CARREGAMENTO DE COGS
@@ -253,6 +254,7 @@ async def on_guild_join(guild: discord.Guild) -> None:
     if gid not in bot.prefix_cache:
         bot.prefix_cache[gid] = bot.default_prefix
         save_prefixes(bot.prefix_cache)
+        bot.prefixes_cache = bot.prefix_cache
 
 
 @bot.event
@@ -261,6 +263,7 @@ async def on_guild_remove(guild: discord.Guild) -> None:
     if gid in bot.prefix_cache:
         bot.prefix_cache.pop(gid)
         save_prefixes(bot.prefix_cache)
+        bot.prefixes_cache = bot.prefix_cache
 
 # ==========================
 # HANDLER DE ERROS GLOBAL
@@ -293,6 +296,7 @@ async def setprefix(ctx: commands.Context, prefix: str) -> None:
     """Altera o prefixo do bot neste servidor."""
     bot.prefix_cache[str(ctx.guild.id)] = prefix
     save_prefixes(bot.prefix_cache)
+    bot.prefixes_cache = bot.prefix_cache
     await ctx.send(f"Prefixo alterado para **{prefix}**")
 
 # ==========================

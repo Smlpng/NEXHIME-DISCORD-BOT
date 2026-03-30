@@ -51,13 +51,16 @@ class Roadmap(commands.Cog):
 
         embed.add_field(
             name="🎯 Fase 4 (RPG) `v0.4`| **Em Andamento**",
-            value="• Comandos Básicos, exemplos:\n"
+            value="• Alguns comandos principais do RPG:\n"
             "• `[n!]` **menu**\n"
-            "• `[n!]` **escolher_raça**\n"
-            "• `[n!]` **escolher_tribo**\n"
-            "• `[n!]` **mapa**\n"
+            "• `[n!]` **escolher_classe**\n"
+            "• `[n!]` **escolher_raca**\n"
             "• `[n!]` **quests**\n"
-            "• `[n!]` **trocar_tribo**\n",
+            "• `[n!]` **fight**\n"
+            "• `[n!]` **zone**\n"
+            "• `[n!]` **change_zone**\n"
+            "• `[n!]` **inventory**\n"
+            "• `[n!]` **loja**\n"
             inline=False
         )
 
