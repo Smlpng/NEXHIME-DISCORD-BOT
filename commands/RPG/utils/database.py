@@ -391,6 +391,17 @@ def set_active_hero_class(user_id: int, class_id: int) -> dict | None:
 		return dict(hero)
 
 
+def clear_active_hero_class(user_id: int) -> dict | None:
+	with LOCK:
+		state = _read_state_unlocked()
+		hero = _get_active_hero_row(state, user_id)
+		if hero is None:
+			return None
+		hero["class"] = None
+		_write_state_unlocked(state)
+		return dict(hero)
+
+
 def set_active_hero_race(user_id: int, race_name: str) -> dict | None:
 	with LOCK:
 		state = _read_state_unlocked()

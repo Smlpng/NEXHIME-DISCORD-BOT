@@ -27,12 +27,47 @@ class Roadmap(commands.Cog):
         )
 
         embed.add_field(
+            name="✅ ~~ Fase 1.1 (Moderação extra) ~~ `v0.1.1`| **Concluído**",
+            value="• Novos comandos de moderação adicionados:\n"
+                  "• `[n!]` **slowmode**\n"
+                  "• `[n!]` **limpar_usuario**\n"
+                  "• `[n!]` **nickname**\n"
+                  "• `[n!]` **reset_nick**\n"
+                  "• `[n!]` **modlog**\n"
+                  "• `[n!]` **antilink**\n"
+                  "• `[n!]` **lockdown**\n",
+            inline=False
+        )
+
+        embed.add_field(
             name="✅ ~~ Fase 2 (Entretenimento inicial) ~~ `v0.2`| **Concluído**",
             value="• Comandos Básicos e Avançados, exemplos:\n"
             "• `[n!]` **ascii** \n"
             "• `[n!]` **say** \n"
             "• `[n!]` **quote** \n"
             "• `[n!]` **showquote** ",
+            inline=False
+        )
+
+        embed.add_field(
+            name="✅ ~~ Fase 2.1 (Entretenimento extra) ~~ `v0.2.1`| **Concluído**",
+            value="• Novos comandos de entretenimento adicionados:\n"
+                  "• `[n!]` **cara_ou_coroa**\n"
+                  "• `[n!]` **rps**\n"
+                  "• `[n!]` **trivia**\n"
+                  "• `[n!]` **rate**\n"
+                  "• `[n!]` **meme_lista**\n",
+            inline=False
+        )
+
+        embed.add_field(
+            name="✅ ~~ Utilitários (Geral) ~~ `v0.2.2`| **Concluído**",
+            value="• Novos comandos gerais adicionados:\n"
+                  "• `[n!]` **uptime**\n"
+                  "• `[n!]` **botinfo**\n"
+                  "• `[n!]` **enquete**\n"
+                  "• `[n!]` **afk**\n"
+                  "• `[n!]` **timer**\n",
             inline=False
         )
 
@@ -60,10 +95,20 @@ class Roadmap(commands.Cog):
             "• `[n!]` **zone**\n"
             "• `[n!]` **change_zone**\n"
             "• `[n!]` **inventory**\n"
-            "• `[n!]` **loja**\n"
+            "• `[n!]` **loja**\n",
             inline=False
         )
 
+        embed.add_field(
+            name="🎯 Fase 4.1 (RPG extra) `v0.4.1`| **Em Andamento**",
+            value="• Novos comandos do RPG adicionados:\n"
+                  "• `[n!]` **explorar**\n"
+                  "• `[n!]` **boss**\n"
+                  "• `[n!]` **reset_classe**\n",
+            inline=False
+        )
+
+        
 
         data_atual = datetime.now().strftime("%d de %B de %Y")
         embed.set_footer(text=f"Para saber dos demais comandos, use [n!] help | Última atualização: {data_atual}")
