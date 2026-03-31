@@ -32,6 +32,7 @@ class Stats(commands.Cog):
         zone_name = resolve_zone_name(data.get("zone_id"))
         primate_race = data.get("race") or "Não definida"
         tribe_name = data.get("tribe") or "Não definida"
+        title_name = data.get("title") or "Sem título"
         created_at = self._format_timestamp(getattr(inte.user, "created_at", None))
         joined_at = self._format_timestamp(getattr(inte.user, "joined_at", None))
         progress_bar = build_progress_bar(xp_value, xp_needed)
@@ -49,6 +50,7 @@ class Stats(commands.Cog):
         embed.add_field(name="🛡️ Classe", value=class_name, inline=True)
         embed.add_field(name="🐒 Espécie", value=primate_race, inline=True)
         embed.add_field(name="🏕️ Tribo", value=tribe_name, inline=True)
+        embed.add_field(name="🏷️ Título", value=title_name, inline=True)
         embed.add_field(name="🗺️ Local", value=zone_name, inline=False)
         add_spacer(embed)
         embed.add_field(

@@ -67,11 +67,15 @@ class Tweet(commands.Cog):
         image_bytes: bytes,
         *,
         filename: str = "tweet.png",
+        content: str | None = None,
     ) -> bool:
         if channel is None or not hasattr(channel, "send"):
             return False
         try:
-            await channel.send(file=discord.File(BytesIO(image_bytes), filename=filename))
+            kwargs = {"file": discord.File(BytesIO(image_bytes), filename=filename)}
+            if content:
+                kwargs["content"] = content
+            await channel.send(**kwargs)
             return True
         except (discord.Forbidden, discord.NotFound, discord.HTTPException):
             return False
@@ -376,6 +380,26 @@ class Tweet(commands.Cog):
 
         image_bytes = buffer.getvalue()
 
+        def origin_line_for(destination: discord.abc.Messageable | None) -> str | None:
+            """Retorna uma linha curta com a origem do tweet para anexar na mensagem.
+
+            Observação: menções de canal só funcionam dentro do mesmo servidor.
+            """
+            if ctx.guild is None:
+                return None
+
+            channel_id = getattr(ctx.channel, "id", None)
+            if channel_id:
+                # Mostra sempre no formato <#ID> como solicitado.
+                # Observação: fora do servidor de origem, a menção não vira link clicável,
+                # mas ainda preserva o ID do canal.
+                channel_label = f"<#{channel_id}>"
+            else:
+                channel_label = f"#{getattr(ctx.channel, 'name', 'canal')}"
+
+            guild_name = getattr(ctx.guild, "name", "Servidor")
+            return f"Postado em: <#{channel_id}>"
+
         send_direct_to_target = bool(
             target_channel is not None
             and ctx.guild
@@ -390,7 +414,7 @@ class Tweet(commands.Cog):
             if getattr(target_channel, "id", None) == getattr(ctx.channel, "id", None) and not send_direct_to_target:
                 pass
             else:
-                await self._safe_send_file(target_channel, image_bytes)
+                await self._safe_send_file(target_channel, image_bytes, content=origin_line_for(target_channel))
 
         if ctx.guild is None:
             return
@@ -406,7 +430,7 @@ class Tweet(commands.Cog):
                     return
             if channel is None or not hasattr(channel, "send"):
                 return
-            await self._safe_send_file(channel, image_bytes)
+            await self._safe_send_file(channel, image_bytes, content=origin_line_for(channel))
 
         ctx_channel_id = getattr(ctx.channel, "id", None)
         target_channel_id = getattr(target_channel, "id", None) if target_channel is not None else None

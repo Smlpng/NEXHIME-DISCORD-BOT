@@ -10,5 +10,19 @@
 			"Descrição": "Recurso mais raro usado em upgrades e forja.",
 			"resource": "iron"
 		}
+	},
+	"Títulos": {
+		"O pensador": {
+			"Preço": 250,
+			"Descrição": "Título cosmético do seu herói."
+		},
+		"O estudioso": {
+			"Preço": 250,
+			"Descrição": "Título cosmético do seu herói."
+		},
+		"O aventureiro": {
+			"Preço": 250,
+			"Descrição": "Título cosmético do seu herói."
+		}
 	}
 }

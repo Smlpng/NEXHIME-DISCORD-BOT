@@ -3,10 +3,15 @@ from pathlib import Path
 
 import discord
 from discord import Embed
-from discord.ui import View
+from discord.ui import Button, View
 from discord.ext import commands
 
-from commands.RPG.utils.database import get_active_hero, update_active_hero_resources
+from commands.RPG.utils.database import (
+    active_hero_has_title,
+    get_active_hero,
+    grant_active_hero_title,
+    update_active_hero_resources,
+)
 from commands.RPG.utils.progress import add_nex_spent
 from commands.RPG.utils.hero_check import economy_profile_created
 from commands.RPG.utils.command_adapter import CommandContextAdapter
@@ -49,6 +54,11 @@ def _iter_items(loja: dict):
 def _normalize_key(text: str) -> str:
     return " ".join(text.strip().lower().split())
 
+
+def _is_titles_segment(segmento: str) -> bool:
+    key = _normalize_key(segmento)
+    return key in {"titulos", "títulos"}
+
 def _find_item(loja: dict, item_key: str) -> tuple[str, str, dict] | None:
     """Resolve o item pelo nome (prefixo) ou pela chave antiga "segmento|item"."""
     raw = (item_key or "").strip()
@@ -75,7 +85,7 @@ def _find_item(loja: dict, item_key: str) -> tuple[str, str, dict] | None:
     return None
 
 
-def _build_shop_embed(loja: dict) -> Embed:
+def _build_shop_embed(loja: dict, *, only_segment: str | None = None) -> Embed:
     embed = Embed(title="Loja", description="Itens disponíveis:", color=RPG_PRIMARY_COLOR)
     if not loja:
         embed.add_field(
@@ -90,6 +100,8 @@ def _build_shop_embed(loja: dict) -> Embed:
 
     grouped_lines: dict[str, list[str]] = {}
     for segmento, item_name, payload in _iter_items(loja):
+        if only_segment is not None and _normalize_key(segmento) != _normalize_key(only_segment):
+            continue
         preco = payload.get("Preço", payload.get("preco", 0))
         desc = payload.get("Descrição", payload.get("descricao", ""))
         line = f"**{item_name}**: **{preco}** 🪙"
@@ -97,15 +109,91 @@ def _build_shop_embed(loja: dict) -> Embed:
             line += f"\n_{desc}_"
         grouped_lines.setdefault(str(segmento), []).append(line)
 
+    if not grouped_lines:
+        if only_segment is not None:
+            embed.add_field(
+                name="Seção vazia",
+                value=f"Não encontrei itens na seção **{only_segment}**.",
+                inline=False,
+            )
+        else:
+            embed.add_field(
+                name="Loja vazia",
+                value="Não encontrei itens válidos no arquivo da loja.",
+                inline=False,
+            )
+        return embed
+
     for segmento, lines in grouped_lines.items():
         embed.add_field(name=segmento, value="\n\n".join(lines)[:1024], inline=False)
 
     embed.add_field(
         name="Como comprar",
-        value="Use `comprar <item> <quantidade>`.",
+        value=(
+            "Use `comprar <item> <quantidade>`.\n"
+            "Para **Títulos**, use `comprar <título>` (quantidade sempre 1)."
+        ),
+        inline=False,
+    )
+    if only_segment is not None:
+        embed.set_footer(text=f"Mostrando seção: {only_segment}")
+    return embed
+
+
+def _build_shop_home_embed(loja: dict) -> Embed:
+    embed = Embed(
+        title="Loja",
+        description="Escolha uma seção nos botões abaixo para ver os itens.",
+        color=RPG_PRIMARY_COLOR,
+    )
+    if not loja:
+        embed.add_field(
+            name="Loja vazia",
+            value=(
+                "Não encontrei itens em `DataBase/loja.json`.\n"
+                "Edite o arquivo seguindo a estrutura esperada e tente novamente."
+            ),
+            inline=False,
+        )
+        return embed
+
+    sections: list[str] = []
+    for segmento, items in loja.items():
+        if not isinstance(items, dict):
+            continue
+        item_count = sum(1 for _, payload in items.items() if isinstance(payload, dict))
+        sections.append(f"• **{segmento}** ({item_count})")
+
+    if sections:
+        embed.add_field(name="Seções", value="\n".join(sections)[:1024], inline=False)
+
+    embed.add_field(
+        name="Como comprar",
+        value=(
+            "Depois de abrir a seção, use `comprar <item> <quantidade>`.\n"
+            "Para **Títulos**, use `comprar <título>` (quantidade sempre 1)."
+        ),
         inline=False,
     )
     return embed
+
+
+class _SectionButton(Button):
+    def __init__(self, *, label: str, owner_user_id: int, loja: dict):
+        super().__init__(label=label, style=discord.ButtonStyle.secondary)
+        self._segment_label = label
+        self._owner_user_id = owner_user_id
+        self._loja = loja
+
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self._owner_user_id:
+            await interaction.response.send_message(
+                "Apenas quem abriu esta loja pode trocar de seção.",
+                ephemeral=True,
+            )
+            return
+        embed = _build_shop_embed(self._loja, only_segment=self._segment_label)
+        await interaction.response.edit_message(embed=embed, view=self.view)
 
 class Shop(commands.Cog):
     def __init__(self, bot):
@@ -118,9 +206,15 @@ class Shop(commands.Cog):
         await economy_profile_created(inte)
 
         loja = _load_loja()
-        embed = _build_shop_embed(loja)
-        
-        view = View()
+        embed = _build_shop_home_embed(loja)
+
+        view = View(timeout=180)
+        # 1 botão por seção (máx. 25 botões por mensagem no Discord)
+        for segmento in list(loja.keys())[:25]:
+            if not isinstance(segmento, str):
+                segmento = str(segmento)
+            view.add_item(_SectionButton(label=segmento, owner_user_id=inte.user.id, loja=loja))
+
         await inte.response.send_message(embed=embed, view=view)
         
         
@@ -156,7 +250,7 @@ class Shop(commands.Cog):
             await inte.response.send_message("Item inválido ou não encontrado na loja.")
             return
 
-        _segmento, item_name, payload = resolved
+        segmento, item_name, payload = resolved
         unit_price = payload.get("Preço", payload.get("preco", None))
         if unit_price is None:
             await inte.response.send_message("Este item não possui o campo 'Preço' no loja.json.")
@@ -170,9 +264,38 @@ class Shop(commands.Cog):
         data = get_active_hero(inte.user.id)
         user_nex = data["nex"]
 
+        is_title = _is_titles_segment(segmento) or _normalize_key(str(payload.get("type", ""))) == "title"
+        if is_title and amount != 1:
+            await inte.response.send_message("Para comprar títulos, a quantidade deve ser 1. Ex: `comprar O pensador`")
+            return
+
         price = unit_price * amount
         if price > user_nex:
             await inte.response.send_message(f"Voce nao tem nex suficiente. Saldo atual: {user_nex} nex.")
+            return
+
+        if is_title:
+            if active_hero_has_title(inte.user.id, item_name):
+                await inte.response.send_message("Você já possui esse título. Use `titulo usar <nome>` para equipar.")
+                return
+
+            paid = update_active_hero_resources(inte.user.id, nex=-price)
+            if not paid:
+                await inte.response.send_message("Saldo insuficiente.")
+                return
+
+            granted = grant_active_hero_title(inte.user.id, item_name, set_active=True)
+            if not granted:
+                update_active_hero_resources(inte.user.id, nex=price)
+                await inte.response.send_message("Falha ao registrar o título. Sua compra foi estornada.")
+                return
+
+            add_nex_spent(inte.user.id, price)
+            updated_data = get_active_hero(inte.user.id)
+            await inte.response.send_message(
+                f"Compra concluída: título **{item_name}** por **{price}** nex. "
+                f"Carteira atual: {updated_data['nex']} nex."
+            )
             return
 
         # Mantém compatibilidade: se o JSON tiver um campo de recurso, use-o.

@@ -6,7 +6,7 @@
       "class": 1,
       "level": 1,
       "xp": 2,
-      "nex": 78,
+      "nex": 99750,
       "wood": 0,
       "iron": 0,
       "runes": 0,
@@ -15,7 +15,13 @@
       "zone_id": 1,
       "active": 1,
       "race": "Gorila",
-      "tribe": "Tribo do Vazio Estelar"
+      "tribe": "Tribo do Vazio Estelar",
+      "titles": [
+        "O Criador",
+        "O aventureiro",
+        "Beta Tester"
+      ],
+      "title": "O Criador"
     },
     {
       "id": 2,
@@ -32,7 +38,11 @@
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
-      "active": 1
+      "active": 1,
+      "titles": [
+        "Beta Tester"
+      ],
+      "title": "Beta Tester"
     }
   ],
   "inventory": [],
@@ -41,7 +51,7 @@
       "hero_id": 1,
       "kills": 1,
       "upgrades": 0,
-      "nex_spent": 0
+      "nex_spent": 250
     },
     {
       "hero_id": 2,
@@ -62,6 +72,7 @@
     "773954862223851560": 0,
     "859906494103158818": 0
   },
+  "daily_claims": {},
   "meta": {
     "next_ids": {
       "hero": 3,

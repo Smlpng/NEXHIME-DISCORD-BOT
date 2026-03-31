@@ -110,6 +110,12 @@ def _normalize_state(state: dict | None) -> dict:
 		hero.pop("gold", None)
 		hero.setdefault("race", None)
 		hero.setdefault("tribe", None)
+		# Títulos (cosmético) — mantém compatibilidade com saves antigos.
+		if hero.get("titles") is None or not isinstance(hero.get("titles"), list):
+			hero["titles"] = []
+		if hero.get("title") is not None and not isinstance(hero.get("title"), str):
+			hero["title"] = None
+		hero.setdefault("title", None)
 
 	for advancement in normalized["advancements"]:
 		if "nex_spent" not in advancement and "gold_spent" in advancement:
@@ -248,6 +254,7 @@ def _build_clean_hero_row(state: dict, hero: dict) -> dict:
 		"active": hero["active"],
 		"race": hero.get("race"),
 		"tribe": hero.get("tribe"),
+		"title": hero.get("title"),
 		"class": hero["class"],
 		"level": hero["level"],
 		"xp": hero["xp"],
@@ -285,6 +292,8 @@ def _build_hero(user_id: int, class_id: int | None, active: int, hero_id: int) -
 		"user_id": user_id,
 		"race": None,
 		"tribe": None,
+		"title": None,
+		"titles": [],
 		"class": class_id,
 		"level": 1,
 		"xp": 0,
@@ -297,6 +306,92 @@ def _build_hero(user_id: int, class_id: int | None, active: int, hero_id: int) -
 		"zone_id": 1,
 		"active": active,
 	}
+
+
+def get_active_hero_title(user_id: int) -> str | None:
+	hero = get_active_hero(user_id)
+	if hero is None:
+		return None
+	value = hero.get("title")
+	return value if isinstance(value, str) and value.strip() else None
+
+
+def list_active_hero_titles(user_id: int) -> list[str]:
+	hero = get_active_hero(user_id)
+	if hero is None:
+		return []
+	titles = hero.get("titles")
+	if not isinstance(titles, list):
+		return []
+	# Mantém apenas strings não vazias, sem duplicar (preservando ordem).
+	seen: set[str] = set()
+	clean: list[str] = []
+	for item in titles:
+		if not isinstance(item, str):
+			continue
+		name = item.strip()
+		if not name:
+			continue
+		key = name.casefold()
+		if key in seen:
+			continue
+		seen.add(key)
+		clean.append(name)
+	return clean
+
+
+def active_hero_has_title(user_id: int, title_name: str) -> bool:
+	needle = (title_name or "").strip()
+	if not needle:
+		return False
+	needle_key = needle.casefold()
+	return any(existing.casefold() == needle_key for existing in list_active_hero_titles(user_id))
+
+
+def grant_active_hero_title(user_id: int, title_name: str, *, set_active: bool = False) -> bool:
+	name = (title_name or "").strip()
+	if not name:
+		return False
+	with LOCK:
+		state = _read_state_unlocked()
+		hero = _get_active_hero_row(state, user_id)
+		if hero is None:
+			return False
+		if hero.get("titles") is None or not isinstance(hero.get("titles"), list):
+			hero["titles"] = []
+		if not any(isinstance(existing, str) and existing.casefold() == name.casefold() for existing in hero["titles"]):
+			hero["titles"].append(name)
+		if set_active:
+			hero["title"] = name
+		_write_state_unlocked(state)
+		return True
+
+
+def set_active_hero_title(user_id: int, title_name: str | None) -> bool:
+	# None/"" remove o título ativo.
+	if title_name is None:
+		name = None
+	else:
+		candidate = title_name.strip()
+		name = candidate if candidate else None
+	with LOCK:
+		state = _read_state_unlocked()
+		hero = _get_active_hero_row(state, user_id)
+		if hero is None:
+			return False
+		if name is None:
+			hero["title"] = None
+			_write_state_unlocked(state)
+			return True
+		# Só permite setar se o título for possuído.
+		owned = hero.get("titles")
+		if not isinstance(owned, list):
+			return False
+		if not any(isinstance(existing, str) and existing.casefold() == name.casefold() for existing in owned):
+			return False
+		hero["title"] = name
+		_write_state_unlocked(state)
+		return True
 
 
 def _build_advancement(hero_id: int) -> dict:
