@@ -57,14 +57,6 @@ class Tomate(commands.Cog):
             # O alvo do tomate é o autor da mensagem
             target = message.author
             
-            # Atualiza e salva o contador de tomatadas
-            tomatadas_data = _load_tomatadas()
-            target_id = str(target.id)
-            tomatadas_data[target_id] = tomatadas_data.get(target_id, 0) + 1
-            _save_tomatadas(tomatadas_data)
-            
-            total_tomatadas = tomatadas_data[target_id]
-            
             # Obtém quem atirou o tomate
             reactor = payload.member
             if not reactor:
