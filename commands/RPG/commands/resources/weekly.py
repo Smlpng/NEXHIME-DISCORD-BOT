@@ -35,7 +35,7 @@ class Weekly(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="weekly", aliases=["semanal"], description="Coleta sua recompensa semanal de nex.")
+    @commands.command(name="weekly", aliases=["semanal"], help="Coleta sua recompensa semanal de nex.")
     async def weekly(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
         ensure_profile(inte.user.id)

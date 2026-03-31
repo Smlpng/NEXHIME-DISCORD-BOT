@@ -6,7 +6,7 @@ class Joke(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="piada", aliases=["joke"], description="Receba uma piada aleatória para alegrar o dia.")
+    @commands.command(name="piada", aliases=["joke"], help="Receba uma piada aleatória para alegrar o dia.")
     async def joke(self, ctx: commands.Context):
         """Responde com uma piada aleatória."""
         jokes = [

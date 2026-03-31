@@ -13,10 +13,10 @@ class Rate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="rate",
         aliases=["nota"],
-        description="Dá uma nota (0 a 10) para um texto ou usuário.",
+        help="Dá uma nota (0 a 10) para um texto ou usuário.",
     )
     async def rate(self, ctx: commands.Context, *, alvo: str):
         gid = str(ctx.guild.id) if ctx.guild else "dm"

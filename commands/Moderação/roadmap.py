@@ -7,7 +7,7 @@ class Roadmap(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="roadmap", help="Envia um embed com as atualizações do roadmap.")
+    @commands.command(name="roadmap", help="Envia um embed com as atualizações do roadmap.")
     async def roadmap(self, ctx: commands.Context):
         embed = discord.Embed(
             title="📌 Atualizações do Roadmap",

@@ -34,7 +34,7 @@ class Fatos(commands.Cog):
 ]
 
 
-    @commands.hybrid_command(name="fato", aliases=["fact"], description="Envia um fato curioso ou engraçado.")
+    @commands.command(name="fato", aliases=["fact"], help="Envia um fato curioso ou engraçado.")
     async def fato(self, ctx: commands.Context):
         """Envia um fato curioso ou engraçado."""
         fato = random.choice(self.fatos)

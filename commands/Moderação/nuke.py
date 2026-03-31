@@ -5,14 +5,14 @@ class Maintenance(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="limpar", aliases=["clear"], description="Limpa N mensagens (máx 100).")
+    @commands.command(name="limpar", aliases=["clear"], help="Limpa N mensagens (máx 100).")
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx: commands.Context, quantidade: int):
         quantidade = max(1, min(quantidade, 100))
         deleted = await ctx.channel.purge(limit=quantidade+1)
         await ctx.send(f"Removidas {len(deleted)-1} mensagens.", delete_after=5)
 
-    @commands.hybrid_command(name="nuke", description="Clona o canal e remove o antigo (limpeza completa).")
+    @commands.command(name="nuke", help="Clona o canal e remove o antigo (limpeza completa).")
     @commands.has_permissions(manage_channels=True)
     async def nuke(self, ctx: commands.Context):
         pos = ctx.channel.position

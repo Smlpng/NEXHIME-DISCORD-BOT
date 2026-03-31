@@ -39,9 +39,9 @@ class ModLog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="modlog",
-        description="Configura o canal de modlog. Use: modlog set #canal | modlog off",
+        help="Configura o canal de modlog. Use: modlog set #canal | modlog off",
     )
     @commands.has_permissions(manage_guild=True)
     async def modlog(self, ctx: commands.Context, acao: str, canal: discord.TextChannel | None = None):

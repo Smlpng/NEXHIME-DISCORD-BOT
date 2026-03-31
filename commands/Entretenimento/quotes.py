@@ -23,7 +23,7 @@ def _save(data):
 class Quotes(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.hybrid_command(name="citação", aliases=["quotes"], description="Salva uma citação para este servidor.")
+    @commands.command(name="citação", aliases=["quotes"], help="Salva uma citação para este servidor.")
     async def quote(self, ctx: commands.Context, *, texto: str):
         data = _load()
         gid = str(ctx.guild.id)
@@ -32,7 +32,7 @@ class Quotes(commands.Cog):
         _save(data)
         await ctx.reply("Citação salva.")
 
-    @commands.hybrid_command(name="remover_citação", aliases=["delete_quote"], description="Remove uma citação pelo índice (veja /ver_citação).")
+    @commands.command(name="remover_citação", aliases=["delete_quote"], help="Remove uma citação pelo índice (veja o comando ver_citação).")
     @commands.has_permissions(manage_messages=True)
     async def delquote(self, ctx: commands.Context, indice: int):
         data = _load()
@@ -45,7 +45,7 @@ class Quotes(commands.Cog):
         else:
             await ctx.reply("Índice inválido.")
 
-    @commands.hybrid_command(name="ver_citação", aliases=["show_quotes"], description="Mostra uma citação (por índice ou aleatória).")
+    @commands.command(name="ver_citação", aliases=["show_quotes"], help="Mostra uma citação (por índice ou aleatória).")
     async def showquote(self, ctx: commands.Context, indice: int = None):
         data = _load()
         gid = str(ctx.guild.id)

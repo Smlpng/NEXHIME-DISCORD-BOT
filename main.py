@@ -37,7 +37,6 @@ from pathlib import Path
 import status
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 # ==========================
@@ -213,17 +212,7 @@ async def setup_hook() -> None:
     # except Exception as e:
     #     log.error(f"Erro no welcome: {e}")
 
-    # Sincronização de slash commands
-    try:
-        if DEV_GUILD_ID:
-            guild = discord.Object(id=int(DEV_GUILD_ID))
-            synced = await bot.tree.sync(guild=guild)
-            log.info(f"{len(synced)} slash commands sincronizados no servidor DEV")
-        else:
-            synced = await bot.tree.sync()
-            log.info(f"{len(synced)} slash commands globais sincronizados")
-    except Exception as e:
-        log.error(f"Erro ao sincronizar slash commands: {e}")
+    # Prefix-only: não sincroniza slash commands.
 
 # ==========================
 # ON READY
@@ -283,25 +272,18 @@ async def on_command_error(ctx: commands.Context, error: Exception) -> None:
 # COMANDOS DE ADMINISTRAÇÃO
 # ==========================
 
-@bot.hybrid_command(hidden=True, with_app_command=True)
+@bot.command(hidden=True)
 @commands.guild_only()
-@app_commands.guild_only()
 @commands.has_permissions(administrator=True)
-@app_commands.checks.has_permissions(administrator=True)
-@app_commands.default_permissions(administrator=True)
 async def debug_cmds(ctx: commands.Context) -> None:
     """Lista todos os comandos de prefixo carregados."""
     cmds = sorted(c.name for c in bot.commands)
     await ctx.send(f"Comandos carregados ({len(cmds)}):\n" + ", ".join(cmds))
 
 
-@bot.hybrid_command(with_app_command=True)
+@bot.command()
 @commands.guild_only()
-@app_commands.guild_only()
 @commands.has_permissions(manage_guild=True)
-@app_commands.checks.has_permissions(manage_guild=True)
-@app_commands.default_permissions(manage_guild=True)
-@app_commands.describe(prefix="Novo prefixo do bot neste servidor")
 async def setprefix(ctx: commands.Context, prefix: str) -> None:
     """Altera o prefixo do bot neste servidor."""
     bot.prefix_cache[str(ctx.guild.id)] = prefix

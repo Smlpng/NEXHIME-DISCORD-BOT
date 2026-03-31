@@ -6,9 +6,9 @@ class Lockdown(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="lockdown",
-        description="Tranca/destranca vários canais. Uso: lockdown on|off [categoria]",
+        help="Tranca/destranca vários canais. Uso: lockdown on|off [categoria]",
     )
     @commands.has_permissions(manage_channels=True)
     async def lockdown(self, ctx: commands.Context, acao: str, categoria: discord.CategoryChannel | None = None):

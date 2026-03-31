@@ -36,10 +36,10 @@ class Enquete(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="enquete",
         aliases=["poll"],
-        description="Cria uma enquete com opções separadas por | (ex: opção A | opção B).",
+        help="Cria uma enquete com opções separadas por | (ex: opção A | opção B).",
     )
     async def enquete(self, ctx: commands.Context, pergunta: str, opcoes: str, duracao: str | None = None):
         options = [opt.strip() for opt in opcoes.split("|") if opt.strip()]

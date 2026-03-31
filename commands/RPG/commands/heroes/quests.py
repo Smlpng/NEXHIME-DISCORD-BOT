@@ -145,7 +145,7 @@ class Quests(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="quests")
+    @commands.command(name="quests")
     async def quests(self, ctx, acao: str | None = None, *, alvo: str | None = None):
         """Gerencia as missoes adaptadas ao RPG atual."""
         inte = CommandContextAdapter(ctx)
@@ -166,7 +166,7 @@ class Quests(commands.Cog):
 
         if not alvo:
             return await inte.response.send_message(
-                "Uso: /quests, /quests disponiveis, /quests ver <id>, /quests aceitar <id>, /quests entregar <id> ou /quests cancelar <id>."
+                "Uso: quests, quests disponiveis, quests ver <id>, quests aceitar <id>, quests entregar <id> ou quests cancelar <id>."
             )
 
         quest_id, quest = resolve_quest(alvo)

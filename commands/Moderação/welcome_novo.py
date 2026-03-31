@@ -56,9 +56,9 @@ class WelcomeNovo(commands.Cog):
 			if owner:
 				await owner.send(f"Novo membro entrou: {member} ({member.mention})")
 
-	@commands.hybrid_command(
+	@commands.command(
 		name="testar_boas_vindas",
-		description="Testa a mensagem de boas-vindas no canal atual.",
+		help="Testa a mensagem de boas-vindas no canal atual.",
 	)
 	@commands.has_permissions(manage_guild=True)
 	async def testar_boas_vindas(self, ctx: commands.Context, membro: discord.Member | None = None):

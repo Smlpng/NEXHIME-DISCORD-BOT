@@ -8,7 +8,7 @@ class Roles(commands.Cog):
     def _hierarchy_ok(self, ctx: commands.Context, target: discord.Member) -> bool:
         return ctx.guild.me.top_role > target.top_role and ctx.author.top_role > target.top_role
 
-    @commands.hybrid_command(name="adicionar_cargo", aliases=["addrole"], description="Adiciona um cargo a um membro.")
+    @commands.command(name="adicionar_cargo", aliases=["addrole"], help="Adiciona um cargo a um membro.")
     @commands.has_permissions(manage_roles=True)
     async def addrole(self, ctx: commands.Context, membro: discord.Member, cargo: discord.Role):
         if not self._hierarchy_ok(ctx, membro) or ctx.guild.me.top_role <= cargo:
@@ -16,7 +16,7 @@ class Roles(commands.Cog):
         await membro.add_roles(cargo, reason=f"Por {ctx.author}")
         await ctx.reply(f"Cargo {cargo.name} adicionado a {membro.mention}.")
 
-    @commands.hybrid_command(name="remover_cargo", aliases=["removerole"], description="Remove um cargo de um membro.")
+    @commands.command(name="remover_cargo", aliases=["removerole"], help="Remove um cargo de um membro.")
     @commands.has_permissions(manage_roles=True)
     async def removerole(self, ctx: commands.Context, membro: discord.Member, cargo: discord.Role):
         if not self._hierarchy_ok(ctx, membro) or ctx.guild.me.top_role <= cargo:

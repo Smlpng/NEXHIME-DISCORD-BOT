@@ -44,9 +44,9 @@ class AntiLink(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="antilink",
-        description="Anti-link: antilink on|off; antilink whitelist add|remove|list",
+        help="Anti-link: antilink on|off; antilink whitelist add|remove|list",
     )
     @commands.has_permissions(manage_guild=True)
     async def antilink(self, ctx: commands.Context, acao: str, subacao: str | None = None, canal: discord.TextChannel | None = None):

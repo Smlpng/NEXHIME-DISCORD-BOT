@@ -20,10 +20,10 @@ class Timer(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="timer",
         aliases=["lembrete_canal"],
-        description="Agenda uma mensagem após um tempo (ex: 10m, 2h, 1d).",
+        help="Agenda uma mensagem após um tempo (ex: 10m, 2h, 1d).",
     )
     async def timer(self, ctx: commands.Context, tempo: str, *, mensagem: str):
         seconds = _parse_duration_to_seconds(tempo)

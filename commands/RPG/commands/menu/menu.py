@@ -139,17 +139,17 @@ class Stats(commands.Cog):
             return self.load_ability_info(inte)
         return self.load_stats(data, inte)
 
-    @commands.hybrid_command(
+    @commands.command(
         name="escolher_classe",
         aliases=["choose_class"],
-        description="Escolha a classe do seu herói no RPG.",
+        help="Escolha a classe do seu herói no RPG.",
     )
     async def escolher_classe(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
         ensure_profile(inte.user.id)
         await create_hero(inte)
         
-    @commands.hybrid_command(name="menu")
+    @commands.command(name="menu")
     async def menu(self, ctx):
         """Mostra o menu do perfil e do heroi."""
         inte = CommandContextAdapter(ctx)

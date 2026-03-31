@@ -5,7 +5,7 @@ from datetime import datetime
 class UserInfo(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.hybrid_command(name="userinfo", aliases=["whois", "user", "eu"], description="Mostra informações de um usuário.")
+    @commands.command(name="userinfo", aliases=["whois", "user", "eu"], help="Mostra informações de um usuário.")
     async def userinfo(self, ctx: commands.Context, membro: discord.Member=None):
         m = membro or ctx.author
         emb = discord.Embed(title=f"Informações de {m}", color=m.color if hasattr(m, "color") else discord.Color.blurple())

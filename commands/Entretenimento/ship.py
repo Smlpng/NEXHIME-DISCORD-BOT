@@ -10,10 +10,10 @@ class ShipCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.hybrid_command(
+    @commands.command(
         name="shippar",
         aliases=["ship"],
-        description="Calcula a compatibilidade entre duas pessoas.",
+        help="Calcula a compatibilidade entre duas pessoas.",
     )
     async def ship(self, ctx: commands.Context, nome1: str = None, nome2: str = None):
         """Ja desejou saber se você e seu par darão certo?"""

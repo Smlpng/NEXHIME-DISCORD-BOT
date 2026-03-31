@@ -36,7 +36,7 @@ class Invite(commands.Cog):
 
 		return None
 
-	@commands.hybrid_command(name="invite", aliases=["convite", "inv"], description="Envia no seu privado o convite deste servidor.")
+	@commands.command(name="invite", aliases=["convite", "inv"], help="Envia no seu privado o convite deste servidor.")
 	async def invite(self, ctx: commands.Context):
 		if not ID_GUILD:
 			await self._send_feedback(ctx, "❌ Configure o `ID_GUILD` no início do arquivo antes de usar este comando.")

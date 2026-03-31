@@ -8,7 +8,7 @@ class BotInfo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="botinfo", aliases=["sobre", "info_bot"], description="Mostra informações do bot.")
+    @commands.command(name="botinfo", aliases=["sobre", "info_bot"], help="Mostra informações do bot.")
     async def botinfo(self, ctx: commands.Context):
         prefix_count = len({command.qualified_name for command in self.bot.walk_commands()})
         slash_count = len({command.qualified_name for command in self.bot.tree.walk_commands()})

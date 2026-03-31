@@ -41,23 +41,13 @@ def get_command_category(cmd: commands.Command) -> str:
 
     return "Outros"
 
-
-def get_command_mode(cmd: commands.Command) -> str:
-    if isinstance(cmd, commands.HybridCommand):
-        return "Slash + Prefixo"
-    return "Prefixo"
-
-
 def format_command_entry(cmd: commands.Command, prefix_label: str) -> str:
     prefix_example = f"{prefix_label} {cmd.qualified_name}"
-    slash_example = f"/{cmd.qualified_name}" if isinstance(cmd, commands.HybridCommand) else "--"
     aliases = ", ".join(cmd.aliases[:3]) if getattr(cmd, "aliases", None) else "Sem aliases"
     description = cmd.description or getattr(cmd, "short_doc", "Sem descrição")
     return (
         f"**{cmd.qualified_name}**\n"
-        f"Tipo: {get_command_mode(cmd)}\n"
         f"Prefixo: `{prefix_example}`\n"
-        f"Slash: `{slash_example}`\n"
         f"Aliases: {aliases}\n"
         f"Descrição: {description}"
     )
@@ -96,7 +86,6 @@ class HelpView(discord.ui.View):
             )
             emb.add_field(name="Prefixo atual", value=p_label, inline=True)
             emb.add_field(name="Comandos", value=str(len(cmds)), inline=True)
-            emb.add_field(name="Uso", value="Prefira slash quando quiser autocomplete e prefixo quando quiser velocidade.", inline=False)
             for command in cmds[:8]:
                 emb.add_field(name=command.qualified_name, value=format_command_entry(command, p_label), inline=False)
             if len(cmds) > 8:
@@ -110,9 +99,9 @@ class Help(commands.Cog):
         self.bot = bot
         self._seen_prefix_help_message_ids: set[int] = set()
 
-    @commands.hybrid_command(
+    @commands.command(
         name="help",
-        description="Exibe as categorias e comandos disponíveis (Dinâmico)."
+        help="Exibe as categorias e comandos disponíveis (Dinâmico)."
     )
     async def help(self, ctx: commands.Context):
         # Guard: se o mesmo message.id disparar o comando mais de uma vez no mesmo processo,
@@ -140,7 +129,6 @@ class Help(commands.Cog):
         # Ordena em ordem alfabética as categorias e os comandos dentro delas
         sorted_grouped = {k: sorted(v, key=lambda c: c.name) for k, v in sorted(grouped_commands.items())}
         prefix_total = len(unique_commands)
-        slash_total = len({command.qualified_name for command in self.bot.tree.walk_commands()})
         prefix_label = format_prefix_label(self.bot, ctx.guild)
 
         embed = discord.Embed(
@@ -152,22 +140,15 @@ class Help(commands.Cog):
             color=discord.Color.green(),
         )
         embed.add_field(name="Prefixados", value=str(prefix_total), inline=True)
-        embed.add_field(name="Slash", value=str(slash_total), inline=True)
         embed.add_field(name="Categorias", value=str(len(sorted_grouped)), inline=True)
         categories_preview = "\n".join(
             f"{EMOJIS_CATEGORIAS.get(category.capitalize(), '📁')} **{category}**: {len(commands_list)}"
             for category, commands_list in sorted_grouped.items()
         )
         embed.add_field(name="Mapa rápido", value=categories_preview[:1024], inline=False)
-        embed.set_footer(text="Dica: comandos híbridos funcionam com slash e prefixo.")
+        embed.set_footer(text="Dica: use o prefixo do servidor para executar comandos.")
 
         view = HelpView(ctx, sorted_grouped)
-
-        # Proteção: em alguns ambientes o hybrid pode chegar com interaction já respondida
-        # (ex.: quando outra camada deu defer). Nesse caso, usamos followup.
-        if ctx.interaction and ctx.interaction.response.is_done():
-            await ctx.interaction.followup.send(embed=embed, view=view)
-            return
 
         await ctx.send(embed=embed, view=view)
 

@@ -5,32 +5,29 @@ class CheckHibridos(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="check_hibridos", aliases=["ch", "faltam_hibridos"], description="Lista todos os comandos que ainda NÃO são híbridos (slash)")
+    @commands.command(name="check_hibridos", aliases=["ch", "faltam_hibridos"], help="Verifica se ainda existe algum comando híbrido (slash) carregado.")
     @commands.has_permissions(administrator=True)
     async def check_hibridos(self, ctx: commands.Context):
-        non_hybrid_cmds = []
+        hybrid_cmds = []
 
-        # itera por todos os comandos carregados no bot
         for command in self.bot.commands:
-            # Pula o help padrão ou comandos escondidos desnecessariamente se tiver
             if command.name == "help" and not command.cog:
                 continue
-                
-            # Verifica se o comando é uma instância de HybridCommand
-            if not isinstance(command, commands.HybridCommand):
-                non_hybrid_cmds.append(command)
+            if isinstance(command, commands.HybridCommand):
+                hybrid_cmds.append(command)
 
-        if not non_hybrid_cmds:
+        if not hybrid_cmds:
             embed = discord.Embed(
                 title="✅ Tudo Atualizado!",
-                description="Todos os seus comandos já foram convertidos para híbridos e suportam Slash Commands (`/`)!",
+                description="Nenhum comando híbrido (slash) foi encontrado. O bot está em modo **apenas prefixo**.",
                 color=discord.Color.green()
             )
             return await ctx.send(embed=embed)
 
-        # Agrupa os comandos que não são híbridos por Cog/Pasta
+        # Agrupa os comandos híbridos por Cog/Pasta
         grouped_cmds = {}
-        for cmd in non_hybrid_cmds:
+
+        for cmd in hybrid_cmds:
             cog_name = cmd.cog_name or "Sem Categoria/Main"
             if cog_name not in grouped_cmds:
                 grouped_cmds[cog_name] = []
@@ -39,13 +36,13 @@ class CheckHibridos(commands.Cog):
         # Ordena as categorias e comandos
         sorted_grouped = {k: sorted(v) for k, v in sorted(grouped_cmds.items())}
 
-        desc = f"Encontrei **{len(non_hybrid_cmds)} comandos** que ainda são os padrões antigos (apenas texto/prefixo).\n\n"
+        desc = f"Encontrei **{len(hybrid_cmds)} comandos** que ainda estão como híbridos (slash + prefixo).\n\n"
         
         for cog, cmds in sorted_grouped.items():
             desc += f"📁 **{cog}**\n {', '.join(cmds)}\n\n"
 
         embed = discord.Embed(
-            title="⚠️ Comandos Falta Serem Híbridos",
+            title="⚠️ Ainda existem comandos híbridos",
             description=desc,
             color=discord.Color.red()
         )

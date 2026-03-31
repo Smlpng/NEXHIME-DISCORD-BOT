@@ -84,7 +84,7 @@ class Equip(commands.Cog):
         embed = self._build_selector_embed(inte.user.display_name, slot_name, inventory_rows, equipped_item_id)
         await inte.response.send_message(embed=embed, view=view, ephemeral=True)
     
-    @commands.hybrid_command(name='equip_weapon')
+    @commands.command(name='equip_weapon')
     async def equip_weapon(self, ctx):
         """Equipa uma arma."""
         inte = CommandContextAdapter(ctx)
@@ -92,7 +92,7 @@ class Equip(commands.Cog):
         
         
         
-    @commands.hybrid_command(name='equip_armor')
+    @commands.command(name='equip_armor')
     async def equip_armor(self, ctx):
         """Equipa uma armadura."""
         inte = CommandContextAdapter(ctx)

@@ -21,10 +21,10 @@ class RPS(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="rps",
         aliases=["ppt", "pedra_papel_tesoura"],
-        description="Joga pedra/papel/tesoura contra o bot.",
+        help="Joga pedra/papel/tesoura contra o bot.",
     )
     async def rps(self, ctx: commands.Context, escolha: str):
         escolha = (escolha or "").strip().lower()

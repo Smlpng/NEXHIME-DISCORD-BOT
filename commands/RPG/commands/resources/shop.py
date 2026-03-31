@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 import discord
-from discord import app_commands, Embed
+from discord import Embed
 from discord.ui import View
 from discord.ext import commands
 
@@ -49,28 +49,29 @@ def _iter_items(loja: dict):
 def _normalize_key(text: str) -> str:
     return " ".join(text.strip().lower().split())
 
-
-def _choices_from_loja(loja: dict) -> list[app_commands.Choice[str]]:
-    choices: list[app_commands.Choice[str]] = []
-    for segmento, item_name, _payload in _iter_items(loja):
-        # value precisa ser curto e estável; usamos "segmento|item"
-        value = f"{_normalize_key(segmento)}|{_normalize_key(item_name)}"
-        label = item_name
-        # limite do Discord: 100 choices por comando
-        if len(choices) >= 100:
-            break
-        choices.append(app_commands.Choice(name=label, value=value))
-    return choices
-
-
 def _find_item(loja: dict, item_key: str) -> tuple[str, str, dict] | None:
-    """Resolve o item pelo value gerado em _choices_from_loja."""
-    if "|" not in item_key:
+    """Resolve o item pelo nome (prefixo) ou pela chave antiga "segmento|item"."""
+    raw = (item_key or "").strip()
+    if not raw:
         return None
-    seg_key, name_key = item_key.split("|", 1)
+
+    if "|" in raw:
+        seg_key, name_key = raw.split("|", 1)
+        for segmento, item_name, payload in _iter_items(loja):
+            if _normalize_key(segmento) == _normalize_key(seg_key) and _normalize_key(item_name) == _normalize_key(name_key):
+                return segmento, item_name, payload
+        return None
+
+    name_key = _normalize_key(raw)
+    matches: list[tuple[str, str, dict]] = []
     for segmento, item_name, payload in _iter_items(loja):
-        if _normalize_key(segmento) == seg_key and _normalize_key(item_name) == name_key:
-            return segmento, item_name, payload
+        if _normalize_key(item_name) == name_key:
+            matches.append((segmento, item_name, payload))
+
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        return matches[0]
     return None
 
 
@@ -101,7 +102,7 @@ def _build_shop_embed(loja: dict) -> Embed:
 
     embed.add_field(
         name="Como comprar",
-        value="Use `/comprar <item> <quantidade>` (ou `comprar` via prefixo).",
+        value="Use `comprar <item> <quantidade>`.",
         inline=False,
     )
     return embed
@@ -110,7 +111,7 @@ class Shop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='loja', aliases=["shop"])
+    @commands.command(name='loja', aliases=["shop"])
     async def shop(self, ctx):
         """Abre a loja."""
         inte = CommandContextAdapter(ctx)
@@ -123,19 +124,32 @@ class Shop(commands.Cog):
         await inte.response.send_message(embed=embed, view=view)
         
         
-    @commands.hybrid_command(name="comprar", aliases=["buy"], description="Compra um item da loja.")
-    async def buy(self, ctx, item: str, amount: int):
+    @commands.command(name="comprar", aliases=["buy"], help="Compra um item da loja.")
+    async def buy(self, ctx, *, args: str):
         """Compra recursos na loja."""
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         if get_active_hero(inte.user.id) is None:
             return await inte.response.send_message("Seu perfil economico foi criado, mas voce precisa criar um heroi antes de comprar recursos para o inventario dele.")
-        
+
+        raw = (args or "").strip()
+        if not raw:
+            return await inte.response.send_message("Uso: comprar <item> <quantidade>.")
+
+        parts = raw.split()
+        amount = 1
+        if parts and parts[-1].isdigit():
+            amount = int(parts[-1])
+            parts = parts[:-1]
+
+        item = " ".join(parts).strip()
+        if not item:
+            return await inte.response.send_message("Informe o item. Ex: comprar Madeira 2")
+
         if amount <= 0:
             await inte.response.send_message(f"A quantidade {amount} nao e suportada. O minimo e 1.")
             return
-        
-        
+
         loja = _load_loja()
         resolved = _find_item(loja, item)
         if not resolved:
@@ -196,19 +210,6 @@ class Shop(commands.Cog):
             f"Compra concluída: {amount}x {item_name} por {price} nex. "
             f"Carteira atual: {updated_data['nex']} nex. Saldo de {resource_label}: {resource_balance}."
         )
-
-
-    @buy.autocomplete("item")
-    async def buy_item_autocomplete(self, interaction: discord.Interaction, current: str):
-        # Autocomplete (para slash): filtra por texto e limita a 25.
-        loja = _load_loja()
-        all_choices = _choices_from_loja(loja)
-        if not current:
-            return all_choices[:25]
-        cur = _normalize_key(current)
-        filtered = [c for c in all_choices if cur in _normalize_key(c.name)]
-        return filtered[:25]
-        
 
 async def setup(bot):
     await bot.add_cog(Shop(bot))

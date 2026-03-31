@@ -7,7 +7,7 @@ class Zone(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='zone')
+    @commands.command(name='zone')
     async def zone(self, ctx):
         """Mostra informacoes da zona atual."""
         inte = CommandContextAdapter(ctx)

@@ -26,7 +26,7 @@ class Daily(commands.Cog):
             return f"{minutes}m {seconds}s"
         return f"{seconds}s"
 
-    @commands.hybrid_command(name="daily")
+    @commands.command(name="daily")
     async def daily(self, ctx):
         """Coleta sua recompensa diária de nex."""
         inte = CommandContextAdapter(ctx)

@@ -7,7 +7,7 @@ class TrioDragao(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="trio_dragão", aliases=["trio_dragao"], description="Cria um meme do trio de dragões.")
+    @commands.command(name="trio_dragão", aliases=["trio_dragao"], help="Cria um meme do trio de dragões.")
     async def triodragao(
         self,
         ctx: commands.Context,

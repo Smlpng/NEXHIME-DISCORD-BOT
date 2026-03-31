@@ -2,7 +2,6 @@ import unicodedata
 from typing import Optional
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 from commands.RPG.utils.command_adapter import CommandContextAdapter
@@ -130,19 +129,13 @@ class Tribe(commands.Cog):
 
         return f"Parabéns! Você entrou para **{desired_role.name}**, agora vá, explore, conquiste e honre sua tribo!"
 
-    async def _autocomplete(self, current: str):
-        value = (current or "").strip().lower()
-        options = [tribe for tribe in TRIBES if value in tribe.lower()] or TRIBES
-        return [app_commands.Choice(name=tribe, value=tribe) for tribe in options[:20]]
-
     async def _resolve_tribe(self, value: str | None) -> str | None:
         if value is None:
             return None
         lowered = _normalize(value)
         return next((tribe for tribe in TRIBES if _normalize(tribe) == lowered), None)
 
-    @commands.hybrid_command(name="escolher_tribo")
-    @app_commands.describe(tribo="Nome da tribo ou deixe em branco para abrir o seletor")
+    @commands.command(name="escolher_tribo")
     async def escolher_tribo(self, ctx, *, tribo: Optional[str] = None):
         """Define a tribo do herói atual."""
         inte = CommandContextAdapter(ctx)
@@ -159,7 +152,7 @@ class Tribe(commands.Cog):
         if hero.get("tribe"):
             return await inte.response.send_message(f"Seu heroi ja pertence a {hero['tribe']}.", ephemeral=True)
 
-        if tribo is None and inte.interaction is not None:
+        if tribo is None:
             view = TribeView("Selecione sua tribo")
             await inte.response.send_message("Escolha a tribo do seu herói:", view=view, ephemeral=True)
             await view.wait()
@@ -179,8 +172,7 @@ class Tribe(commands.Cog):
             response = f"{response}\n\n{role_message}"
         await inte.response.send_message(response, ephemeral=True)
 
-    @commands.hybrid_command(name="trocar_tribo")
-    @app_commands.describe(nova_tribo="Nome da nova tribo ou deixe em branco para abrir o seletor")
+    @commands.command(name="trocar_tribo")
     async def trocar_tribo(self, ctx, *, nova_tribo: Optional[str] = None):
         """Troca a tribo do herói atual dentro do sistema novo."""
         inte = CommandContextAdapter(ctx)
@@ -197,7 +189,7 @@ class Tribe(commands.Cog):
         if not hero.get("tribe"):
             return await inte.response.send_message("Seu heroi ainda nao escolheu uma tribo. Use escolher_tribo primeiro.", ephemeral=True)
 
-        if nova_tribo is None and inte.interaction is not None:
+        if nova_tribo is None:
             view = TribeView("Selecione a nova tribo")
             await inte.response.send_message("Escolha a nova tribo do seu herói:", view=view, ephemeral=True)
             await view.wait()
@@ -222,14 +214,6 @@ class Tribe(commands.Cog):
             embed.add_field(name="Cargo", value=role_message, inline=False)
         embed.set_footer(text="No canal configurado, a troca de tribo tambem sincroniza o cargo do Discord.")
         await inte.response.send_message(embed=embed, ephemeral=True)
-
-    @escolher_tribo.autocomplete("tribo")
-    async def escolher_tribo_autocomplete(self, interaction: discord.Interaction, current: str):
-        return await self._autocomplete(current)
-
-    @trocar_tribo.autocomplete("nova_tribo")
-    async def trocar_tribo_autocomplete(self, interaction: discord.Interaction, current: str):
-        return await self._autocomplete(current)
 
 
 async def setup(bot):

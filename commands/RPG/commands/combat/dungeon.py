@@ -1,4 +1,4 @@
-from discord import app_commands, Embed, ButtonStyle
+from discord import Embed, ButtonStyle
 from discord.ext import commands
 from discord.ui import View, Button
 from commands.RPG.utils.hero_actions import load_hero
@@ -12,14 +12,8 @@ class Dungeon(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='dungeon')
-    @app_commands.choices(
-        cooperative=[
-            app_commands.Choice(name="Nao", value=2),
-            app_commands.Choice(name="Sim", value=1)
-        ]
-    )
-    async def dungeon(self, ctx, cooperative: int):
+    @commands.command(name='dungeon')
+    async def dungeon(self, ctx, cooperative: int = 2):
         """Inicia uma dungeon."""
         inte = CommandContextAdapter(ctx)
         if not await hero_created(inte):

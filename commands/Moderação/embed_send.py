@@ -124,9 +124,9 @@ class EmbedSend(commands.Cog):
 			return False, "O bot não tem permissão de `Embed Links` no canal destino."
 		return True, None
 
-	@commands.hybrid_command(
+	@commands.command(
 		name="embed",
-		description="Cria e envia um embed totalmente customizável via chat (wizard).",
+		help="Cria e envia um embed totalmente customizável via chat (wizard).",
 	)
 	@commands.has_permissions(manage_messages=True)
 	async def embed(self, ctx: commands.Context):

@@ -58,7 +58,7 @@ class Work(commands.Cog):
 		message = random.choice(outcomes).format(user=inte.user.mention, nex=earned_nex)
 		await inte.response.send_message(message)
 
-	@commands.hybrid_command(name="trabalhar", aliases=["work"])
+	@commands.command(name="trabalhar", aliases=["work"])
 	async def trabalhar(self, ctx):
 		"""Trabalha para ganhar um pouco de nex."""
 		outcomes = [
@@ -76,7 +76,7 @@ class Work(commands.Cog):
 			outcomes=outcomes,
 		)
 
-	@commands.hybrid_command(name="glubglub", aliases=["slut"])
+	@commands.command(name="glubglub", aliases=["slut"])
 	async def slut(self, ctx):
 		"""Usa carisma e ousadia para conseguir nex rapido."""
 		outcomes = [

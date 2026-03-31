@@ -1,4 +1,4 @@
-from discord import app_commands, Embed, Color
+from discord import Embed, Color
 from discord.ext import commands
 from commands.RPG.utils.database import get_advancements
 from commands.RPG.utils.hero_check import hero_created
@@ -8,7 +8,7 @@ class Advancements(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='advancements')
+    @commands.command(name='advancements')
     async def advancements(self, ctx):
         """Mostra o progresso do heroi."""
         inte = CommandContextAdapter(ctx)

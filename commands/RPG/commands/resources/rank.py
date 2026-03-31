@@ -25,7 +25,7 @@ class Rank(commands.Cog):
         except discord.HTTPException:
             return str(user_id)
 
-    @commands.hybrid_command(name="rank")
+    @commands.command(name="rank")
     async def rank(self, ctx):
         """Mostra o ranking econômico do RPG."""
         inte = CommandContextAdapter(ctx)

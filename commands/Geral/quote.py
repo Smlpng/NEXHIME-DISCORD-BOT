@@ -21,7 +21,7 @@ class Quote(commands.Cog):
         with open(self.quotes_file, "w", encoding="utf-8") as f:
             json.dump(self.quotes, f, indent=4, ensure_ascii=False)
 
-    @commands.hybrid_command(name="quote", aliases=["citation"], description="Salva ou exibe sua citação favorita.")
+    @commands.command(name="quote", aliases=["citation"], help="Salva ou exibe sua citação favorita.")
     async def quote(self, ctx: commands.Context, *, text: str | None = None):
         """Salva ou exibe uma citação favorita do servidor."""
         if text:
@@ -46,7 +46,7 @@ class Quote(commands.Cog):
             else:
                 await ctx.reply(f"Você ainda não tem uma citação salva, {ctx.author.name}.", mention_author=False)
 
-    @commands.hybrid_command(name="remover_quote", aliases=["delquote"], description="Exclui uma citação pelo número.")
+    @commands.command(name="remover_quote", aliases=["delquote"], help="Exclui uma citação pelo número.")
     async def delquote(self, ctx: commands.Context, index: int):
         """Exclui uma citação especificada pelo número."""
         if ctx.author.name in self.quotes and len(self.quotes[ctx.author.name]) >= index > 0:
@@ -57,7 +57,7 @@ class Quote(commands.Cog):
         else:
             await ctx.reply(f"Não há uma citação válida com esse número, {ctx.author.name}.", mention_author=False)
 
-    @commands.hybrid_command(name="ver_quotes", description="Exibe as citações de um usuário.")
+    @commands.command(name="ver_quotes", help="Exibe as citações de um usuário.")
     async def showquote(self, ctx: commands.Context, member: discord.Member | None = None):
         """Exibe as citações de um usuário, ou do autor do comando se não especificado."""
         if member is None:

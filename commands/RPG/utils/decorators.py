@@ -1,7 +1,3 @@
-from discord import app_commands
-from discord.ext import commands
-from typing import Any
-
 def same_user(original_func):
     def decorator(*args, **kwargs):
         global ctx

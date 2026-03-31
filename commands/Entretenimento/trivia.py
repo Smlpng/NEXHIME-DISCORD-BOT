@@ -29,10 +29,10 @@ class Trivia(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="trivia",
         aliases=["quiz"],
-        description="Faz uma pergunta rápida; responda no chat em até 20s.",
+        help="Faz uma pergunta rápida; responda no chat em até 20s.",
     )
     async def trivia(self, ctx: commands.Context):
         item = random.choice(_QUESTIONS)

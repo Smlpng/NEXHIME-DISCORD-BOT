@@ -123,7 +123,7 @@ class Tomate(commands.Cog):
             # Envia a embed no mesmo canal
             await channel.send(embed=embed)
 
-    @commands.hybrid_command(name="tomatadas_rank", aliases=["rank_tomates", "tomatadas", "tomates"], description="Mostra o ranking global de quem mais levou tomatadas")
+    @commands.command(name="tomatadas_rank", aliases=["rank_tomates", "tomatadas", "tomates"], help="Mostra o ranking global de quem mais levou tomatadas")
     async def rank_tomatadas(self, ctx: commands.Context):
         tomatadas_data = _load_tomatadas()
         

@@ -1,7 +1,6 @@
 from typing import Optional
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 from commands.RPG.utils.command_adapter import CommandContextAdapter
@@ -39,13 +38,7 @@ class Race(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def _autocomplete(self, current: str):
-        value = (current or "").strip().lower()
-        options = [race for race in RACES if value in race.lower()] or RACES
-        return [app_commands.Choice(name=race, value=race) for race in options[:20]]
-
-    @commands.hybrid_command(name="escolher_raca")
-    @app_commands.describe(raca="Nome da raça ou deixe em branco para abrir o seletor")
+    @commands.command(name="escolher_raca")
     async def escolher_raca(self, ctx, *, raca: Optional[str] = None):
         """Define a raça do herói atual."""
         inte = CommandContextAdapter(ctx)
@@ -58,7 +51,7 @@ class Race(commands.Cog):
         if hero.get("race"):
             return await inte.response.send_message(f"Seu heroi ja tem uma raca definida: {hero['race']}.", ephemeral=True)
 
-        if raca is None and inte.interaction is not None:
+        if raca is None:
             view = RaceView()
             await inte.response.send_message("Escolha a raça do seu herói:", view=view, ephemeral=True)
             await view.wait()
@@ -81,10 +74,6 @@ class Race(commands.Cog):
         embed.add_field(name="Raça", value=selected_race, inline=True)
         embed.set_footer(text="Você pode ver essa informação no menu do herói.")
         await inte.response.send_message(embed=embed, ephemeral=True)
-
-    @escolher_raca.autocomplete("raca")
-    async def escolher_raca_autocomplete(self, interaction: discord.Interaction, current: str):
-        return await self._autocomplete(current)
 
 
 async def setup(bot):

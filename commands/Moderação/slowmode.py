@@ -6,10 +6,10 @@ class Slowmode(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="slowmode",
         aliases=["modo_lento"],
-        description="Define o slowmode do canal atual (em segundos). Use 0 para desligar.",
+        help="Define o slowmode do canal atual (em segundos). Use 0 para desligar.",
     )
     @commands.has_permissions(manage_channels=True)
     async def slowmode(self, ctx: commands.Context, segundos: int):

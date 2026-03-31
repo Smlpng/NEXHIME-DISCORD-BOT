@@ -9,7 +9,7 @@ class Rest(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="descansar", aliases=["rest"])
+    @commands.command(name="descansar", aliases=["rest"])
     async def descansar(self, ctx):
         """Explica como o descanso funciona no RPG atual."""
         inte = CommandContextAdapter(ctx)
@@ -27,13 +27,13 @@ class Rest(commands.Cog):
                 "No sistema atual, vida e mana nao ficam persistidas entre combates. "
                 "Seu heroi ja entra pronto para a proxima luta, entao descansar nao precisa aplicar cooldown ou recuperar energia."
             )
-            embed.add_field(name="Proximo passo", value="Use /fight, /dungeon, /raid ou /pvp quando quiser continuar.", inline=False)
+            embed.add_field(name="Proximo passo", value="Use fight, dungeon, raid ou pvp quando quiser continuar.", inline=False)
         else:
             embed.description = (
                 "Seu heroi ainda nao escolheu uma classe, mas o descanso tambem nao e necessario no sistema atual. "
                 "Primeiro escolha a classe quando quiser pelo menu do heroi."
             )
-            embed.add_field(name="Dica", value="Abra /menu para ver o perfil e definir classe, raça ou tribo quando quiser.", inline=False)
+            embed.add_field(name="Dica", value="Abra menu para ver o perfil e definir classe, raça ou tribo quando quiser.", inline=False)
 
         await inte.response.send_message(embed=embed, ephemeral=True)
 

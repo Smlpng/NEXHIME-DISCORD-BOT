@@ -10,7 +10,7 @@ class Fight(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='fight')
+    @commands.command(name='fight')
     async def fight(self, ctx):
         """Inicia uma batalha na zona atual."""
         inte = CommandContextAdapter(ctx)

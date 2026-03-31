@@ -6,10 +6,10 @@ class RemindMe(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="remindme",
         aliases=["lembrete", "lembrar", "remind"],
-        description="Envia um lembrete após um tempo (ex: 10m, 2h, 1d)."
+        help="Envia um lembrete após um tempo (ex: 10m, 2h, 1d)."
     )
     async def remindme(self, ctx: commands.Context, time: str, *, message: str):
         """Envia uma mensagem de lembrete após o tempo especificado na DM."""

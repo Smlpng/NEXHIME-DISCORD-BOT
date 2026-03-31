@@ -12,7 +12,7 @@ class Raid(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='raid')
+    @commands.command(name='raid')
     async def raid(self, ctx):
         """Enfrente um inimigo poderoso em grupo."""
         inte = CommandContextAdapter(ctx)

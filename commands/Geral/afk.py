@@ -28,7 +28,7 @@ class AFK(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="afk", description="Marca você como AFK (ausente) com um motivo opcional.")
+    @commands.command(name="afk", help="Marca você como AFK (ausente) com um motivo opcional.")
     async def afk(self, ctx: commands.Context, *, motivo: str | None = None):
         if ctx.guild is None:
             return await ctx.reply("Este comando funciona em servidores.", mention_author=False)

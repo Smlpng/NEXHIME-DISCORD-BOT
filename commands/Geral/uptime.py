@@ -12,7 +12,7 @@ class Uptime(commands.Cog):
         if not hasattr(bot, "_started_at_monotonic"):
             bot._started_at_monotonic = time.monotonic()
 
-    @commands.hybrid_command(name="uptime", aliases=["online"], description="Mostra há quanto tempo o bot está online.")
+    @commands.command(name="uptime", aliases=["online"], help="Mostra há quanto tempo o bot está online.")
     async def uptime(self, ctx: commands.Context):
         started_ts = int(getattr(self.bot, "_started_at_ts", int(discord.utils.utcnow().timestamp())))
         seconds = max(0, int(time.monotonic() - getattr(self.bot, "_started_at_monotonic", time.monotonic())))

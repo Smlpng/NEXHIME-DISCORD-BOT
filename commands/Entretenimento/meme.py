@@ -6,7 +6,7 @@ class Meme(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="meme", description="Receba um meme aleatório da internet.")
+    @commands.command(name="meme", help="Receba um meme aleatório da internet.")
     async def meme(self, ctx: commands.Context):
         """Envia uma imagem ou meme aleatório."""
         await self.fetch_and_send_meme(ctx)

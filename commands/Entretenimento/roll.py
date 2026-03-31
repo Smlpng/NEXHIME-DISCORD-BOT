@@ -6,7 +6,7 @@ class Roll(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="rolar", aliases=["roll"], description="Rola um dado ou escolhe um número aleatório.")
+    @commands.command(name="rolar", aliases=["roll"], help="Rola um dado ou escolhe um número aleatório.")
     async def roll(self, ctx: commands.Context, number: int):
         """Rola um dado ou escolhe um número aleatório entre 1 e o número fornecido."""
         if number <= 0:

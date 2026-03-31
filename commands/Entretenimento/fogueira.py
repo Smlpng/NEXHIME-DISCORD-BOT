@@ -10,7 +10,7 @@ class Queimar(commands.Cog):
         self.bot = bot
         self.template_path = "assets/queimar/fogueira.png"  # imagem base do Bob Esponja
 
-    @commands.hybrid_command(name="queimar", aliases=["burn"], description="Queima uma imagem com o Bob Esponja (meme).")
+    @commands.command(name="queimar", aliases=["burn"], help="Queima uma imagem com o Bob Esponja (meme).")
     async def queimar(self, ctx: commands.Context, user: discord.User = None):
         """Queime algo com o Bob Esponja"""
         imagem_alvo = None

@@ -17,7 +17,7 @@ class Wanted(commands.Cog):
             for dy in range(-thickness, thickness + 1):
                 draw.text((x + dx, y + dy), text, font=font, fill=fill)
 
-    @commands.hybrid_command(name="procurado", aliases=["wanted"], description="Crie uma imagem de procurado com sua foto")
+    @commands.command(name="procurado", aliases=["wanted"], help="Crie uma imagem de procurado com sua foto")
     async def wanted(self, ctx: commands.Context, membro: discord.Member | None = None):
         """Crie uma imagem de procurado com sua foto"""
         membro = membro or ctx.author

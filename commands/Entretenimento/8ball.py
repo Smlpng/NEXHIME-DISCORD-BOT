@@ -6,7 +6,7 @@ class EightBall(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="bola8", aliases=["8ball"], description="Faça uma pergunta e receba uma resposta aleatória.")
+    @commands.command(name="bola8", aliases=["8ball"], help="Faça uma pergunta e receba uma resposta aleatória.")
     async def eight_ball(self, ctx: commands.Context, *, question: str):
         """Responde com uma frase aleatória como 'Sim', 'Não', 'Talvez', etc."""
         responses = [

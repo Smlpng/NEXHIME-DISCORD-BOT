@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
 import os
 import inspect
 
@@ -53,10 +52,10 @@ class Comandos(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="comandos",
         aliases=["commands", "cmds"],
-        description="Mostra os comandos por categoria."
+        help="Mostra os comandos por categoria."
     )
     async def comandos(self, ctx):
         embed = discord.Embed(

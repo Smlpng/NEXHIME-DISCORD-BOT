@@ -13,10 +13,10 @@ DB_DIR = BASE_DIR / "DataBase"
 TWEET_REDIRECT_FILE = DB_DIR / "tweet_channels.json"
 BACKGROUND = BASE_DIR / "assets" / "templates" / "tweet" / "tweet_bg.png"
 MAIN_GUILD_ID = 1454442259536678972
-TWEET_CHANNEL_ID = 1484012616819937391
+TWEET_CHANNEL_ID = 1488553040553185310
 
 
-def load_tweet_redirects() -> dict[str, int]:
+def load_tweet_redirects() -> dict[str, dict]:
     try:
         with TWEET_REDIRECT_FILE.open("r", encoding="utf-8") as file:
             data = json.load(file)
@@ -26,17 +26,31 @@ def load_tweet_redirects() -> dict[str, int]:
     if not isinstance(data, dict):
         return {}
 
-    redirects: dict[str, int] = {}
-    for guild_id, channel_id in data.items():
-        try:
-            redirects[str(guild_id)] = int(channel_id)
-        except (TypeError, ValueError):
+    redirects: dict[str, dict] = {}
+    for guild_id, payload in data.items():
+        guild_key = str(guild_id)
+        if isinstance(payload, int):
+            redirects[guild_key] = {"channel_id": int(payload), "external": "none"}
+            continue
+        if isinstance(payload, str) and payload.isdigit():
+            redirects[guild_key] = {"channel_id": int(payload), "external": "none"}
+            continue
+        if isinstance(payload, dict):
+            raw_channel_id = payload.get("channel_id", payload.get("id"))
+            try:
+                channel_id = int(raw_channel_id)
+            except (TypeError, ValueError):
+                continue
+            external = str(payload.get("external", payload.get("mode", "none")) or "none").lower()
+            if external not in {"none", "main", "all"}:
+                external = "none"
+            redirects[guild_key] = {"channel_id": channel_id, "external": external}
             continue
 
     return redirects
 
 
-def save_tweet_redirects(data: dict[str, int]) -> None:
+def save_tweet_redirects(data: dict[str, dict]) -> None:
     DB_DIR.mkdir(parents=True, exist_ok=True)
     with TWEET_REDIRECT_FILE.open("w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=2)
@@ -46,6 +60,70 @@ class Tweet(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guild_redirect_channels = load_tweet_redirects()
+
+    async def _safe_send_file(
+        self,
+        channel: discord.abc.Messageable | None,
+        image_bytes: bytes,
+        *,
+        filename: str = "tweet.png",
+    ) -> bool:
+        if channel is None or not hasattr(channel, "send"):
+            return False
+        try:
+            await channel.send(file=discord.File(BytesIO(image_bytes), filename=filename))
+            return True
+        except (discord.Forbidden, discord.NotFound, discord.HTTPException):
+            return False
+
+    async def _get_avatar_image(self, user: discord.abc.User) -> Image.Image | None:
+        """Retorna avatar do usuário como PIL Image (RGBA) ou None."""
+        try:
+            avatar_bytes = await user.display_avatar.read()
+            return Image.open(BytesIO(avatar_bytes)).convert("RGBA")
+        except Exception:
+            pass
+
+        # Fallback para ambientes onde Asset.read() falhe
+        try:
+            avatar_url = user.display_avatar.url
+            response = requests.get(avatar_url, timeout=10)
+            response.raise_for_status()
+            return Image.open(BytesIO(response.content)).convert("RGBA")
+        except Exception:
+            return None
+
+    @staticmethod
+    def _sanitize_channel_name(name: str) -> str:
+        name = (name or "").strip().lower()
+        if not name:
+            return "tweet-redirecionamento"
+
+        allowed = set("abcdefghijklmnopqrstuvwxyz0123456789-_")
+        name = name.replace(" ", "-")
+        cleaned = []
+        last_dash = False
+        for ch in name:
+            if ch in allowed:
+                if ch == "-":
+                    if last_dash:
+                        continue
+                    last_dash = True
+                else:
+                    last_dash = False
+                cleaned.append(ch)
+            elif ch in {"/", "\\", ".", ",", ":", ";", "|", "'", '"', "`"}:
+                continue
+            else:
+                # substitui caracteres não suportados por hífen para manter legível
+                if not last_dash:
+                    cleaned.append("-")
+                    last_dash = True
+
+        final = "".join(cleaned).strip("-")
+        if not final:
+            final = "tweet-redirecionamento"
+        return final[:90]
 
     async def get_target_channel(self) -> discord.abc.Messageable | None:
         channel = self.bot.get_channel(TWEET_CHANNEL_ID)
@@ -60,8 +138,16 @@ class Tweet(commands.Cog):
         return fetched_channel if hasattr(fetched_channel, "send") else None
 
     async def get_guild_redirect_channel(self, guild_id: int) -> discord.abc.Messageable | None:
-        channel_id = self.guild_redirect_channels.get(str(guild_id))
+        payload = self.guild_redirect_channels.get(str(guild_id))
+        if not isinstance(payload, dict):
+            return None
+
+        channel_id = payload.get("channel_id")
         if channel_id is None:
+            return None
+        try:
+            channel_id = int(channel_id)
+        except (TypeError, ValueError):
             return None
 
         channel = self.bot.get_channel(channel_id)
@@ -77,43 +163,168 @@ class Tweet(commands.Cog):
 
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.hybrid_command(name="tweet_redirect", description="Define o canal para onde o tweet também será enviado neste servidor")
+    @commands.command(name="tweet_redirect", help="Define o canal para onde o tweet também será enviado neste servidor")
     async def tweet_redirect(self, ctx, canal: discord.TextChannel):
-        self.guild_redirect_channels[str(ctx.guild.id)] = canal.id
+        guild_key = str(ctx.guild.id)
+        current = self.guild_redirect_channels.get(guild_key)
+        external = "none"
+        if isinstance(current, dict):
+            external = str(current.get("external", "none") or "none").lower()
+            if external not in {"none", "main", "all"}:
+                external = "none"
+        self.guild_redirect_channels[guild_key] = {"channel_id": canal.id, "external": external}
         save_tweet_redirects(self.guild_redirect_channels)
         await ctx.send(f"Canal de redirecionamento do tweet definido para {canal.mention}.")
 
-    @commands.hybrid_command(description="Cria um tweet falso")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(
+        name="configurar_tweet",
+        aliases=["setup_tweet"],
+        help="Cria um canal de redirecionamento para o tweet e salva o ID no banco.",
+    )
+    async def configurar_tweet(self, ctx: commands.Context):
+        if ctx.guild is None:
+            return await ctx.send("Esse comando só pode ser usado dentro de um servidor.")
+
+        current_payload = self.guild_redirect_channels.get(str(ctx.guild.id))
+        current_channel = None
+        if isinstance(current_payload, dict) and current_payload.get("channel_id"):
+            try:
+                current_channel = ctx.guild.get_channel(int(current_payload["channel_id"]))
+            except (TypeError, ValueError):
+                current_channel = None
+
+        embed = discord.Embed(
+            title="Configurar redirecionamento de Tweet",
+            description=(
+                "Vou criar um chat específico neste servidor para o redirecionamento dos tweets.\n\n"
+                "Depois disso, o bot vai **guardar o ID** do chat criado no banco, então o redirecionamento vai continuar funcionando "
+                "mesmo após reiniciar."
+            ),
+            color=discord.Color.blurple(),
+        )
+        embed.add_field(
+            name="Nome do canal",
+            value=(
+                "Se você quiser, responda **agora** com o nome do canal (ex: `tweet-redirecionamento`).\n"
+                "Se não quiser, responda `padrao` (ou `padrão`) para usar o nome padrão.\n"
+                "Tempo: 30 segundos."
+            ),
+            inline=False,
+        )
+        if current_channel is not None:
+            embed.add_field(
+                name="Já configurado",
+                value=f"Canal atual: {current_channel.mention}\nSe continuar, vou criar um novo canal e substituir a configuração.",
+                inline=False,
+            )
+
+        await ctx.send(embed=embed)
+
+        def check(message: discord.Message) -> bool:
+            return (
+                message.author.id == ctx.author.id
+                and message.channel.id == ctx.channel.id
+                and message.guild is not None
+                and message.guild.id == ctx.guild.id
+            )
+
+        channel_name = "tweet-redirecionamento"
+        try:
+            reply: discord.Message = await self.bot.wait_for("message", check=check, timeout=30)
+            raw = (reply.content or "").strip()
+            if raw and raw.lower() not in {"padrao", "padrão", "nao", "não"}:
+                channel_name = raw
+        except Exception:
+            pass
+
+        external_mode = "none"
+        embed2 = discord.Embed(
+            title="Redirecionamento externo",
+            description=(
+                "Agora escolha se este servidor também vai receber tweets criados em **outros servidores**.\n\n"
+                "Responda com `1`, `2` ou `3`:\n"
+                "`1` = Outros servidores (todos)\n"
+                "`2` = Só do servidor principal\n"
+                "`3` = Nenhum (somente deste servidor)"
+            ),
+            color=discord.Color.blurple(),
+        )
+        embed2.set_footer(text="Tempo: 30 segundos")
+        await ctx.send(embed=embed2)
+
+        try:
+            reply2: discord.Message = await self.bot.wait_for("message", check=check, timeout=30)
+            raw2 = (reply2.content or "").strip().lower()
+            if raw2 in {"1", "todos", "all", "outros", "global"}:
+                external_mode = "all"
+            elif raw2 in {"2", "principal", "main"}:
+                external_mode = "main"
+            elif raw2 in {"3", "nenhum", "none", "nao", "não"}:
+                external_mode = "none"
+        except Exception:
+            pass
+
+        channel_name = self._sanitize_channel_name(channel_name)
+
+        try:
+            created = await ctx.guild.create_text_channel(
+                name=channel_name,
+                reason=f"Configuração de tweet por {ctx.author} ({ctx.author.id})",
+                category=getattr(ctx.channel, "category", None),
+            )
+        except discord.Forbidden:
+            return await ctx.send("Não tenho permissão para criar canais neste servidor.")
+        except discord.HTTPException:
+            return await ctx.send("Falhei ao criar o canal (erro do Discord). Tente novamente.")
+
+        self.guild_redirect_channels[str(ctx.guild.id)] = {"channel_id": created.id, "external": external_mode}
+        save_tweet_redirects(self.guild_redirect_channels)
+        mode_label = {"none": "Nenhum", "main": "Só do principal", "all": "Outros servidores (todos)"}.get(external_mode, "Nenhum")
+        await ctx.send(
+            f"Canal de redirecionamento configurado: {created.mention} (ID salvo). "
+            f"Redirecionamento externo: **{mode_label}**."
+        )
+
+    @commands.command(help="Cria um tweet falso")
     async def tweet(self, ctx, *, texto: str):
+        # Context (prefix commands) não tem defer; mantenha compatibilidade com possíveis interações.
         if getattr(ctx, "interaction", None):
-            await ctx.defer()
+            try:
+                await ctx.interaction.response.defer(thinking=True)
+            except Exception:
+                pass
 
         target_channel = await self.get_target_channel()
         if target_channel is None:
             await ctx.send(
-                "Não consegui encontrar o canal configurado para o tweet na cog. "
-                "Verifique a constante TWEET_CHANNEL_ID."
+                "Aviso: não consegui acessar o canal global configurado para tweet (TWEET_CHANNEL_ID). "
+                "Vou enviar o tweet apenas aqui e nos redirecionamentos configurados."
             )
-            return
 
         # carregar fundo
-        img = Image.open(BACKGROUND).convert("RGBA")
+        try:
+            img = Image.open(BACKGROUND).convert("RGBA")
+        except Exception:
+            await ctx.send(
+                "Não consegui abrir o template do tweet. Verifique o arquivo em assets/templates/tweet/tweet_bg.png."
+            )
+            return
         draw = ImageDraw.Draw(img)
 
         width, height = img.size
 
-        # baixar avatar
-        avatar_url = ctx.author.display_avatar.url
-        response = requests.get(avatar_url)
-        avatar = Image.open(BytesIO(response.content)).convert("RGBA")
+        # baixar avatar (resiliente)
+        avatar = await self._get_avatar_image(ctx.author)
+        if avatar is not None:
+            avatar = avatar.resize((60, 60))
 
-        avatar = avatar.resize((60, 60))
+            mask = Image.new("L", (60, 60), 0)
+            mask_draw = ImageDraw.Draw(mask)
+            mask_draw.ellipse((0, 0, 60, 60), fill=255)
 
-        mask = Image.new("L", (60, 60), 0)
-        mask_draw = ImageDraw.Draw(mask)
-        mask_draw.ellipse((0, 0, 60, 60), fill=255)
-
-        img.paste(avatar, (34, 24), mask)
+            img.paste(avatar, (34, 24), mask)
 
         # fontes
         try:
@@ -166,34 +377,77 @@ class Tweet(commands.Cog):
         image_bytes = buffer.getvalue()
 
         send_direct_to_target = bool(
-            ctx.guild
+            target_channel is not None
+            and ctx.guild
             and ctx.guild.id == MAIN_GUILD_ID
             and getattr(ctx.channel, "id", None) != getattr(target_channel, "id", None)
         )
 
         if not send_direct_to_target:
-            current_channel_file = discord.File(BytesIO(image_bytes), filename="tweet.png")
-            await ctx.send(file=current_channel_file)
+            await self._safe_send_file(ctx.channel, image_bytes)
 
-        if getattr(target_channel, "id", None) == getattr(ctx.channel, "id", None) and not send_direct_to_target:
-            pass
-        else:
-            target_channel_file = discord.File(BytesIO(image_bytes), filename="tweet.png")
-            await target_channel.send(file=target_channel_file)
+        if target_channel is not None:
+            if getattr(target_channel, "id", None) == getattr(ctx.channel, "id", None) and not send_direct_to_target:
+                pass
+            else:
+                await self._safe_send_file(target_channel, image_bytes)
 
         if ctx.guild is None:
             return
 
-        redirect_channel = await self.get_guild_redirect_channel(ctx.guild.id)
-        if redirect_channel is None:
-            return
+        origin_guild_id = ctx.guild.id
 
-        redirect_channel_id = getattr(redirect_channel, "id", None)
-        if redirect_channel_id in {getattr(ctx.channel, "id", None), getattr(target_channel, "id", None)}:
-            return
+        async def send_to_channel_id(channel_id: int):
+            channel = self.bot.get_channel(channel_id)
+            if channel is None:
+                try:
+                    channel = await self.bot.fetch_channel(channel_id)
+                except discord.HTTPException:
+                    return
+            if channel is None or not hasattr(channel, "send"):
+                return
+            await self._safe_send_file(channel, image_bytes)
 
-        redirect_file = discord.File(BytesIO(image_bytes), filename="tweet.png")
-        await redirect_channel.send(file=redirect_file)
+        ctx_channel_id = getattr(ctx.channel, "id", None)
+        target_channel_id = getattr(target_channel, "id", None) if target_channel is not None else None
+
+        # 1) Redirecionamento do próprio servidor (sempre, se configurado)
+        origin_payload = self.guild_redirect_channels.get(str(origin_guild_id))
+        if isinstance(origin_payload, dict) and origin_payload.get("channel_id"):
+            try:
+                local_redirect_id = int(origin_payload["channel_id"])
+            except (TypeError, ValueError):
+                local_redirect_id = None
+
+            if local_redirect_id and local_redirect_id not in {ctx_channel_id, target_channel_id}:
+                await send_to_channel_id(local_redirect_id)
+
+        # 2) Redirecionamento externo: outros servidores que optaram por receber
+        for guild_key, payload in self.guild_redirect_channels.items():
+            try:
+                dest_guild_id = int(guild_key)
+            except (TypeError, ValueError):
+                continue
+            if dest_guild_id == origin_guild_id:
+                continue
+            if not isinstance(payload, dict):
+                continue
+
+            external_mode = str(payload.get("external", "none") or "none").lower()
+            if external_mode == "none":
+                continue
+            if external_mode == "main" and origin_guild_id != MAIN_GUILD_ID:
+                continue
+
+            channel_id = payload.get("channel_id")
+            try:
+                channel_id = int(channel_id)
+            except (TypeError, ValueError):
+                continue
+
+            if channel_id in {ctx_channel_id, target_channel_id}:
+                continue
+            await send_to_channel_id(channel_id)
 
 
 async def setup(bot):

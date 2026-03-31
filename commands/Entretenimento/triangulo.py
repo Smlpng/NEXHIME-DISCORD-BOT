@@ -11,7 +11,7 @@ class TrianguloAmoroso(commands.Cog):
         self.template_path = "assets/triangulo/template.png"
         self.font_path = "assets/fonts/Impact.ttf"
 
-    @commands.hybrid_command(name="triângulo", aliases=["triangulo"], description="Cria um triângulo amoroso (meme).")
+    @commands.command(name="triângulo", aliases=["triangulo"], help="Cria um triângulo amoroso (meme).")
     async def triangulo(self, ctx: commands.Context, membro: discord.Member = None):
         """Crie um triangulo amoroso"""
         # Coordenadas onde cada avatar será colado (200x200 cada)

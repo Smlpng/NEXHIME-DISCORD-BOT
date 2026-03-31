@@ -7,7 +7,7 @@ class Dex(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='dex')
+    @commands.command(name='dex')
     async def dex(self, ctx):
         """Mostra o registro de inimigos encontrados."""
         inte = CommandContextAdapter(ctx)

@@ -27,7 +27,7 @@ class Bank(commands.Cog):
         embed.add_field(name="Movimentações", value="Use depositar, sacar e transferir para mover seu nex com segurança.", inline=False)
         return embed
 
-    @commands.hybrid_command(name="banco")
+    @commands.command(name="banco")
     async def banco(self, ctx):
         """Mostra a carteira e o saldo bancario."""
         inte = CommandContextAdapter(ctx)
@@ -42,7 +42,7 @@ class Bank(commands.Cog):
 
         await inte.response.send_message(embed=embed)
 
-    @commands.hybrid_command(name="depositar")
+    @commands.command(name="depositar")
     async def depositar(self, ctx, amount: int):
         """Deposita nex da carteira no banco."""
         inte = CommandContextAdapter(ctx)
@@ -61,7 +61,7 @@ class Bank(commands.Cog):
         embed.description = f"Depósito concluído: {amount} nex foram enviados para o banco."
         await inte.response.send_message(embed=embed)
 
-    @commands.hybrid_command(name="sacar")
+    @commands.command(name="sacar")
     async def sacar(self, ctx, amount: int):
         """Saca nex do banco para a carteira."""
         inte = CommandContextAdapter(ctx)
@@ -80,7 +80,7 @@ class Bank(commands.Cog):
         embed.description = f"Saque concluído: {amount} nex voltaram para a sua carteira."
         await inte.response.send_message(embed=embed)
 
-    @commands.hybrid_command(name="transferir")
+    @commands.command(name="transferir")
     async def transferir(self, ctx, member: discord.Member, amount: int):
         """Transfere nex do seu banco para o banco de outro jogador."""
         inte = CommandContextAdapter(ctx)

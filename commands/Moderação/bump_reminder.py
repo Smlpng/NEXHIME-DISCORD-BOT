@@ -92,9 +92,9 @@ class BumpReminder(commands.Cog):
     # Comando híbrido: !bump_reminder / /bump_reminder
     # ──────────────────────────────────────────────
 
-    @commands.hybrid_command(
+    @commands.command(
         name="bump_reminder",
-        description="Inicia um lembrete de 2 horas para fazer o /bump novamente."
+        help="Inicia um lembrete de 2 horas para fazer o /bump novamente."
     )
     async def bump_reminder(self, ctx: commands.Context):
         guild_id = str(ctx.guild.id)
@@ -118,8 +118,7 @@ class BumpReminder(commands.Cog):
         self.pending[guild_id] = task
 
         await ctx.reply(
-            f"✅ Lembrete registrado! Vou te avisar em **2 horas** para fazer o `/bump` de novo. 🔔",
-            ephemeral=True
+            f"✅ Lembrete registrado! Vou te avisar em **2 horas** para fazer o `/bump` de novo. 🔔"
         )
 
 

@@ -11,7 +11,7 @@ class Pvp(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='pvp')
+    @commands.command(name='pvp')
     async def pvp(self, ctx):
         """Inicia um combate PVP."""
         inte = CommandContextAdapter(ctx)

@@ -11,7 +11,7 @@ class Cerebro(commands.Cog):
         self.font_path = "assets/fonts/Impact.ttf"  # Troque se necessário
         self.template_path = "assets/cerebro/cerebro.png"
 
-    @commands.hybrid_command(name="cérebro", aliases=["cerebro", "brain"], description="Cria um meme Expanding Brain.")
+    @commands.command(name="cérebro", aliases=["cerebro", "brain"], help="Cria um meme Expanding Brain.")
     async def cerebro(self, ctx: commands.Context, *, ideias: str):
         """Crie um meme com Expanding Brain"""
         partes = [parte.strip() for parte in ideias.split('|')]

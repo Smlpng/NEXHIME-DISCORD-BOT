@@ -88,9 +88,9 @@ class EmojiManage(commands.Cog):
             or mime.startswith("image/gif")
         )
 
-    @commands.hybrid_command(
+    @commands.command(
         name="emojiadd",
-        description="Cria um emoji a partir de URL, anexo ou emoji customizado existente."
+        help="Cria um emoji a partir de URL, anexo ou emoji customizado existente."
     )
     @commands.has_permissions(manage_emojis_and_stickers=True)
     async def emojiadd(self, ctx: commands.Context, nome: str, origem: str | None = None):

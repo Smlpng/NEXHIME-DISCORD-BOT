@@ -9,7 +9,7 @@ class Inventory(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='inventory', aliases=['inventario'])
+    @commands.command(name='inventory', aliases=['inventario'])
     async def inventory(self, ctx):
         """Mostra o inventario."""
         inte = CommandContextAdapter(ctx)

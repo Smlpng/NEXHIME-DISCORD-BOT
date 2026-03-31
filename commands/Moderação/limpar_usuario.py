@@ -6,10 +6,10 @@ class LimparUsuario(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="limpar_usuario",
         aliases=["clear_user", "purge_user"],
-        description="Limpa N mensagens de um usuário no canal (máx 100).",
+        help="Limpa N mensagens de um usuário no canal (máx 100).",
     )
     @commands.has_permissions(manage_messages=True)
     async def limpar_usuario(self, ctx: commands.Context, membro: discord.Member, quantidade: int):

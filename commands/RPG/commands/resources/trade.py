@@ -1,4 +1,4 @@
-from discord import app_commands, Embed, Color, ButtonStyle
+from discord import Embed, Color, ButtonStyle
 from discord.ext import commands
 from discord.ui import View, Button
 from commands.RPG.utils.database import get_active_hero, update_active_hero_resources
@@ -20,25 +20,39 @@ class Trade(commands.Cog):
             3: 'Nex'
         }
 
-    @commands.hybrid_command(name='trade')
-    @app_commands.choices(
-        give=[
-            app_commands.Choice(name="Madeira", value=1),
-            app_commands.Choice(name="Ferro", value=2),
-            app_commands.Choice(name="Nex", value=3)
-        ],
-        receive=[
-            app_commands.Choice(name="Madeira", value=1),
-            app_commands.Choice(name="Ferro", value=2),
-            app_commands.Choice(name="Nex", value=3)
-        ]
-    )
-    async def trade(self, ctx, give : int, give_amount : int, receive : int, receive_amount : int):
+    def _parse_resource(self, value: str) -> int | None:
+        value = (value or "").strip().lower()
+        if value.isdigit():
+            parsed = int(value)
+            return parsed if parsed in self.resource_names else None
+
+        aliases = {
+            "madeira": 1,
+            "wood": 1,
+            "ferro": 2,
+            "iron": 2,
+            "nex": 3,
+        }
+        return aliases.get(value)
+
+    @commands.command(name='trade')
+    async def trade(self, ctx, give: str, give_amount: int, receive: str, receive_amount: int):
         """Troca recursos com outros jogadores."""
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         if get_active_hero(inte.user.id) is None:
             return await inte.response.send_message("Seu perfil economico foi criado, mas voce precisa criar um heroi antes de trocar recursos do jogo.")
+
+        give_id = self._parse_resource(give)
+        receive_id = self._parse_resource(receive)
+        if give_id is None or receive_id is None:
+            return await inte.response.send_message(
+                "Recursos inválidos. Use: madeira/ferro/nex (ou 1/2/3).",
+                ephemeral=True,
+            )
+
+        give = give_id
+        receive = receive_id
         
         if give == receive:
             return await inte.response.send_message("Os recursos oferecidos e recebidos precisam ser diferentes.", ephemeral=True)

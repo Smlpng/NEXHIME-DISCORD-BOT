@@ -22,10 +22,10 @@ class MemeLista(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="meme_lista",
         aliases=["memes_lista", "templates"],
-        description="Lista os geradores de imagem disponíveis.",
+        help="Lista os geradores de imagem disponíveis.",
     )
     async def meme_lista(self, ctx: commands.Context):
         existing = set()
@@ -40,7 +40,7 @@ class MemeLista(commands.Cog):
             lines.append(f"{status} **{cmd}** — {label}")
 
         embed = discord.Embed(title="🎨 Geradores de imagem", description="\n".join(lines), color=discord.Color.purple())
-        embed.set_footer(text="Use /help para ver detalhes e exemplos.")
+        embed.set_footer(text="Use o comando help para ver detalhes e exemplos.")
         await ctx.reply(embed=embed, mention_author=False)
 
 

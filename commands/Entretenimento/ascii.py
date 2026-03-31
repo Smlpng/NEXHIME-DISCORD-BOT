@@ -6,7 +6,7 @@ class AsciiArt(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="ascii", description="Converte texto em arte ASCII.")
+    @commands.command(name="ascii", help="Converte texto em arte ASCII.")
     async def ascii(self, ctx: commands.Context, *, text: str):
         """Converte texto em arte ASCII com espaçamento entre as letras e sem o símbolo extra no início."""
         try:

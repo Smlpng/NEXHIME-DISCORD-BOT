@@ -1,4 +1,4 @@
-from discord import app_commands, SelectOption
+from discord import SelectOption
 from discord.ext import commands
 from discord.ui import View, Select
 from commands.RPG.game.zones.embeds import get_zone_embed
@@ -11,7 +11,7 @@ class ChangeZone(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='change_zone')
+    @commands.command(name='change_zone')
     async def change_zone(self, ctx):
         """Troca a zona atual do mapa."""
         inte = CommandContextAdapter(ctx)

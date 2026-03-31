@@ -8,7 +8,7 @@ class KickBan(commands.Cog):
     def _hierarchy_ok(self, ctx: commands.Context, target: discord.Member) -> bool:
         return ctx.author.top_role > target.top_role and ctx.guild.me.top_role > target.top_role
 
-    @commands.hybrid_command(name="expulsar", aliases=["kick"], description="Expulsa um membro do servidor.")
+    @commands.command(name="expulsar", aliases=["kick"], help="Expulsa um membro do servidor.")
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx: commands.Context, membro: discord.Member, *, motivo: str = None):
         if not self._hierarchy_ok(ctx, membro):
@@ -16,7 +16,7 @@ class KickBan(commands.Cog):
         await membro.kick(reason=motivo or f"Por {ctx.author}")
         await ctx.reply(f"{membro} expulso.")
 
-    @commands.hybrid_command(name="banir", aliases=["ban"], description="Bane um membro do servidor.")
+    @commands.command(name="banir", aliases=["ban"], help="Bane um membro do servidor.")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx: commands.Context, membro: discord.Member, *, motivo: str = None):
         if not self._hierarchy_ok(ctx, membro):
@@ -24,7 +24,7 @@ class KickBan(commands.Cog):
         await membro.ban(reason=motivo or f"Por {ctx.author}")
         await ctx.reply(f"{membro} banido.")
 
-    @commands.hybrid_command(name="desbanir", aliases=["unban"], description="Desbane um usuário pelo nome#tag ou ID.")
+    @commands.command(name="desbanir", aliases=["unban"], help="Desbane um usuário pelo nome#tag ou ID.")
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx: commands.Context, identificador: str):
         # aceita ID ou nome#discriminador
@@ -47,7 +47,7 @@ class KickBan(commands.Cog):
         await ctx.guild.unban(target, reason=f"Por {ctx.author}")
         await ctx.reply(f"{target} desbanido.")
 
-    @commands.hybrid_command(name="softban", description="Softban: bane e desbane para limpar mensagens.")
+    @commands.command(name="softban", help="Softban: bane e desbane para limpar mensagens.")
     @commands.has_permissions(ban_members=True)
     async def softban(self, ctx: commands.Context, membro: discord.Member, *, motivo: str = None):
         if not self._hierarchy_ok(ctx, membro):

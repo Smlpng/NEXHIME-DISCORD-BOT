@@ -12,7 +12,7 @@ class Mute(commands.Cog):
     def _hierarchy_ok(self, ctx: commands.Context, target: discord.Member) -> bool:
         return ctx.author.top_role > target.top_role and ctx.guild.me.top_role > target.top_role
 
-    @commands.hybrid_command(name="silenciar", aliases=["mute"], description="Silencia um membro (timeout).")
+    @commands.command(name="silenciar", aliases=["mute"], help="Silencia um membro (timeout).")
     @commands.has_permissions(moderate_members=True)
     async def mute(self, ctx: commands.Context, membro: discord.Member, minutos: int = TIMEOUT_DEFAULT_MIN, *, motivo: str = None):
         if membro == ctx.author:
@@ -35,7 +35,7 @@ class Mute(commands.Cog):
             await membro.add_roles(role, reason=motivo or f"Por {ctx.author}")
             await ctx.reply(f"{membro.mention} recebeu cargo {role.name} (fallback).")
 
-    @commands.hybrid_command(name="dessilenciar", aliases=["unmute"], description="Remove o silêncio de um membro.")
+    @commands.command(name="dessilenciar", aliases=["unmute"], help="Remove o silêncio de um membro.")
     @commands.has_permissions(moderate_members=True)
     async def unmute(self, ctx: commands.Context, membro: discord.Member, *, motivo: str = None):
         if not self._hierarchy_ok(ctx, membro):

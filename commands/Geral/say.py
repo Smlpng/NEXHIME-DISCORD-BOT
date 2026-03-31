@@ -5,7 +5,7 @@ class Say(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="say", aliases=["dizer", "falar", "echo"], description="Faz o bot repetir uma mensagem.")
+    @commands.command(name="say", aliases=["dizer", "falar", "echo"], help="Faz o bot repetir uma mensagem.")
     async def say(self, ctx: commands.Context, *, mensagem: str):
         # Deleta a mensagem original apenas se não for slash command
         if ctx.message and ctx.interaction is None:

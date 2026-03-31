@@ -4,7 +4,7 @@ from discord.ext import commands
 class ServerInfo(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.hybrid_command(name="serverinfo", description="Mostra informações do servidor.")
+    @commands.command(name="serverinfo", help="Mostra informações do servidor.")
     async def serverinfo(self, ctx: commands.Context):
         g = ctx.guild
         emb = discord.Embed(title=f"Servidor: {g.name}", color=discord.Color.green())

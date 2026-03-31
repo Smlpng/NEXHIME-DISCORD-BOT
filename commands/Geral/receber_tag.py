@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
 
 # =========================
 # CONFIGURAÇÃO
@@ -56,19 +55,15 @@ class ReceberTag(commands.Cog):
         return len(role.members)
 
     # ------------------- Comando Híbrido -------------------
-    @commands.hybrid_command(
+    @commands.command(
         name="receber_tag",
-        description="Receba uma ou mais tags permitidas. Se já tiver, o bot avisa; se não, o bot adiciona."
-    )
-    @app_commands.describe(
-        tags="Mencione cargos (no prefixo) ou digite nomes separados por vírgula (no slash use o autocomplete)."
+        help="Receba uma ou mais tags permitidas. Se já tiver, o bot avisa; se não, o bot adiciona."
     )
     async def receber_tag(self, ctx: commands.Context, *, tags: str | None = None):
         """
         Uso:
         - Prefixo: !receber_tag @Gamer @Música
-                   !receber_tag gamer, música
-        - Slash:   /receber_tag   (use autocomplete; pode digitar 'Gamer, Música')
+               !receber_tag gamer, música
         Regras:
         - Só cargos listados em ALLOWED_ROLE_IDS.
         - Se ROLE_CAPS tiver limite para o cargo, respeita a capacidade.
@@ -157,19 +152,6 @@ class ReceberTag(commands.Cog):
         if not responses:
             responses = ["ℹ️ Nenhuma alteração realizada."]
         await self._smart_send(ctx, "\n".join(responses), ephemeral=ephemeral)
-
-    # ---------------- Autocomplete para slash ----------------
-    @receber_tag.autocomplete("tags")
-    async def receber_tag_autocomplete(self, interaction: discord.Interaction, current: str):
-        if not interaction.guild:
-            return []
-        allowed = self._get_allowed_roles(interaction.guild)
-        nomes = [r.name for r in allowed]
-        if current:
-            c = current.lower()
-            nomes = [n for n in nomes if c in n.lower()]
-        return [app_commands.Choice(name=n, value=n) for n in nomes[:20]]
-
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ReceberTag(bot))

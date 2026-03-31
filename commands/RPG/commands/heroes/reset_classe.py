@@ -13,10 +13,10 @@ class ResetClasse(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="reset_classe",
         aliases=["respec"],
-        description="Reseta sua classe no RPG (permite escolher novamente).",
+        help="Reseta sua classe no RPG (permite escolher novamente).",
     )
     async def reset_classe(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)

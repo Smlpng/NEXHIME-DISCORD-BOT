@@ -14,10 +14,10 @@ class Nickname(commands.Cog):
             return False
         return ctx.author.top_role > target.top_role and ctx.guild.me.top_role > target.top_role
 
-    @commands.hybrid_command(
+    @commands.command(
         name="nickname",
         aliases=["nick"],
-        description="Altera o apelido (nickname) de um membro.",
+        help="Altera o apelido (nickname) de um membro.",
     )
     @commands.has_permissions(manage_nicknames=True)
     async def nickname(self, ctx: commands.Context, membro: discord.Member, *, novo_nome: str):
@@ -32,10 +32,10 @@ class Nickname(commands.Cog):
         except discord.Forbidden:
             await ctx.reply("Não tenho permissão para alterar apelidos.", mention_author=False)
 
-    @commands.hybrid_command(
+    @commands.command(
         name="reset_nick",
         aliases=["resetnick", "unnick"],
-        description="Remove o apelido de um membro (volta ao nome padrão).",
+        help="Remove o apelido de um membro (volta ao nome padrão).",
     )
     @commands.has_permissions(manage_nicknames=True)
     async def reset_nick(self, ctx: commands.Context, membro: discord.Member):

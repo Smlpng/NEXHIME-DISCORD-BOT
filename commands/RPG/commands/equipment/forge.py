@@ -1,5 +1,5 @@
 from discord.ext import commands
-from discord import app_commands, ButtonStyle, Embed
+from discord import ButtonStyle, Embed
 from discord.ui import View, Button
 from commands.RPG.utils.database import get_active_hero, list_active_clean_inventory
 from commands.RPG.game.items.weapons import weapon_dict
@@ -16,7 +16,7 @@ class Forge(commands.Cog):
         self.message = None
         self.image = "https://cdn.discordapp.com/attachments/474702643625984021/1253102100645416960/forja.jpeg?ex=6674a1c6&is=66735046&hm=f19475fa6c33f9433842236160c5c77cd6adfb0cc26399b2e6f6c5ed0d804f53&"
 
-    @commands.hybrid_command(name='forge')
+    @commands.command(name='forge')
     async def forge(self, ctx):
         """Melhora equipamentos na forja."""
         inte = CommandContextAdapter(ctx)

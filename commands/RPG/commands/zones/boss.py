@@ -34,7 +34,7 @@ class Boss(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="boss", description="Encontra um boss na zona atual (cooldown).")
+    @commands.command(name="boss", help="Encontra um boss na zona atual (cooldown).")
     async def boss(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
         ensure_profile(inte.user.id)

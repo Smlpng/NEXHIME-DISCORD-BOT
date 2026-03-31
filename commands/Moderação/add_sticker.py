@@ -8,7 +8,7 @@ class AddSticker(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.hybrid_command(name="add_sticker", description="Adiciona uma figurinha ao servidor.")
+    @commands.command(name="add_sticker", help="Adiciona uma figurinha ao servidor.")
     @commands.has_permissions(manage_emojis=True)
     async def add_sticker(self, ctx, name: str = None, *, link: str = None):
         """

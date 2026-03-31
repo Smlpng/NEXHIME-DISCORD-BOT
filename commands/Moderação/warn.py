@@ -37,7 +37,7 @@ class Warn(commands.Cog):
             return False
         return ctx.author.top_role > membro.top_role and ctx.guild.me.top_role > membro.top_role
 
-    @commands.hybrid_command(name="avisar", aliases=["warn"], description="Avisa um usuário (registra ocorrência).")
+    @commands.command(name="avisar", aliases=["warn"], help="Avisa um usuário (registra ocorrência).")
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx: commands.Context, membro: discord.Member, *, motivo: str):
         if not self._can_moderate(ctx, membro):
@@ -55,7 +55,7 @@ class Warn(commands.Cog):
         _save(data)
         await ctx.reply(f"{membro.mention} recebeu um aviso: {motivo}\nTotal de avisos: {len(lst)}")
 
-    @commands.hybrid_command(name="remover_aviso", aliases=["unwarn"], description="Remove o último aviso de um usuário.")
+    @commands.command(name="remover_aviso", aliases=["unwarn"], help="Remove o último aviso de um usuário.")
     @commands.has_permissions(manage_messages=True)
     async def unwarn(self, ctx: commands.Context, membro: discord.Member):
         if not self._can_moderate(ctx, membro):
@@ -70,7 +70,7 @@ class Warn(commands.Cog):
             return await ctx.reply(f"Último aviso de {membro.mention} removido. Restam {remaining} avisos.")
         await ctx.reply("Este usuário não possui avisos.")
 
-    @commands.hybrid_command(name="avisos", aliases=["warns"], description="Mostra os avisos de um usuário.")
+    @commands.command(name="avisos", aliases=["warns"], help="Mostra os avisos de um usuário.")
     @commands.has_permissions(manage_messages=True)
     async def warns(self, ctx: commands.Context, membro: discord.Member):
         data = _load()

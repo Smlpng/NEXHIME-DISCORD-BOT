@@ -34,7 +34,7 @@ class Explorar(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="explorar", description="Explora a zona atual e encontra um inimigo (cooldown).")
+    @commands.command(name="explorar", help="Explora a zona atual e encontra um inimigo (cooldown).")
     async def explorar(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
         ensure_profile(inte.user.id)

@@ -7,10 +7,10 @@ class CaraOuCoroa(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
+    @commands.command(
         name="cara_ou_coroa",
         aliases=["coinflip", "coroa", "cara"],
-        description="Joga cara ou coroa.",
+        help="Joga cara ou coroa.",
     )
     async def cara_ou_coroa(self, ctx: commands.Context):
         result = random.choice(["Cara", "Coroa"])

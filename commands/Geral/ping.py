@@ -5,7 +5,7 @@ class Ping(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="ping", aliases=["latencia", "latência", "ms"], description="Latência do bot")
+    @commands.command(name="ping", aliases=["latencia", "latência", "ms"], help="Latência do bot")
     async def ping(self, ctx: commands.Context):
         await ctx.reply(f"🏓 | Pong! {round(self.bot.latency * 1000)}ms")
 

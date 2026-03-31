@@ -41,7 +41,7 @@ class ShowDoMilhao(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="show_do_milhão", aliases=["showdomilhao", "show_do_milhao"], description="Jogo do Show do Milhão.")
+    @commands.command(name="show_do_milhão", aliases=["showdomilhao", "show_do_milhao"], help="Jogo do Show do Milhão.")
     async def show_do_milhao(self, ctx: commands.Context):
         """Já pensou em participar do Show do Milhão?"""
         try:
