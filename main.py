@@ -1,6 +1,3 @@
-# novo_main.py — Arquivo principal (bot.py + main.py mesclados)
-# Estrutura esperada:
-#
 # BOT/
 # ├── commands/
 # │   ├── 01_Moderação/

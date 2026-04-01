@@ -745,6 +745,53 @@ def list_economy_leaderboard(limit: int = 10) -> list[dict]:
 	return rows[:max(limit, 1)]
 
 
+def list_hero_progress_leaderboard(limit: int = 10) -> list[dict]:
+	state = _load_state()
+	advancements_by_hero = {
+		row["hero_id"]: row
+		for row in state["advancements"]
+	}
+	seen_by_hero: dict[int, int] = {}
+	for dex_entry in state["dex"]:
+		hero_id = dex_entry["hero_id"]
+		seen_by_hero[hero_id] = seen_by_hero.get(hero_id, 0) + 1
+
+	rows = []
+	for hero in state["hero"]:
+		if hero.get("active") != 1:
+			continue
+		advancement = advancements_by_hero.get(hero["id"], {})
+		kills = int(advancement.get("kills", 0))
+		upgrades = int(advancement.get("upgrades", 0))
+		nex_spent = int(advancement.get("nex_spent", 0))
+		seen = int(seen_by_hero.get(hero["id"], 0))
+		score = (
+			int(hero.get("level", 0)) * 1000
+			+ int(hero.get("xp", 0))
+			+ kills * 30
+			+ upgrades * 60
+			+ seen * 20
+			+ nex_spent // 10
+		)
+		rows.append(
+			{
+				"user_id": hero["user_id"],
+				"level": int(hero.get("level", 0)),
+				"xp": int(hero.get("xp", 0)),
+				"kills": kills,
+				"upgrades": upgrades,
+				"seen": seen,
+				"score": score,
+			}
+		)
+
+	rows.sort(
+		key=lambda row: (row["score"], row["level"], row["kills"], row["xp"]),
+		reverse=True,
+	)
+	return rows[:max(limit, 1)]
+
+
 def deposit_gold_to_bank(user_id: int, amount: int) -> bool:
 	return deposit_nex_to_bank(user_id, amount)
 
