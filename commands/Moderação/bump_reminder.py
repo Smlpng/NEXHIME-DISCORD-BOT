@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 # Tempo de espera: 2 horas em segundos
-BUMP_DELAY = 2 * 60 * 60
+BUMP_DELAY = 2 * 60 * 61
 
 DB_PATH = Path(__file__).resolve().parents[2] / "DataBase" / "bump_reminder.json"
 
@@ -50,43 +50,72 @@ class BumpReminder(commands.Cog):
     async def _restore_pending(self):
         data = _load()
         now = datetime.now(timezone.utc).timestamp()
-        to_remove = []
 
         for guild_id, entry in data.items():
+            if guild_id in self.pending and not self.pending[guild_id].done():
+                continue
+
             remaining = entry["remind_at"] - now
 
-            if remaining <= 0:
-                task = asyncio.create_task(
-                    self._send_reminder(guild_id, entry["channel_id"], entry["user_id"], 0)
+            task = asyncio.create_task(
+                self._reminder_loop(
+                    guild_id,
+                    entry["channel_id"],
+                    entry["user_id"],
+                    max(remaining, 0),
                 )
-                to_remove.append(guild_id)
-            else:
-                task = asyncio.create_task(
-                    self._send_reminder(guild_id, entry["channel_id"], entry["user_id"], remaining)
-                )
+            )
 
             self.pending[guild_id] = task
 
-        for gid in to_remove:
-            data.pop(gid, None)
-
+    def _store_reminder(self, guild_id: str, channel_id: int, user_id: int, remind_at: float) -> None:
+        data = _load()
+        data[guild_id] = {
+            "user_id": user_id,
+            "channel_id": channel_id,
+            "remind_at": remind_at,
+        }
         _save(data)
 
-    async def _send_reminder(self, guild_id: str, channel_id: int, user_id: int, delay: float):
-        if delay > 0:
-            await asyncio.sleep(delay)
-
-        channel = self.bot.get_channel(channel_id)
-        if channel is not None:
-            await channel.send(
-                f"<@{user_id}> ⏰ Já se passaram 2 horas! "
-                f"Está na hora de fazer o `/bump` de novo!"
-            )
-
+    def _clear_reminder(self, guild_id: str) -> None:
         data = _load()
         data.pop(guild_id, None)
         _save(data)
-        self.pending.pop(guild_id, None)
+
+    def _cancel_pending(self, guild_id: str, clear_data: bool = False) -> bool:
+        task = self.pending.pop(guild_id, None)
+        if task is not None:
+            task.cancel()
+
+        if clear_data:
+            self._clear_reminder(guild_id)
+
+        return task is not None
+
+    async def _reminder_loop(self, guild_id: str, channel_id: int, user_id: int, delay: float):
+        try:
+            next_delay = delay
+
+            while True:
+                if next_delay > 0:
+                    await asyncio.sleep(next_delay)
+
+                channel = self.bot.get_channel(channel_id)
+                if channel is not None:
+                    await channel.send(
+                        f"<@{user_id}> ⏰ Já se passaram 2 horas! "
+                        f"Está na hora de fazer o `/bump` de novo! Se você não deseja mais receber este lembrete, use `n!stop_bump`."
+                    )
+
+                next_delay = BUMP_DELAY
+                remind_at = datetime.now(timezone.utc).timestamp() + next_delay
+                self._store_reminder(guild_id, channel_id, user_id, remind_at)
+        except asyncio.CancelledError:
+            raise
+        finally:
+            task = self.pending.get(guild_id)
+            if task is asyncio.current_task():
+                self.pending.pop(guild_id, None)
 
     # ──────────────────────────────────────────────
     # Comando híbrido: !bump_reminder / /bump_reminder
@@ -94,32 +123,47 @@ class BumpReminder(commands.Cog):
 
     @commands.command(
         name="bump_reminder",
-        help="Inicia um lembrete de 2 horas para fazer o /bump novamente."
+        help="Inicia um lembrete recorrente de 2 horas para fazer o /bump novamente."
     )
     async def bump_reminder(self, ctx: commands.Context):
+        if ctx.guild is None:
+            await ctx.reply("Este comando funciona apenas em servidores.")
+            return
+
         guild_id = str(ctx.guild.id)
 
         # Cancela timer anterior (se existir)
-        if guild_id in self.pending:
-            self.pending[guild_id].cancel()
+        self._cancel_pending(guild_id, clear_data=False)
 
         remind_at = datetime.now(timezone.utc).timestamp() + BUMP_DELAY
-        data = _load()
-        data[guild_id] = {
-            "user_id": ctx.author.id,
-            "channel_id": ctx.channel.id,
-            "remind_at": remind_at
-        }
-        _save(data)
+        self._store_reminder(guild_id, ctx.channel.id, ctx.author.id, remind_at)
 
         task = asyncio.create_task(
-            self._send_reminder(guild_id, ctx.channel.id, ctx.author.id, BUMP_DELAY)
+            self._reminder_loop(guild_id, ctx.channel.id, ctx.author.id, BUMP_DELAY)
         )
         self.pending[guild_id] = task
 
         await ctx.reply(
-            f"✅ Lembrete registrado! Vou te avisar em **2 horas** para fazer o `/bump` de novo. 🔔"
+            "✅ Lembrete registrado! Vou continuar te avisando a cada **2 horas** até você usar `n!stop_bump`."
         )
+
+    @commands.command(
+        name="stop_bump",
+        help="Encerra o lembrete recorrente do /bump neste servidor."
+    )
+    async def stop_bump(self, ctx: commands.Context):
+        if ctx.guild is None:
+            await ctx.reply("Este comando funciona apenas em servidores.")
+            return
+
+        guild_id = str(ctx.guild.id)
+        stopped = self._cancel_pending(guild_id, clear_data=True)
+
+        if not stopped and guild_id not in _load():
+            await ctx.reply("Não há nenhum lembrete de bump ativo neste servidor.")
+            return
+
+        await ctx.reply("🛑 Lembrete de bump encerrado. Não vou mais enviar avisos até um novo `n!bump_reminder`.")
 
 
 async def setup(bot: commands.Bot):
