@@ -1,11 +1,4 @@
 {
   "TOKEN": "YOUR_DISCORD_TOKEN_HERE",
-  "prefix": "n!",
-  
-  "channels": {
-    "explore_log": 123456789012345678,
-    "combat_log": null
-  },
-  "mov_chat_channel_id": 1445145598578659389,
-  "motivational_last_sent": "2025-12-11T09:56:42.416491+00:00"
+  "prefix": "YOUR_PREFIX_HERE"
 }
