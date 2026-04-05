@@ -52,6 +52,9 @@ class EmbedSend(commands.Cog):
 	def __init__(self, bot: commands.Bot):
 		self.bot = bot
 
+	def _is_supported_target(self, channel: object) -> bool:
+		return isinstance(channel, (discord.TextChannel, discord.Thread))
+
 	async def _ask(
 		self,
 		ctx: commands.Context,
@@ -96,28 +99,54 @@ class EmbedSend(commands.Cog):
 			return str(msg.attachments[0].url)
 		return ""
 
-	def _try_parse_channel(self, ctx: commands.Context, raw: str) -> discord.TextChannel | None:
+	def _try_parse_channel(self, ctx: commands.Context, raw: str) -> discord.TextChannel | discord.Thread | None:
 		v = (raw or "").strip()
 		if v.lower() in {"aqui", "here", "atual", "current"}:
-			return ctx.channel if isinstance(ctx.channel, discord.TextChannel) else None
+			return ctx.channel if self._is_supported_target(ctx.channel) else None
 		if ctx.guild is None:
 			return None
 		# mention <#id>
 		m = re.fullmatch(r"<#(\d+)>", v)
 		if m:
-			return ctx.guild.get_channel(int(m.group(1)))  # type: ignore[return-value]
+			channel_id = int(m.group(1))
+			channel = ctx.guild.get_channel(channel_id)
+			if channel is None:
+				channel = ctx.guild.get_thread(channel_id)
+			return channel if self._is_supported_target(channel) else None
 		# id puro
 		if v.isdigit():
-			return ctx.guild.get_channel(int(v))  # type: ignore[return-value]
+			channel_id = int(v)
+			channel = ctx.guild.get_channel(channel_id)
+			if channel is None:
+				channel = ctx.guild.get_thread(channel_id)
+			return channel if self._is_supported_target(channel) else None
 		# nome
-		return discord.utils.get(ctx.guild.text_channels, name=v)
+		channel = discord.utils.get(ctx.guild.text_channels, name=v)
+		if channel is not None:
+			return channel
+		thread = discord.utils.get(ctx.guild.threads, name=v)
+		return thread if self._is_supported_target(thread) else None
 
-	def _bot_can_send_embed(self, channel: discord.abc.Messageable, me: discord.Member | None) -> tuple[bool, str | None]:
-		if not isinstance(channel, discord.TextChannel):
-			return True, None
+	def _bot_can_send_embed(self, channel: discord.TextChannel | discord.Thread, me: discord.Member | None) -> tuple[bool, str | None]:
 		if me is None:
 			return False, "Não consegui identificar as permissões do bot no servidor."
+
+		if isinstance(channel, discord.Thread):
+			parent = channel.parent
+			if parent is None:
+				return False, "Não consegui identificar o canal pai da thread destino."
+			perms = parent.permissions_for(me)
+			if not perms.view_channel:
+				return False, "O bot não consegue ver a thread destino."
+			if not perms.send_messages_in_threads:
+				return False, "O bot não tem permissão de enviar mensagens em threads no destino."
+			if not perms.embed_links:
+				return False, "O bot não tem permissão de `Embed Links` na thread destino."
+			return True, None
+
 		perms = channel.permissions_for(me)
+		if not perms.view_channel:
+			return False, "O bot não consegue ver o canal destino."
 		if not perms.send_messages:
 			return False, "O bot não tem permissão de enviar mensagens no canal destino."
 		if not perms.embed_links:
@@ -152,7 +181,18 @@ class EmbedSend(commands.Cog):
 			dest_channel = ctx.channel
 		else:
 			raw = self._message_to_text_or_attachment_url(dest_msg)
-			dest_channel = self._try_parse_channel(ctx, raw) or ctx.channel
+			dest_channel = self._try_parse_channel(ctx, raw)
+			if dest_channel is None:
+				return await ctx.reply(
+					"Não consegui encontrar o canal informado. Use uma menção, ID, nome exato ou `aqui`.",
+					mention_author=False,
+				)
+
+		if not self._is_supported_target(dest_channel):
+			return await ctx.reply(
+				"O destino informado não é suportado. Use um canal de texto ou uma thread.",
+				mention_author=False,
+			)
 
 		me = ctx.guild.me
 		ok, reason = self._bot_can_send_embed(dest_channel, me)
@@ -301,9 +341,12 @@ class EmbedSend(commands.Cog):
 		try:
 			await dest_channel.send(embed=embed)
 		except discord.Forbidden:
-			return await ctx.reply("Não consegui enviar no canal destino (Forbidden).", mention_author=False)
+			return await ctx.reply(
+				f"Não consegui enviar o embed em {dest_channel.mention}: falta alguma permissão no canal destino.",
+				mention_author=False,
+			)
 		except discord.HTTPException as e:
-			return await ctx.reply(f"Falha ao enviar embed: {e}", mention_author=False)
+			return await ctx.reply(f"Falha ao enviar embed em {dest_channel.mention}: {e}", mention_author=False)
 
 		await ctx.reply(f"Embed enviado em {dest_channel.mention}.", mention_author=False)
 

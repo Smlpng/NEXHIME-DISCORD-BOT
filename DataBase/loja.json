@@ -11,18 +11,36 @@
 			"resource": "iron"
 		}
 	},
-	"Títulos": {
-		"O pensador": {
+	"Tomates": {
+		"Bolsa de tomate simples": {
 			"Preço": 250,
-			"Descrição": "Título cosmético do seu herói."
+			"Descrição": "Título cosmético do seu herói.",
+			"resource": "tomato",
+			"capacity": 110
 		},
-		"O estudioso": {
-			"Preço": 250,
-			"Descrição": "Título cosmético do seu herói."
+		"Bolsa de tomate grande": {
+			"Preço": 500,
+			"Descrição": "Título cosmético do seu herói.",
+			"resource": "tomato",
+			"capacity": 250
 		},
-		"O aventureiro": {
-			"Preço": 250,
-			"Descrição": "Título cosmético do seu herói."
+		"Tomate": {
+			"Preço": 10,
+			"Descrição": "Título cosmético do seu herói.",
+			"resource": "tomato",
+			"quantity": 1
+		},
+		"10x Tomate": {
+			"Preço": 100,
+			"Descrição": "Título cosmético do seu herói.",
+			"resource": "tomato",
+			"quantity": 10
+		},
+		"50x Tomate": {
+			"Preço": 500,
+			"Descrição": "Título cosmético do seu herói.",
+			"resource": "tomato",
+			"quantity": 50
 		}
 	}
 }

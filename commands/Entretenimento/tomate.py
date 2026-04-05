@@ -3,8 +3,8 @@ from discord.ext import commands
 import json
 from pathlib import Path
 import time
-import json
-from pathlib import Path
+
+from commands.RPG.utils.database import ensure_profile, get_active_hero, update_active_hero_resources
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DB_DIR = BASE_DIR / "DataBase"
@@ -31,6 +31,31 @@ class Tomate(commands.Cog):
         # Dicionário para armazenar o tempo do último tomate de cada usuário (ID do usuário -> timestamp)
         self.cooldowns = {}
         self.COOLDOWN_TIME = 90  # 1 minuto e meio em segundos
+
+    @commands.command(
+        name="bolsa_tomates",
+        aliases=["bolsa_tomate", "minha_bolsa_tomates", "tomate_bag"],
+        help="Mostra a bolsa de tomates equipada, capacidade e saldo atual."
+    )
+    async def bolsa_tomates(self, ctx: commands.Context):
+        ensure_profile(ctx.author.id)
+        profile = get_active_hero(ctx.author.id)
+        if profile is None:
+            return await ctx.reply("Nao consegui localizar seu perfil de tomates.", mention_author=False)
+
+        bag_name = str(profile.get("tomato_bag", "Bolsa basica"))
+        capacity = int(profile.get("tomato_capacity", 100))
+        tomatoes = int(profile.get("tomato", 0))
+
+        embed = discord.Embed(
+            title="🍅 Sua bolsa de tomates",
+            color=discord.Color.red(),
+        )
+        embed.add_field(name="Bolsa equipada", value=bag_name, inline=False)
+        embed.add_field(name="Capacidade", value=f"{capacity} tomates", inline=True)
+        embed.add_field(name="Disponivel", value=f"{tomatoes} tomates", inline=True)
+        embed.set_footer(text=f"Espaco restante: {max(capacity - tomatoes, 0)} tomate(s).")
+        await ctx.reply(embed=embed, mention_author=False)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
@@ -70,6 +95,28 @@ class Tomate(commands.Cog):
             # Verifica se o alvo é a própria pessoa (auto-tomatada)
             if reactor and target.id == reactor.id:
                 return # Ignora se a pessoa tentar jogar tomate nela mesma
+
+            ensure_profile(payload.user_id)
+            thrower_profile = get_active_hero(payload.user_id)
+            if thrower_profile is None:
+                return
+
+            current_tomatoes = int(thrower_profile.get("tomato", 0))
+            if current_tomatoes <= 0:
+                try:
+                    aviso = await channel.send(
+                        f"🚫 {reactor.mention if reactor else f'<@{payload.user_id}>'}, você está sem tomates na bolsa."
+                    )
+                    await aviso.delete(delay=5.0)
+                except discord.HTTPException:
+                    pass
+
+                try:
+                    if reactor and message.guild:
+                        await message.remove_reaction(payload.emoji, reactor)
+                except discord.HTTPException:
+                    pass
+                return
             
             # Verifica o cooldown do atirador
             if reactor:
@@ -97,9 +144,22 @@ class Tomate(commands.Cog):
                             pass
                             
                         return
-                
-                # Atualiza o tempo do último tomate do atirador
-                self.cooldowns[reactor_id] = current_time
+
+            spent = update_active_hero_resources(payload.user_id, tomato=-1)
+            if not spent:
+                try:
+                    aviso = await channel.send(
+                        f"🚫 {reactor.mention if reactor else f'<@{payload.user_id}>'}, você está sem tomates na bolsa."
+                    )
+                    await aviso.delete(delay=5.0)
+                except discord.HTTPException:
+                    pass
+                return
+
+            if reactor:
+                self.cooldowns[str(reactor.id)] = time.time()
+            updated_profile = get_active_hero(payload.user_id)
+            remaining_tomatoes = int(updated_profile.get("tomato", 0)) if updated_profile else 0
 
             # Atualiza e salva o contador de tomatadas
             tomatadas_data = _load_tomatadas()
@@ -118,7 +178,7 @@ class Tomate(commands.Cog):
                 description=f"{reactor_mention} arremessou um tomate em {target.mention}!",
                 color=discord.Color.red()
             )
-            embed.set_footer(text=f"Coitado(a)! Já levou {total_tomatadas} tomatada(s) no total!")
+            embed.set_footer(text=f"Coitado(a)! Já levou {total_tomatadas} tomatada(s) no total! Restam {remaining_tomatoes} tomates na bolsa de quem jogou.")
             
             # Envia a embed no mesmo canal
             await channel.send(embed=embed)

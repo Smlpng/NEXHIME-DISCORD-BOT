@@ -10,6 +10,7 @@ from commands.RPG.utils.database import (
     active_hero_has_title,
     get_active_hero,
     grant_active_hero_title,
+    set_active_hero_tomato_bag,
     update_active_hero_resources,
 )
 from commands.RPG.utils.progress import add_nex_spent
@@ -297,6 +298,69 @@ class Shop(commands.Cog):
                 f"Carteira atual: {updated_data['nex']} nex."
             )
             return
+
+        if _normalize_key(str(payload.get("resource", payload.get("Recurso", "")))) == "tomato":
+            if "capacity" in payload:
+                try:
+                    new_capacity = int(payload.get("capacity"))
+                except (TypeError, ValueError):
+                    await inte.response.send_message("A capacidade desta bolsa está inválida no loja.json.")
+                    return
+
+                current_tomatoes = int(data.get("tomato", 0))
+                if current_tomatoes > new_capacity:
+                    await inte.response.send_message(
+                        f"Voce esta com {current_tomatoes} tomates e a nova bolsa suporta apenas {new_capacity}. Use tomates antes de trocar de bolsa."
+                    )
+                    return
+
+                paid = update_active_hero_resources(inte.user.id, nex=-price)
+                if not paid:
+                    await inte.response.send_message("Saldo insuficiente.")
+                    return
+
+                equipped = set_active_hero_tomato_bag(inte.user.id, item_name, new_capacity)
+                if not equipped:
+                    update_active_hero_resources(inte.user.id, nex=price)
+                    await inte.response.send_message("Falha ao equipar a nova bolsa. Sua compra foi estornada.")
+                    return
+
+                add_nex_spent(inte.user.id, price)
+                updated_data = get_active_hero(inte.user.id)
+                await inte.response.send_message(
+                    f"Compra concluida: **{item_name}** equipada por **{price}** nex. "
+                    f"Bolsa atual: {updated_data['tomato_bag']} ({updated_data['tomato_capacity']} tomates). "
+                    f"Saldo de tomates: {updated_data['tomato']}. Carteira atual: {updated_data['nex']} nex."
+                )
+                return
+
+            if "quantity" in payload:
+                try:
+                    tomato_amount = int(payload.get("quantity")) * amount
+                except (TypeError, ValueError):
+                    await inte.response.send_message("A quantidade de tomates deste item está inválida no loja.json.")
+                    return
+
+                updated = update_active_hero_resources(inte.user.id, nex=-price, tomato=tomato_amount)
+                if not updated:
+                    current_tomatoes = int(data.get("tomato", 0))
+                    current_capacity = int(data.get("tomato_capacity", current_tomatoes))
+                    if current_tomatoes + tomato_amount > current_capacity:
+                        await inte.response.send_message(
+                            f"Sua bolsa comporta ate {current_capacity} tomates e voce esta com {current_tomatoes}."
+                        )
+                    else:
+                        await inte.response.send_message("A compra foi bloqueada para evitar saldo negativo ou recurso inválido.")
+                    return
+
+                add_nex_spent(inte.user.id, price)
+                updated_data = get_active_hero(inte.user.id)
+                await inte.response.send_message(
+                    f"Compra concluida: {amount}x {item_name} por {price} nex. "
+                    f"Carteira atual: {updated_data['nex']} nex. "
+                    f"Tomates: {updated_data['tomato']}/{updated_data['tomato_capacity']}."
+                )
+                return
 
         # Mantém compatibilidade: se o JSON tiver um campo de recurso, use-o.
         # Caso não tenha, tenta mapear pelo nome do item (madeira/ferro etc.).

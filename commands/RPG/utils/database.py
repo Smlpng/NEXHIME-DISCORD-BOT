@@ -7,6 +7,9 @@ from threading import RLock
 ROOT_DIR = Path(__file__).resolve().parents[3]
 DATA_FILE = Path(os.getenv("RPG50_DATA_FILE", ROOT_DIR / "DataBase" / "players.json"))
 LOCK = RLock()
+DEFAULT_TOMATO_BAG = "Bolsa basica"
+DEFAULT_TOMATO_CAPACITY = 100
+DEFAULT_TOMATO_AMOUNT = 100
 
 HERO_FIELDS = [
 	"id",
@@ -17,9 +20,13 @@ HERO_FIELDS = [
 	"level",
 	"xp",
 	"nex",
+	"bank",
 	"wood",
 	"iron",
 	"runes",
+	"tomato_bag",
+	"tomato_capacity",
+	"tomato",
 	"weapon_id",
 	"armor_id",
 	"zone_id",
@@ -71,7 +78,6 @@ def _default_state() -> dict:
 		"advancements": [],
 		"dex": [],
 		"quest_log": {},
-		"bank": {},
 		"daily_claims": {},
 		"meta": {
 			"next_ids": {
@@ -87,13 +93,49 @@ def _table_max_id(rows: list[dict], field_name: str = "id") -> int:
 	return max((row[field_name] for row in rows), default=0)
 
 
+def _normalize_tomato_loadout(hero: dict) -> None:
+	bag_name = hero.get("tomato_bag")
+	if not isinstance(bag_name, str) or not bag_name.strip():
+		hero["tomato_bag"] = DEFAULT_TOMATO_BAG
+	else:
+		hero["tomato_bag"] = bag_name.strip()
+
+	try:
+		capacity = int(hero.get("tomato_capacity", DEFAULT_TOMATO_CAPACITY))
+	except (TypeError, ValueError):
+		capacity = DEFAULT_TOMATO_CAPACITY
+	if capacity <= 0:
+		capacity = DEFAULT_TOMATO_CAPACITY
+	hero["tomato_capacity"] = capacity
+
+	try:
+		tomatoes = int(hero.get("tomato", DEFAULT_TOMATO_AMOUNT))
+	except (TypeError, ValueError):
+		tomatoes = DEFAULT_TOMATO_AMOUNT
+	hero["tomato"] = max(0, min(tomatoes, capacity))
+
+
+def _normalize_bank_balance(hero: dict, legacy_bank: dict | None = None) -> None:
+	legacy_value = 0
+	if isinstance(legacy_bank, dict):
+		legacy_value = legacy_bank.get(str(hero.get("user_id")), 0)
+	try:
+		bank_balance = int(hero.get("bank", legacy_value))
+	except (TypeError, ValueError):
+		try:
+			bank_balance = int(legacy_value)
+		except (TypeError, ValueError):
+			bank_balance = 0
+	hero["bank"] = max(0, bank_balance)
+
+
 def _normalize_state(state: dict | None) -> dict:
 	normalized = _default_state()
+	legacy_bank = {}
 	if state:
+		legacy_bank = state.get("bank", {}) if isinstance(state, dict) else {}
 		normalized.update({key: value for key, value in state.items() if key in normalized})
 		meta = state.get("meta", {}) if isinstance(state, dict) else {}
-		if not isinstance(normalized.get("bank"), dict):
-			normalized["bank"] = {}
 		if not isinstance(normalized.get("daily_claims"), dict):
 			normalized["daily_claims"] = {}
 		if not isinstance(normalized.get("quest_log"), dict):
@@ -116,6 +158,8 @@ def _normalize_state(state: dict | None) -> dict:
 		if hero.get("title") is not None and not isinstance(hero.get("title"), str):
 			hero["title"] = None
 		hero.setdefault("title", None)
+		_normalize_bank_balance(hero, legacy_bank)
+		_normalize_tomato_loadout(hero)
 
 	for advancement in normalized["advancements"]:
 		if "nex_spent" not in advancement and "gold_spent" in advancement:
@@ -227,14 +271,17 @@ def _get_inventory_row(state: dict, hero_id: int, item_id: int, item_type_id: in
 	return max(matches, key=lambda row: (row.get("level", 0), row.get("id", 0)))
 
 
-def _apply_resource_delta(hero: dict, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> bool:
+def _apply_resource_delta(hero: dict, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0) -> bool:
 	updated_values = {
 		"nex": hero["nex"] + nex,
 		"wood": hero["wood"] + wood,
 		"iron": hero["iron"] + iron,
 		"runes": hero["runes"] + runes,
+		"tomato": hero["tomato"] + tomato,
 	}
 	if any(value < 0 for value in updated_values.values()):
+		return False
+	if updated_values["tomato"] > int(hero.get("tomato_capacity", DEFAULT_TOMATO_CAPACITY)):
 		return False
 	hero.update(updated_values)
 	return True
@@ -259,9 +306,13 @@ def _build_clean_hero_row(state: dict, hero: dict) -> dict:
 		"level": hero["level"],
 		"xp": hero["xp"],
 		"nex": hero["nex"],
+		"bank": hero["bank"],
 		"wood": hero["wood"],
 		"iron": hero["iron"],
 		"runes": hero["runes"],
+		"tomato_bag": hero["tomato_bag"],
+		"tomato_capacity": hero["tomato_capacity"],
+		"tomato": hero["tomato"],
 		"weapon_id": hero["weapon_id"],
 		"weapon_level": _get_equipped_level(state, hero, 1, hero["weapon_id"]),
 		"armor_id": hero["armor_id"],
@@ -298,9 +349,13 @@ def _build_hero(user_id: int, class_id: int | None, active: int, hero_id: int) -
 		"level": 1,
 		"xp": 0,
 		"nex": 0,
+		"bank": 0,
 		"wood": 0,
 		"iron": 0,
 		"runes": 0,
+		"tomato_bag": DEFAULT_TOMATO_BAG,
+		"tomato_capacity": DEFAULT_TOMATO_CAPACITY,
+		"tomato": DEFAULT_TOMATO_AMOUNT,
 		"weapon_id": None,
 		"armor_id": None,
 		"zone_id": 1,
@@ -418,11 +473,7 @@ def get_active_hero(user_id: int) -> dict | None:
 def ensure_profile(user_id: int) -> None:
 	with LOCK:
 		state = _read_state_unlocked()
-		state.setdefault("bank", {})
 		updated = False
-		if str(user_id) not in state["bank"]:
-			state["bank"][str(user_id)] = 0
-			updated = True
 		hero = _get_active_hero_row(state, user_id)
 		if hero is None:
 			hero_id = _next_id(state, "hero")
@@ -547,7 +598,7 @@ def get_hero_resources_by_id(hero_id: int) -> dict | None:
 	hero = _get_hero_row_by_id(state, hero_id)
 	if hero is None:
 		return None
-	return {key: hero[key] for key in ("nex", "wood", "iron", "runes")}
+	return {key: hero[key] for key in ("nex", "wood", "iron", "runes", "tomato")}
 
 
 def get_active_hero_clean(user_id: int) -> dict | None:
@@ -625,31 +676,54 @@ def equip_item(user_id: int, item_type_name: str, item_id: int) -> None:
 		_write_state_unlocked(state)
 
 
-def spend_hero_resources(hero_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> None:
+def spend_hero_resources(hero_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0) -> None:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_hero_row_by_id(state, hero_id)
 		if hero is None:
 			return
-		if _apply_resource_delta(hero, nex=-nex, wood=-wood, iron=-iron, runes=-runes):
+		if _apply_resource_delta(hero, nex=-nex, wood=-wood, iron=-iron, runes=-runes, tomato=-tomato):
 			_write_state_unlocked(state)
 
 
-def update_active_hero_resources(user_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0) -> bool:
+def update_active_hero_resources(user_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0) -> bool:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_active_hero_row(state, user_id)
 		if hero is None:
 			return False
-		if not _apply_resource_delta(hero, nex=nex, wood=wood, iron=iron, runes=runes):
+		if not _apply_resource_delta(hero, nex=nex, wood=wood, iron=iron, runes=runes, tomato=tomato):
 			return False
 		_write_state_unlocked(state)
 		return True
 
 
+def set_active_hero_tomato_bag(user_id: int, bag_name: str, capacity: int) -> bool:
+	name = (bag_name or "").strip()
+	if not name:
+		return False
+	try:
+		capacity = int(capacity)
+	except (TypeError, ValueError):
+		return False
+	if capacity <= 0:
+		return False
+	with LOCK:
+		state = _read_state_unlocked()
+		hero = _get_active_hero_row(state, user_id)
+		if hero is None or int(hero.get("tomato", 0)) > capacity:
+			return False
+		hero["tomato_bag"] = name
+		hero["tomato_capacity"] = capacity
+		_write_state_unlocked(state)
+		return True
+
+
 def get_bank_balance(user_id: int) -> int:
-	state = _load_state()
-	return int(state.get("bank", {}).get(str(user_id), 0))
+	hero = get_active_hero(user_id)
+	if hero is None:
+		return 0
+	return int(hero.get("bank", 0))
 
 
 def deposit_nex_to_bank(user_id: int, amount: int) -> bool:
@@ -660,8 +734,7 @@ def deposit_nex_to_bank(user_id: int, amount: int) -> bool:
 		hero = _get_active_hero_row(state, user_id)
 		if hero is None or not _apply_resource_delta(hero, nex=-amount):
 			return False
-		state.setdefault("bank", {})
-		state["bank"][str(user_id)] = int(state["bank"].get(str(user_id), 0)) + amount
+		hero["bank"] = int(hero.get("bank", 0)) + amount
 		_write_state_unlocked(state)
 		return True
 
@@ -672,10 +745,10 @@ def withdraw_nex_from_bank(user_id: int, amount: int) -> bool:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_active_hero_row(state, user_id)
-		balance = int(state.get("bank", {}).get(str(user_id), 0))
+		balance = int(hero.get("bank", 0)) if hero is not None else 0
 		if hero is None or balance < amount or not _apply_resource_delta(hero, nex=amount):
 			return False
-		state["bank"][str(user_id)] = balance - amount
+		hero["bank"] = balance - amount
 		_write_state_unlocked(state)
 		return True
 
@@ -685,12 +758,15 @@ def transfer_bank_nex(sender_user_id: int, target_user_id: int, amount: int) -> 
 		return False
 	with LOCK:
 		state = _read_state_unlocked()
-		bank_state = state.setdefault("bank", {})
-		sender_balance = int(bank_state.get(str(sender_user_id), 0))
+		sender_hero = _get_active_hero_row(state, sender_user_id)
+		target_hero = _get_active_hero_row(state, target_user_id)
+		if sender_hero is None or target_hero is None:
+			return False
+		sender_balance = int(sender_hero.get("bank", 0))
 		if sender_balance < amount:
 			return False
-		bank_state[str(sender_user_id)] = sender_balance - amount
-		bank_state[str(target_user_id)] = int(bank_state.get(str(target_user_id), 0)) + amount
+		sender_hero["bank"] = sender_balance - amount
+		target_hero["bank"] = int(target_hero.get("bank", 0)) + amount
 		_write_state_unlocked(state)
 		return True
 
@@ -726,12 +802,11 @@ def get_daily_remaining_seconds(user_id: int, cooldown_seconds: int, now_ts: flo
 
 def list_economy_leaderboard(limit: int = 10) -> list[dict]:
 	state = _load_state()
-	bank_state = state.get("bank", {})
 	rows = []
 	for hero in state["hero"]:
 		if hero.get("active") != 1:
 			continue
-		bank_balance = int(bank_state.get(str(hero["user_id"]), 0))
+		bank_balance = int(hero.get("bank", 0))
 		rows.append(
 			{
 				"user_id": hero["user_id"],

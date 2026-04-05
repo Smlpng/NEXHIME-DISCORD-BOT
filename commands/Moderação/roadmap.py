@@ -61,7 +61,7 @@ class Roadmap(commands.Cog):
         )
 
         embed.add_field(
-            name="✅ ~~ Utilitários (Geral) ~~ `v0.2.2`| **Concluído**",
+            name="✅ ~~ Fase 2.2 (Geral) ~~ `v0.2.2`| **Concluído**",
             value="• Novos comandos gerais adicionados:\n"
                   "• `[n!]` **uptime**\n"
                   "• `[n!]` **botinfo**\n"
@@ -72,7 +72,7 @@ class Roadmap(commands.Cog):
         )
 
         embed.add_field(
-            name="✅ ~~ Fase 3 (Economia) ~~ `v0.3`| **Concluído**",
+            name="✅~~  Fase 3 (Economia) ~~ `v0.3`| **Concluído**",
             value="• Comandos Básicos, exemplos:\n"
             "• `[n!]` **daily**\n"
             "• `[n!]` **banco**\n"
@@ -85,7 +85,7 @@ class Roadmap(commands.Cog):
         )
 
         embed.add_field(
-            name="🎯 Fase 4 (RPG) `v0.4`| **Em Andamento**",
+            name="✅~~  Fase 3.1 (RPG) ~~ `v0.3.1`| **Concluído**",
             value="• Alguns comandos principais do RPG:\n"
             "• `[n!]` **menu**\n"
             "• `[n!]` **escolher_classe**\n"
@@ -95,19 +95,25 @@ class Roadmap(commands.Cog):
             "• `[n!]` **zone**\n"
             "• `[n!]` **change_zone**\n"
             "• `[n!]` **inventory**\n"
-            "• `[n!]` **loja**\n",
+            "• `[n!]` **loja**\n"
+            "• E sistema de Títulos\n",
             inline=False
         )
 
         embed.add_field(
-            name="🎯 Fase 4.1 (RPG extra) `v0.4.1`| **Em Andamento**",
-            value="• Novos comandos do RPG adicionados:\n"
-                  "• `[n!]` **explorar**\n"
-                  "• `[n!]` **boss**\n"
+            name="✅~~  Fase 4 ( 🍅 TOMATADAS 🍅 ) ~~ `v0.4`| **Concluído**",
+            value="• Sistema de arremessar tomates adicionado:\n"
+                  "• Reaja com 🍅 para arremessar tomates\n"
+                  "• `[n!]` **tomatadas_rank**\n"
                   "• `[n!]` **reset_classe**\n",
             inline=False
         )
 
+        embed.add_field(
+            name="❓  Próxima fase ( Em breve ) `v0.5`| **Em Andamento**",
+            value="• Novos recursos e melhorias a serem anunciados em breve! Fique ligado para mais atualizações e novidades da NEXHIME! 🚀",
+            inline=False
+        )
         
 
         data_atual = datetime.now().strftime("%d de %B de %Y")

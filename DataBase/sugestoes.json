@@ -2,6 +2,23 @@
   "channels": {
     "1485070453579059464": 1489101029029970001
   },
-  "suggestions": [],
-  "next_id": 1
+  "suggestions": [
+    {
+      "id": 1,
+      "guild_id": 1284553678199586828,
+      "channel_id": 1414066365127590020,
+      "author_id": 773954862223851560,
+      "content": "teste,teste,teste,teste,teste,teste,teste,teste,teste,teste,teste,teste,teste",
+      "forum_thread_id": 1490151183778582699
+    },
+    {
+      "id": 2,
+      "guild_id": 1284553678199586828,
+      "channel_id": 1414066365127590020,
+      "author_id": 773954862223851560,
+      "content": "Teste do comando de sugestao | Teste do comando de sugestao!!!!!!!!!!!!",
+      "forum_thread_id": 1490152560362000415
+    }
+  ],
+  "next_id": 3
 }
