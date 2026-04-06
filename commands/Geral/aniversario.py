@@ -49,6 +49,7 @@ class Aniversario(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self._announced: set[str] = set()
+        self._last_cleared: str = ""
         self.check_birthdays.start()
 
     def cog_unload(self):
@@ -59,6 +60,10 @@ class Aniversario(commands.Cog):
         data = _load()
         now = time.localtime()
         today_key = f"{now.tm_mday:02d}/{now.tm_mon:02d}"
+        # Clear cache when the date changes so each birthday fires once per year
+        if today_key != self._last_cleared:
+            self._announced.clear()
+            self._last_cleared = today_key
         for guild_id_str, channel_id in data["channels"].items():
             guild = self.bot.get_guild(int(guild_id_str))
             if guild is None:
@@ -82,9 +87,6 @@ class Aniversario(commands.Cog):
                         await channel.send(embed=embed)
                     except Exception:
                         pass
-        # Clear yesterday's announcements to avoid stale keys
-        if now.tm_hour < 1:
-            self._announced.clear()
 
     @check_birthdays.before_loop
     async def before_check(self):
