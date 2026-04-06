@@ -30,7 +30,7 @@ class Tomate(commands.Cog):
         self.bot = bot
         # Dicionário para armazenar o tempo do último tomate de cada usuário (ID do usuário -> timestamp)
         self.cooldowns = {}
-        self.COOLDOWN_TIME = 90  # 1 minuto e meio em segundos
+        self.COOLDOWN_TIME = 45  # 45 segundos
 
     @commands.command(
         name="bolsa_tomates",

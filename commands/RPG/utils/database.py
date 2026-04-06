@@ -10,6 +10,9 @@ LOCK = RLock()
 DEFAULT_TOMATO_BAG = "Bolsa basica"
 DEFAULT_TOMATO_CAPACITY = 100
 DEFAULT_TOMATO_AMOUNT = 100
+DEFAULT_FLOWER_BAG = "Bolsa de flores basica"
+DEFAULT_FLOWER_CAPACITY = 100
+DEFAULT_FLOWER_AMOUNT = 100
 
 HERO_FIELDS = [
 	"id",
@@ -27,6 +30,9 @@ HERO_FIELDS = [
 	"tomato_bag",
 	"tomato_capacity",
 	"tomato",
+	"flower_bag",
+	"flower_capacity",
+	"flower",
 	"weapon_id",
 	"armor_id",
 	"zone_id",
@@ -115,6 +121,28 @@ def _normalize_tomato_loadout(hero: dict) -> None:
 	hero["tomato"] = max(0, min(tomatoes, capacity))
 
 
+def _normalize_flower_loadout(hero: dict) -> None:
+	bag_name = hero.get("flower_bag")
+	if not isinstance(bag_name, str) or not bag_name.strip():
+		hero["flower_bag"] = DEFAULT_FLOWER_BAG
+	else:
+		hero["flower_bag"] = bag_name.strip()
+
+	try:
+		capacity = int(hero.get("flower_capacity", DEFAULT_FLOWER_CAPACITY))
+	except (TypeError, ValueError):
+		capacity = DEFAULT_FLOWER_CAPACITY
+	if capacity <= 0:
+		capacity = DEFAULT_FLOWER_CAPACITY
+	hero["flower_capacity"] = capacity
+
+	try:
+		flowers = int(hero.get("flower", DEFAULT_FLOWER_AMOUNT))
+	except (TypeError, ValueError):
+		flowers = DEFAULT_FLOWER_AMOUNT
+	hero["flower"] = max(0, min(flowers, capacity))
+
+
 def _normalize_bank_balance(hero: dict, legacy_bank: dict | None = None) -> None:
 	legacy_value = 0
 	if isinstance(legacy_bank, dict):
@@ -160,6 +188,7 @@ def _normalize_state(state: dict | None) -> dict:
 		hero.setdefault("title", None)
 		_normalize_bank_balance(hero, legacy_bank)
 		_normalize_tomato_loadout(hero)
+		_normalize_flower_loadout(hero)
 
 	for advancement in normalized["advancements"]:
 		if "nex_spent" not in advancement and "gold_spent" in advancement:
@@ -271,17 +300,20 @@ def _get_inventory_row(state: dict, hero_id: int, item_id: int, item_type_id: in
 	return max(matches, key=lambda row: (row.get("level", 0), row.get("id", 0)))
 
 
-def _apply_resource_delta(hero: dict, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0) -> bool:
+def _apply_resource_delta(hero: dict, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0, flower: int = 0) -> bool:
 	updated_values = {
 		"nex": hero["nex"] + nex,
 		"wood": hero["wood"] + wood,
 		"iron": hero["iron"] + iron,
 		"runes": hero["runes"] + runes,
 		"tomato": hero["tomato"] + tomato,
+		"flower": hero["flower"] + flower,
 	}
 	if any(value < 0 for value in updated_values.values()):
 		return False
 	if updated_values["tomato"] > int(hero.get("tomato_capacity", DEFAULT_TOMATO_CAPACITY)):
+		return False
+	if updated_values["flower"] > int(hero.get("flower_capacity", DEFAULT_FLOWER_CAPACITY)):
 		return False
 	hero.update(updated_values)
 	return True
@@ -313,6 +345,9 @@ def _build_clean_hero_row(state: dict, hero: dict) -> dict:
 		"tomato_bag": hero["tomato_bag"],
 		"tomato_capacity": hero["tomato_capacity"],
 		"tomato": hero["tomato"],
+		"flower_bag": hero["flower_bag"],
+		"flower_capacity": hero["flower_capacity"],
+		"flower": hero["flower"],
 		"weapon_id": hero["weapon_id"],
 		"weapon_level": _get_equipped_level(state, hero, 1, hero["weapon_id"]),
 		"armor_id": hero["armor_id"],
@@ -356,6 +391,9 @@ def _build_hero(user_id: int, class_id: int | None, active: int, hero_id: int) -
 		"tomato_bag": DEFAULT_TOMATO_BAG,
 		"tomato_capacity": DEFAULT_TOMATO_CAPACITY,
 		"tomato": DEFAULT_TOMATO_AMOUNT,
+		"flower_bag": DEFAULT_FLOWER_BAG,
+		"flower_capacity": DEFAULT_FLOWER_CAPACITY,
+		"flower": DEFAULT_FLOWER_AMOUNT,
 		"weapon_id": None,
 		"armor_id": None,
 		"zone_id": 1,
@@ -598,7 +636,7 @@ def get_hero_resources_by_id(hero_id: int) -> dict | None:
 	hero = _get_hero_row_by_id(state, hero_id)
 	if hero is None:
 		return None
-	return {key: hero[key] for key in ("nex", "wood", "iron", "runes", "tomato")}
+	return {key: hero[key] for key in ("nex", "wood", "iron", "runes", "tomato", "flower")}
 
 
 def get_active_hero_clean(user_id: int) -> dict | None:
@@ -676,23 +714,23 @@ def equip_item(user_id: int, item_type_name: str, item_id: int) -> None:
 		_write_state_unlocked(state)
 
 
-def spend_hero_resources(hero_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0) -> None:
+def spend_hero_resources(hero_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0, flower: int = 0) -> None:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_hero_row_by_id(state, hero_id)
 		if hero is None:
 			return
-		if _apply_resource_delta(hero, nex=-nex, wood=-wood, iron=-iron, runes=-runes, tomato=-tomato):
+		if _apply_resource_delta(hero, nex=-nex, wood=-wood, iron=-iron, runes=-runes, tomato=-tomato, flower=-flower):
 			_write_state_unlocked(state)
 
 
-def update_active_hero_resources(user_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0) -> bool:
+def update_active_hero_resources(user_id: int, nex: int = 0, wood: int = 0, iron: int = 0, runes: int = 0, tomato: int = 0, flower: int = 0) -> bool:
 	with LOCK:
 		state = _read_state_unlocked()
 		hero = _get_active_hero_row(state, user_id)
 		if hero is None:
 			return False
-		if not _apply_resource_delta(hero, nex=nex, wood=wood, iron=iron, runes=runes, tomato=tomato):
+		if not _apply_resource_delta(hero, nex=nex, wood=wood, iron=iron, runes=runes, tomato=tomato, flower=flower):
 			return False
 		_write_state_unlocked(state)
 		return True
@@ -715,6 +753,27 @@ def set_active_hero_tomato_bag(user_id: int, bag_name: str, capacity: int) -> bo
 			return False
 		hero["tomato_bag"] = name
 		hero["tomato_capacity"] = capacity
+		_write_state_unlocked(state)
+		return True
+
+
+def set_active_hero_flower_bag(user_id: int, bag_name: str, capacity: int) -> bool:
+	name = (bag_name or "").strip()
+	if not name:
+		return False
+	try:
+		capacity = int(capacity)
+	except (TypeError, ValueError):
+		return False
+	if capacity <= 0:
+		return False
+	with LOCK:
+		state = _read_state_unlocked()
+		hero = _get_active_hero_row(state, user_id)
+		if hero is None or int(hero.get("flower", 0)) > capacity:
+			return False
+		hero["flower_bag"] = name
+		hero["flower_capacity"] = capacity
 		_write_state_unlocked(state)
 		return True
 
