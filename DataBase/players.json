@@ -24,7 +24,7 @@
       "active": 1,
       "flower_bag": "Bolsa de flores basica",
       "flower_capacity": 100,
-      "flower": 97
+      "flower": 96
     },
     {
       "id": 2,
@@ -312,7 +312,7 @@
       "active": 1,
       "flower_bag": "Bolsa de flores basica",
       "flower_capacity": 100,
-      "flower": 99
+      "flower": 98
     },
     {
       "id": 13,
@@ -331,7 +331,7 @@
       "runes": 0,
       "tomato_bag": "Bolsa basica",
       "tomato_capacity": 100,
-      "tomato": 99,
+      "tomato": 98,
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
@@ -384,6 +384,32 @@
       "tomato_bag": "Bolsa basica",
       "tomato_capacity": 100,
       "tomato": 99,
+      "flower_bag": "Bolsa de flores basica",
+      "flower_capacity": 100,
+      "flower": 100,
+      "weapon_id": null,
+      "armor_id": null,
+      "zone_id": 1,
+      "active": 1
+    },
+    {
+      "id": 16,
+      "user_id": 523902681199149056,
+      "race": null,
+      "tribe": "Tribo da Folhagem",
+      "title": null,
+      "titles": [],
+      "class": null,
+      "level": 1,
+      "xp": 0,
+      "nex": 0,
+      "bank": 0,
+      "wood": 0,
+      "iron": 0,
+      "runes": 0,
+      "tomato_bag": "Bolsa basica",
+      "tomato_capacity": 100,
+      "tomato": 100,
       "flower_bag": "Bolsa de flores basica",
       "flower_capacity": 100,
       "flower": 100,
@@ -484,6 +510,12 @@
       "kills": 0,
       "upgrades": 0,
       "nex_spent": 0
+    },
+    {
+      "hero_id": 16,
+      "kills": 0,
+      "upgrades": 0,
+      "nex_spent": 0
     }
   ],
   "dex": [],
@@ -491,7 +523,7 @@
   "daily_claims": {},
   "meta": {
     "next_ids": {
-      "hero": 16,
+      "hero": 17,
       "inventory": 1,
       "dex": 1
     }

@@ -9,7 +9,7 @@ from commands.RPG.utils.database import ensure_profile, get_active_hero, update_
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DB_DIR = BASE_DIR / "DataBase"
 FLORES_FILE = DB_DIR / "flor.json"
-FLOWER_EMOJIS = {"💐","🌸","🏵️","🌹","🌺","🌻","🌼","🌷","🪻","🥀"}
+FLOWER_EMOJIS = {"🌹", "🌸", "🌺", "🌻", "🌷", "💐", "🪻", "🥀"}
 
 
 def _load_flores() -> dict:
