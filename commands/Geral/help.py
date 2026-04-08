@@ -23,6 +23,7 @@ EMOJIS_CATEGORIAS = {
     "Moderação": "👮",
     "Economia": "💰",
     "RPG": "⚔️",
+    "Economia & RPG": "💰",
 }
 PAGE_SIZE = 10
 
@@ -32,8 +33,8 @@ def get_command_category(cmd: commands.Command) -> str:
 
     mod_parts = cmd.cog.__module__.split('.')
 
-    if len(mod_parts) > 1 and len(mod_parts) > 2 and mod_parts[1].lower() == "rpg":
-        return "RPG"
+    if len(mod_parts) > 1 and mod_parts[1].lower() in {"rpg", "economiarpg"}:
+        return "Economia & RPG"
 
     if len(mod_parts) > 1:
         raw_cat = mod_parts[-2]
