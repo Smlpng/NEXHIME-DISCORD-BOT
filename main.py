@@ -144,6 +144,14 @@ def is_extension_module(file_path: Path) -> bool:
             return True
     return False
 
+def _should_skip_legacy_extension(module: str) -> bool:
+    if not module.startswith("commands.RPG."):
+        return False
+    replacement = module.replace("commands.RPG.", "commands.EconomiaRPG.", 1)
+    replacement_path = BASE_DIR / Path(replacement.replace(".", os.sep) + ".py")
+    return replacement_path.exists()
+
+
 async def load_extensions() -> None:
     """
     Carrega recursivamente todos os .py dentro de commands/ usando
@@ -175,6 +183,10 @@ async def load_extensions() -> None:
             continue
 
         module = str(file.relative_to(BASE_DIR)).replace(os.sep, ".")[:-3]
+
+        if _should_skip_legacy_extension(module):
+            log.info(f"[COG SKIP] legado substituido por EconomiaRPG → {module}")
+            continue
 
         if module in loaded_modules or module in bot.extensions:
             log.warning(f"[COG SKIP] já carregado → {module}")

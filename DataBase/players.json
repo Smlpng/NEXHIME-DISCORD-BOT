@@ -10,21 +10,21 @@
       "class": null,
       "level": 1,
       "xp": 0,
-      "nex": 997719274,
+      "nex": 997645174,
       "bank": 1000000000,
       "wood": 0,
       "iron": 0,
       "runes": 0,
       "tomato_bag": "Bolsa de tomate grande",
       "tomato_capacity": 250,
-      "tomato": 95,
+      "tomato": 94,
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
       "active": 1,
       "flower_bag": "Bolsa de flores basica",
       "flower_capacity": 100,
-      "flower": 96
+      "flower": 95
     },
     {
       "id": 2,
@@ -495,6 +495,58 @@
       "armor_id": null,
       "zone_id": 1,
       "active": 1
+    },
+    {
+      "id": 20,
+      "user_id": 42,
+      "race": null,
+      "tribe": null,
+      "title": null,
+      "titles": [],
+      "class": "guerreiro",
+      "level": 1,
+      "xp": 0,
+      "nex": 150,
+      "bank": 0,
+      "wood": 0,
+      "iron": 0,
+      "runes": 0,
+      "tomato_bag": "Bolsa basica",
+      "tomato_capacity": 100,
+      "tomato": 100,
+      "flower_bag": "Bolsa de flores basica",
+      "flower_capacity": 100,
+      "flower": 100,
+      "weapon_id": null,
+      "armor_id": null,
+      "zone_id": 1,
+      "active": 1
+    },
+    {
+      "id": 21,
+      "user_id": 84,
+      "race": null,
+      "tribe": null,
+      "title": null,
+      "titles": [],
+      "class": "guerreiro",
+      "level": 1,
+      "xp": 0,
+      "nex": 900,
+      "bank": 0,
+      "wood": 0,
+      "iron": 0,
+      "runes": 0,
+      "tomato_bag": "Bolsa basica",
+      "tomato_capacity": 100,
+      "tomato": 100,
+      "flower_bag": "Bolsa de flores basica",
+      "flower_capacity": 100,
+      "flower": 100,
+      "weapon_id": null,
+      "armor_id": null,
+      "zone_id": 1,
+      "active": 1
     }
   ],
   "inventory": [],
@@ -612,6 +664,18 @@
       "kills": 0,
       "upgrades": 0,
       "nex_spent": 0
+    },
+    {
+      "hero_id": 20,
+      "kills": 0,
+      "upgrades": 0,
+      "nex_spent": 0
+    },
+    {
+      "hero_id": 21,
+      "kills": 0,
+      "upgrades": 0,
+      "nex_spent": 0
     }
   ],
   "dex": [],
@@ -619,7 +683,7 @@
   "daily_claims": {},
   "meta": {
     "next_ids": {
-      "hero": 20,
+      "hero": 22,
       "inventory": 1,
       "dex": 1
     }
