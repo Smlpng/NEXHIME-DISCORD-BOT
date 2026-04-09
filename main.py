@@ -31,10 +31,13 @@ import asyncio
 import logging
 import time
 from pathlib import Path
+from typing import Any
 import status
 
 import discord
 from discord.ext import commands
+
+from mongo import close_mongodb, get_mongodb_settings, initialize_mongodb
 
 # ==========================
 # LOGGING
@@ -64,7 +67,7 @@ PREFIX_FILE = DB_DIR / "prefixes.json"
 # CONFIG
 # ==========================
 
-def load_config() -> dict:
+def load_config() -> dict[str, Any]:
     if not CONFIG_PATH.exists():
         raise RuntimeError(
             "config.json não encontrado. Crie o arquivo com ao menos {'TOKEN': 'seu_token', 'prefix': '!'}"
@@ -77,6 +80,7 @@ config = load_config()
 
 DEFAULT_PREFIX = config.get("prefix", "!")
 DEV_GUILD_ID   = config.get("dev_guild_id")
+MONGODB_URI, MONGODB_DATABASE = get_mongodb_settings(config)
 
 # ==========================
 # PREFIXOS POR SERVIDOR
@@ -205,6 +209,12 @@ async def load_extensions() -> None:
 
 @bot.event
 async def setup_hook() -> None:
+    try:
+        bot.mongo_db = initialize_mongodb(config)
+    except Exception as exc:
+        log.error(f"Erro ao conectar no MongoDB: {exc}")
+        raise
+
     await load_extensions()
 
     # Módulos opcionais do bot principal (status, welcome, etc.)
@@ -232,6 +242,10 @@ async def on_ready() -> None:
     log.info(f"[READY] instance={BOT_INSTANCE_ID} user={bot.user} latency={round(bot.latency * 1000)}ms")
     cmds = sorted(c.name for c in bot.commands)
     log.info(f"{len(cmds)} comandos de prefixo carregados: {', '.join(cmds)}")
+    if MONGODB_URI:
+        log.info(f"[READY] MongoDB ativo no banco '{MONGODB_DATABASE}'")
+    else:
+        log.info("[READY] MongoDB inativo; persistencia segue em JSON.")
 
 
 @bot.event
@@ -311,8 +325,11 @@ async def main() -> None:
             "TOKEN não encontrado no config.json. "
             "Adicione {'TOKEN': 'seu_token_aqui'} ao arquivo."
         )
-    async with bot:
-        await bot.start(token)
+    try:
+        async with bot:
+            await bot.start(token)
+    finally:
+        close_mongodb()
 
 
 if __name__ == "__main__":
