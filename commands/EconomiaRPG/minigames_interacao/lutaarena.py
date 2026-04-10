@@ -7,7 +7,6 @@ from commands.EconomiaRPG.utils.command_adapter import CommandContextAdapter
 from commands.EconomiaRPG.utils.database import get_active_hero, update_active_hero_resources
 from commands.EconomiaRPG.utils.hero_check import economy_profile_created
 from commands.EconomiaRPG.utils.presentation import RPG_PRIMARY_COLOR
-from commands.EconomiaRPG.utils.validators import validate_bet_amount
 
 
 def _format_nex(value: int) -> str:
@@ -74,9 +73,8 @@ class LutaArena(commands.Cog):
             return await inte.response.send_message("Voce nao pode desafiar bots.")
         if membro.id == inte.user.id:
             return await inte.response.send_message("Voce nao pode lutar contra si mesmo.")
-        bet_validation = validate_bet_amount(inte.user.id, bet_amount, context="entrar na arena")
-        if not bet_validation.ok:
-            return await inte.response.send_message(bet_validation.message)
+        if bet_amount <= 0:
+            return await inte.response.send_message("Informe uma aposta positiva.")
         if get_active_hero(inte.user.id) is None:
             return await inte.response.send_message("Nao consegui localizar seu heroi ativo.")
         if get_active_hero(membro.id) is None:

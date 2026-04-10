@@ -11,7 +11,6 @@ from commands.EconomiaRPG.utils.database import (
 )
 from commands.EconomiaRPG.utils.hero_check import economy_profile_created
 from commands.EconomiaRPG.utils.presentation import RPG_PRIMARY_COLOR, add_spacer
-from commands.EconomiaRPG.utils.validators import format_nex, validate_positive_amount, validate_wallet_balance
 
 
 class Bank(commands.Cog):
@@ -51,20 +50,15 @@ class Bank(commands.Cog):
         if get_active_hero(inte.user.id) is None:
             return await inte.response.send_message("Seu perfil economico foi criado, mas voce ainda nao tem um heroi para depositar nex da carteira.")
 
-        amount_validation = validate_positive_amount(amount)
-        if not amount_validation.ok:
-            return await inte.response.send_message(amount_validation.message.replace("quantidade", "quantidade para depositar"))
-
-        balance_validation = validate_wallet_balance(inte.user.id, amount, context="esse deposito")
-        if not balance_validation.ok:
-            return await inte.response.send_message(balance_validation.message)
+        if amount <= 0:
+            return await inte.response.send_message("Informe uma quantidade positiva para depositar.")
 
         if not deposit_nex_to_bank(inte.user.id, amount):
             return await inte.response.send_message("Voce nao tem nex suficiente na carteira para esse deposito.")
 
         hero = get_active_hero(inte.user.id)
         embed = self._build_bank_embed(inte.user.display_name, hero["nex"], get_bank_balance(inte.user.id))
-        embed.description = f"Deposito concluido: {format_nex(amount)} nex foram enviados para o banco."
+        embed.description = f"DepÃ³sito concluÃ­do: {amount} nex foram enviados para o banco."
         await inte.response.send_message(embed=embed)
 
     @commands.command(name="sacar")
@@ -75,16 +69,15 @@ class Bank(commands.Cog):
         if get_active_hero(inte.user.id) is None:
             return await inte.response.send_message("Seu perfil economico foi criado, mas voce ainda nao tem um heroi para receber o saque de nex na carteira.")
 
-        amount_validation = validate_positive_amount(amount, field_name="quantidade para sacar")
-        if not amount_validation.ok:
-            return await inte.response.send_message(amount_validation.message)
+        if amount <= 0:
+            return await inte.response.send_message("Informe uma quantidade positiva para sacar.")
 
         if not withdraw_nex_from_bank(inte.user.id, amount):
             return await inte.response.send_message("Voce nao tem saldo suficiente em nex no banco para esse saque.")
 
         hero = get_active_hero(inte.user.id)
         embed = self._build_bank_embed(inte.user.display_name, hero["nex"], get_bank_balance(inte.user.id))
-        embed.description = f"Saque concluido: {format_nex(amount)} nex voltaram para a sua carteira."
+        embed.description = f"Saque concluÃ­do: {amount} nex voltaram para a sua carteira."
         await inte.response.send_message(embed=embed)
 
     @commands.command(name="transferir")
@@ -97,13 +90,8 @@ class Bank(commands.Cog):
             return await inte.response.send_message("Voce nao pode transferir nex para bots.")
         if member.id == inte.user.id:
             return await inte.response.send_message("Voce nao pode transferir nex para si mesmo.")
-        amount_validation = validate_positive_amount(amount, field_name="quantidade para transferir")
-        if not amount_validation.ok:
-            return await inte.response.send_message(amount_validation.message)
-
-        balance_validation = validate_wallet_balance(inte.user.id, amount, context="essa transferencia")
-        if not balance_validation.ok:
-            return await inte.response.send_message(balance_validation.message)
+        if amount <= 0:
+            return await inte.response.send_message("Informe uma quantidade positiva para transferir.")
 
         target_hero = get_active_hero(member.id)
         if target_hero is None:
@@ -115,13 +103,13 @@ class Bank(commands.Cog):
             hero = get_active_hero(inte.user.id)
             wallet = hero["nex"] if hero else 0
             return await inte.response.send_message(
-                f"Voce nao tem nex suficiente na carteira para essa transferencia. Carteira atual: {format_nex(wallet)} nex."
+                f"Voce nao tem nex suficiente na carteira para essa transferencia. Carteira atual: {wallet} nex."
             )
 
         hero = get_active_hero(inte.user.id)
         wallet = hero["nex"] if hero else 0
         embed = self._build_bank_embed(inte.user.display_name, wallet, get_bank_balance(inte.user.id))
-        embed.description = f"Transferencia concluida: {format_nex(amount)} nex foram enviados para a carteira de {member.display_name}."
+        embed.description = f"TransferÃªncia concluÃ­da: {amount} nex foram enviados para a carteira de {member.display_name}."
         await inte.response.send_message(embed=embed)
 
 

@@ -7,7 +7,6 @@ from commands.EconomiaRPG.utils.command_adapter import CommandContextAdapter
 from commands.EconomiaRPG.utils.database import get_active_hero, update_active_hero_resources
 from commands.EconomiaRPG.utils.hero_check import economy_profile_created
 from commands.EconomiaRPG.utils.presentation import RPG_PRIMARY_COLOR
-from commands.EconomiaRPG.utils.validators import validate_amount_range, validate_bet_amount
 
 
 BOARD_COLUMNS = 4
@@ -326,13 +325,19 @@ class Mines(commands.Cog):
 		if inte.user.id in self.active_games:
 			return await inte.response.send_message("Voce ja tem uma partida de mines aberta. Termine a atual antes de iniciar outra.")
 
-		bet_validation = validate_bet_amount(inte.user.id, bet_amount, context="esse jogo")
-		if not bet_validation.ok:
-			return await inte.response.send_message(f"{bet_validation.message} Ex: !mines 1000 3")
+		if bet_amount <= 0:
+			return await inte.response.send_message("Informe uma aposta positiva. Ex: !mines 1000 3")
 
-		mine_validation = validate_amount_range(mines_count, field_name="minas", minimum=MIN_MINES, maximum=MAX_MINES)
-		if not mine_validation.ok:
-			return await inte.response.send_message(f"{mine_validation.message} Ex: !mines 1000 3")
+		if mines_count < MIN_MINES or mines_count > MAX_MINES:
+			return await inte.response.send_message(
+				f"Escolha entre {MIN_MINES} e {MAX_MINES} minas. Ex: !mines 1000 3"
+			)
+
+		wallet = int(hero.get("nex", 0))
+		if wallet < bet_amount:
+			return await inte.response.send_message(
+				f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex."
+			)
 
 		paid = update_active_hero_resources(inte.user.id, nex=-bet_amount)
 		if not paid:
