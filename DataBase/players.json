@@ -17,14 +17,14 @@
       "runes": 0,
       "tomato_bag": "Bolsa de tomate grande",
       "tomato_capacity": 250,
-      "tomato": 94,
+      "tomato": 93,
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
       "active": 1,
       "flower_bag": "Bolsa de flores basica",
       "flower_capacity": 100,
-      "flower": 95
+      "flower": 94
     },
     {
       "id": 2,
@@ -43,7 +43,7 @@
       "runes": 0,
       "tomato_bag": "Bolsa basica",
       "tomato_capacity": 100,
-      "tomato": 95,
+      "tomato": 94,
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
@@ -94,7 +94,7 @@
       "runes": 0,
       "tomato_bag": "Bolsa basica",
       "tomato_capacity": 100,
-      "tomato": 90,
+      "tomato": 88,
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
@@ -175,14 +175,14 @@
       "runes": 0,
       "tomato_bag": "Bolsa basica",
       "tomato_capacity": 100,
-      "tomato": 81,
+      "tomato": 80,
       "weapon_id": null,
       "armor_id": null,
       "zone_id": 1,
       "active": 1,
       "flower_bag": "Bolsa de flores basica",
       "flower_capacity": 100,
-      "flower": 98
+      "flower": 97
     },
     {
       "id": 8,
