@@ -1,21 +1,17 @@
-import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
+
+from mongo import load_json_document
 
 
 WARNS_PATH = Path("DataBase") / "mod_state.json"
 
 
 def _load_warns() -> dict:
-    WARNS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not WARNS_PATH.exists():
-        WARNS_PATH.write_text("{}", encoding="utf-8")
-    try:
-        return json.loads(WARNS_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+    data = load_json_document(WARNS_PATH, {})
+    return data if isinstance(data, dict) else {}
 
 
 class Historico(commands.Cog):

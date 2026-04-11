@@ -1,8 +1,9 @@
-import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
+
+from mongo import load_json_document, save_json_document
 
 
 DB_PATH = Path("DataBase") / "rules.json"
@@ -15,22 +16,14 @@ DEFAULT_RULES = [
 
 
 def _load_rules() -> list[str]:
-    if not DB_PATH.exists():
-        return DEFAULT_RULES
-    try:
-        data = json.loads(DB_PATH.read_text(encoding="utf-8"))
-        if isinstance(data, list) and data:
-            return [str(item) for item in data]
-    except Exception:
-        pass
+    data = load_json_document(DB_PATH, DEFAULT_RULES)
+    if isinstance(data, list) and data:
+        return [str(item) for item in data]
     return DEFAULT_RULES
 
 
 def _save_rules(entries: list[str]) -> None:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, entries)
 
 
 class Regras(commands.Cog):

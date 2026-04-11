@@ -1,24 +1,18 @@
 import os
-import json
 from pathlib import Path
 import discord
 from discord.ext import commands
 
+from mongo import load_json_document, save_json_document
+
 PREFIXES_FILE = Path("DataBase") / "prefixes.json"
 
 def load_json(path: Path, default: dict) -> dict:
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return default
+    data = load_json_document(path, default)
+    return data if isinstance(data, dict) else default
 
 def save_json(path: Path, data: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    with tmp.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    tmp.replace(path)
+    save_json_document(path, data)
 
 class PrefixModeration(commands.Cog):
     def __init__(self, bot: commands.Bot):

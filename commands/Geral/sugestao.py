@@ -1,9 +1,10 @@
-import json
 from pathlib import Path
 from datetime import datetime
 
 import discord
 from discord.ext import commands
+
+from mongo import load_json_document, save_json_document
 
 
 DB_PATH = Path("DataBase") / "sugestoes.json"
@@ -11,12 +12,8 @@ FORUM_CHANNEL_ID = 1480968259670114466
 
 
 def _load() -> dict:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not DB_PATH.exists():
-        DB_PATH.write_text(json.dumps({"channels": {}, "suggestions": [], "next_id": 1}, ensure_ascii=False, indent=2), encoding="utf-8")
-    try:
-        data = json.loads(DB_PATH.read_text(encoding="utf-8"))
-    except Exception:
+    data = load_json_document(DB_PATH, {"channels": {}, "suggestions": [], "next_id": 1})
+    if not isinstance(data, dict):
         data = {"channels": {}, "suggestions": [], "next_id": 1}
     data.setdefault("channels", {})
     data.setdefault("suggestions", [])
@@ -25,9 +22,7 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, data)
 
 
 def _format_datetime() -> str:

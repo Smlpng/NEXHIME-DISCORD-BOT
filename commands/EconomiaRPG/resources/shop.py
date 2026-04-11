@@ -1,10 +1,11 @@
-import json
 from pathlib import Path
 
 import discord
 from discord import Embed
 from discord.ui import Button, View
 from discord.ext import commands
+
+from mongo import load_json_document
 
 from commands.EconomiaRPG.utils.database import (
     active_hero_has_title,
@@ -32,14 +33,8 @@ def _load_loja() -> dict:
       }
     }
     """
-    try:
-        with LOJA_FILE.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, dict) else {}
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError:
-        return {}
+    data = load_json_document(LOJA_FILE, {})
+    return data if isinstance(data, dict) else {}
 
 
 def _iter_items(loja: dict):

@@ -1,9 +1,10 @@
-import json
 import time
 from pathlib import Path
 
 import discord
 from discord.ext import commands, tasks
+
+from mongo import load_json_document, save_json_document
 
 
 DB_PATH = Path("DataBase") / "agenda.json"
@@ -11,12 +12,8 @@ TIME_UNITS = {"s": 1, "m": 60, "h": 3600, "d": 86400}
 
 
 def _load() -> dict:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not DB_PATH.exists():
-        DB_PATH.write_text(json.dumps({"next_id": 1, "events": []}, ensure_ascii=False, indent=2), encoding="utf-8")
-    try:
-        data = json.loads(DB_PATH.read_text(encoding="utf-8"))
-    except Exception:
+    data = load_json_document(DB_PATH, {"next_id": 1, "events": []})
+    if not isinstance(data, dict):
         data = {"next_id": 1, "events": []}
     data.setdefault("next_id", 1)
     data.setdefault("events", [])
@@ -24,9 +21,7 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, data)
 
 
 def _parse_time(value: str) -> int | None:

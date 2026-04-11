@@ -1,27 +1,18 @@
-import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
 
+from mongo import load_json_document, save_json_document
+
 DB_PATH = Path("DataBase") / "mod_state.json"
 
 def _load():
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not DB_PATH.exists():
-        with DB_PATH.open("w", encoding="utf-8") as f:
-            json.dump({}, f)
-    with DB_PATH.open("r", encoding="utf-8") as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            return {}
+    data = load_json_document(DB_PATH, {})
+    return data if isinstance(data, dict) else {}
 
 def _save(data): 
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    with tmp.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, data)
 
 class Warn(commands.Cog):
     def __init__(self, bot: commands.Bot):

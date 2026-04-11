@@ -1,8 +1,9 @@
-import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
+
+from mongo import load_json_document, save_json_document
 
 from commands.EconomiaRPG.utils.command_adapter import CommandContextAdapter
 from commands.EconomiaRPG.utils.database import get_active_hero, update_active_hero_resources
@@ -21,12 +22,8 @@ RESOURCE_LABELS = {
 
 
 def _load() -> dict:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not DB_PATH.exists():
-        DB_PATH.write_text(json.dumps({"next_id": 1, "offers": []}, ensure_ascii=False, indent=2), encoding="utf-8")
-    try:
-        data = json.loads(DB_PATH.read_text(encoding="utf-8"))
-    except Exception:
+    data = load_json_document(DB_PATH, {"next_id": 1, "offers": []})
+    if not isinstance(data, dict):
         data = {"next_id": 1, "offers": []}
     data.setdefault("next_id", 1)
     data.setdefault("offers", [])
@@ -34,9 +31,7 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, data)
 
 
 def _parse_resource(value: str):

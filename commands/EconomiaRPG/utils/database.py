@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from threading import RLock
 
+from mongo import load_json_document, save_json_document
+
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
 DATA_FILE = Path(os.getenv("RPG50_DATA_FILE", ROOT_DIR / "DataBase" / "players.json"))
@@ -227,25 +229,15 @@ def _normalize_state(state: dict | None) -> dict:
 
 
 def _write_state_unlocked(state: dict) -> None:
-	DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-	temp_file = DATA_FILE.with_suffix(".tmp")
-	temp_file.write_text(json.dumps(_normalize_state(state), indent=2), encoding="utf-8")
-	temp_file.replace(DATA_FILE)
+	save_json_document(DATA_FILE, _normalize_state(state))
 
 
 def _read_state_unlocked() -> dict:
-	if not DATA_FILE.exists():
+	state = load_json_document(DATA_FILE, _default_state())
+	if not isinstance(state, dict):
 		state = _default_state()
 		_write_state_unlocked(state)
 		return state
-
-	try:
-		state = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-	except (json.JSONDecodeError, OSError):
-		state = _default_state()
-		_write_state_unlocked(state)
-		return state
-
 	return _normalize_state(state)
 
 

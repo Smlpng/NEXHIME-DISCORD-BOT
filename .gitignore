@@ -1,9 +1,14 @@
 # Arquivos com segredo / configs locais
 config.json
 .env
+.force_mongo_sync
 
 # Python
 __pycache__/
 *.pyc
 .venv/
 venv
+
+# Persistencia operacional local
+DataBase/*.json
+commands/DataBase/*.json

@@ -1,29 +1,23 @@
 import asyncio
-import json
 import time
 from pathlib import Path
 
 import discord
 from discord.ext import commands, tasks
 
+from mongo import load_json_document, save_json_document
+
 
 DB_PATH = Path("DataBase") / "reminders.json"
 
 
 def _load() -> list[dict]:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not DB_PATH.exists():
-        DB_PATH.write_text("[]", encoding="utf-8")
-    try:
-        return json.loads(DB_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return []
+    data = load_json_document(DB_PATH, [])
+    return data if isinstance(data, list) else []
 
 
 def _save(data: list[dict]) -> None:
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, data)
 
 class RemindMe(commands.Cog):
     def __init__(self, bot):

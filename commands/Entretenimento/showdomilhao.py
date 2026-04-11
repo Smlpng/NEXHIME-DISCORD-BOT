@@ -1,9 +1,13 @@
 import discord
 from discord.ext import commands
 from discord.ui import View, Button
-import json
 import random
 import asyncio
+
+from mongo import load_json_document
+
+
+QUESTIONS_DOCUMENT = "DataBase/showdomilhao_perguntas.json"
 
 class AlternativaButton(Button):
     def __init__(self, index, correta):
@@ -44,15 +48,10 @@ class ShowDoMilhao(commands.Cog):
     @commands.command(name="show_do_milhão", aliases=["showdomilhao", "show_do_milhao"], help="Jogo do Show do Milhão.")
     async def show_do_milhao(self, ctx: commands.Context):
         """Já pensou em participar do Show do Milhão?"""
-        try:
-            with open("databases/perguntas_dificeis.json", "r", encoding="utf-8") as f:
-                todas_perguntas = json.load(f)
-        except FileNotFoundError:
-            await ctx.reply("❌ Arquivo de perguntas não encontrado.", mention_author=False)
-            return
+        todas_perguntas = load_json_document(QUESTIONS_DOCUMENT, [])
 
-        if len(todas_perguntas) < 1:
-            await ctx.reply("❌ Nenhuma pergunta disponível no arquivo.", mention_author=False)
+        if not isinstance(todas_perguntas, list) or len(todas_perguntas) < 1:
+            await ctx.reply("❌ Nenhuma pergunta do Show do Milhão foi encontrada no MongoDB.", mention_author=False)
             return
 
         perguntas = random.sample(todas_perguntas, k=min(10, len(todas_perguntas)))

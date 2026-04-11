@@ -1,8 +1,9 @@
-import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
+
+from mongo import load_json_document, save_json_document
 
 
 DB_PATH = Path("DataBase") / "faq.json"
@@ -14,22 +15,14 @@ DEFAULT_FAQ = [
 
 
 def _load_faq() -> list[dict]:
-    if not DB_PATH.exists():
-        return DEFAULT_FAQ
-    try:
-        data = json.loads(DB_PATH.read_text(encoding="utf-8"))
-        if isinstance(data, list) and data:
-            return data
-    except Exception:
-        pass
+    data = load_json_document(DB_PATH, DEFAULT_FAQ)
+    if isinstance(data, list) and data:
+        return data
     return DEFAULT_FAQ
 
 
 def _save_faq(entries: list[dict]) -> None:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(DB_PATH)
+    save_json_document(DB_PATH, entries)
 
 
 class FAQ(commands.Cog):

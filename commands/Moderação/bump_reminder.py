@@ -1,9 +1,10 @@
-import json
 import asyncio
 import discord
 from discord.ext import commands
 from pathlib import Path
 from datetime import datetime, timezone
+
+from mongo import load_json_document, save_json_document
 
 # Tempo de espera: 2 horas em segundos
 BUMP_DELAY = 2 * 60 * 61
@@ -16,20 +17,12 @@ DB_PATH = Path(__file__).resolve().parents[2] / "DataBase" / "bump_reminder.json
 # ──────────────────────────────────────────────
 
 def _load() -> dict:
-    if DB_PATH.exists():
-        try:
-            with open(DB_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, OSError):
-            pass
-    return {}
+    data = load_json_document(DB_PATH, {})
+    return data if isinstance(data, dict) else {}
 
 
 def _save(data: dict) -> None:
-    tmp = str(DB_PATH) + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-    Path(tmp).replace(DB_PATH)
+    save_json_document(DB_PATH, data)
 
 
 # ──────────────────────────────────────────────

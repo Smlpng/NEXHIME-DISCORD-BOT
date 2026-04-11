@@ -1,25 +1,34 @@
 import discord
 from discord.ext import commands
-import json
+
+from pathlib import Path
+
+from mongo import load_json_document, save_json_document
 
 class Quote(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.quotes_file = 'DataBase/quotes.json'
+        self.quotes_document = Path("DataBase") / "quotes_user.json"
         self.load_quotes()
 
     def load_quotes(self):
         """Carrega as citações do arquivo JSON."""
-        try:
-            with open(self.quotes_file, "r", encoding="utf-8") as f:
-                self.quotes = json.load(f)
-        except FileNotFoundError:
+        data = load_json_document(self.quotes_document, {})
+        if not isinstance(data, dict):
             self.quotes = {}
+            return
+
+        normalized: dict[str, list[str]] = {}
+        for key, value in data.items():
+            if isinstance(value, list) and all(isinstance(item, str) for item in value):
+                normalized[str(key)] = value
+            elif isinstance(value, str):
+                normalized[str(key)] = [value]
+        self.quotes = normalized
 
     def save_quotes(self):
         """Salva as citações no arquivo JSON."""
-        with open(self.quotes_file, "w", encoding="utf-8") as f:
-            json.dump(self.quotes, f, indent=4, ensure_ascii=False)
+        save_json_document(self.quotes_document, self.quotes)
 
     @commands.command(name="quote", aliases=["citation"], help="Salva ou exibe sua citação favorita.")
     async def quote(self, ctx: commands.Context, *, text: str | None = None):

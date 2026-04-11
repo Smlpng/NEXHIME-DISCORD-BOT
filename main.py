@@ -37,7 +37,13 @@ import status
 import discord
 from discord.ext import commands
 
-from mongo import close_mongodb, get_mongodb_settings, initialize_mongodb
+from mongo import (
+    close_mongodb,
+    get_mongodb_settings,
+    initialize_mongodb,
+    load_json_document,
+    save_json_document,
+)
 
 # ==========================
 # LOGGING
@@ -70,16 +76,15 @@ PREFIX_FILE = DB_DIR / "prefixes.json"
 def load_config() -> dict[str, Any]:
     if not CONFIG_PATH.exists():
         raise RuntimeError(
-            "config.json não encontrado. Crie o arquivo com ao menos {'TOKEN': 'seu_token', 'prefix': '!'}"
+            "config.json nao encontrado. Crie o arquivo com TOKEN, prefix, MONGODB_URI e MONGODB_DATABASE."
         )
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
 config = load_config()
-
 DEFAULT_PREFIX = config.get("prefix", "!")
-DEV_GUILD_ID   = config.get("dev_guild_id")
+DEV_GUILD_ID = config.get("dev_guild_id")
 MONGODB_URI, MONGODB_DATABASE = get_mongodb_settings(config)
 
 # ==========================
@@ -87,19 +92,12 @@ MONGODB_URI, MONGODB_DATABASE = get_mongodb_settings(config)
 # ==========================
 
 def load_prefixes() -> dict:
-    if not PREFIX_FILE.exists():
-        return {}
-    try:
-        with open(PREFIX_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    data = load_json_document(PREFIX_FILE, {})
+    return data if isinstance(data, dict) else {}
 
 
 def save_prefixes(data: dict) -> None:
-    DB_DIR.mkdir(exist_ok=True)
-    with open(PREFIX_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    save_json_document(PREFIX_FILE, data)
 
 
 def get_prefix(bot: commands.Bot, message: discord.Message):
@@ -128,7 +126,7 @@ bot = commands.Bot(
 )
 
 bot.default_prefix = DEFAULT_PREFIX
-bot.prefix_cache   = load_prefixes()
+bot.prefix_cache = {}
 bot.prefixes_cache = bot.prefix_cache
 
 # ==========================
@@ -197,12 +195,6 @@ async def load_extensions() -> None:
 
 @bot.event
 async def setup_hook() -> None:
-    try:
-        bot.mongo_db = initialize_mongodb(config)
-    except Exception as exc:
-        log.error(f"Erro ao conectar no MongoDB: {exc}")
-        raise
-
     await load_extensions()
 
     # Módulos opcionais do bot principal (status, welcome, etc.)
@@ -233,7 +225,7 @@ async def on_ready() -> None:
     if MONGODB_URI:
         log.info(f"[READY] MongoDB ativo no banco '{MONGODB_DATABASE}'")
     else:
-        log.info("[READY] MongoDB inativo; persistencia segue em JSON.")
+        log.info("[READY] MongoDB inativo.")
 
 
 @bot.event
@@ -307,12 +299,22 @@ async def setprefix(ctx: commands.Context, prefix: str) -> None:
 # ==========================
 
 async def main() -> None:
+    if not MONGODB_URI:
+        raise RuntimeError("MONGODB_URI nao encontrado no config.json.")
+
+    try:
+        bot.mongo_db = initialize_mongodb(config)
+    except Exception as exc:
+        log.error(f"Erro ao conectar no MongoDB: {exc}")
+        raise
+
+    bot.default_prefix = DEFAULT_PREFIX
+    bot.prefix_cache = load_prefixes()
+    bot.prefixes_cache = bot.prefix_cache
+
     token = config.get("TOKEN")
     if not token:
-        raise RuntimeError(
-            "TOKEN não encontrado no config.json. "
-            "Adicione {'TOKEN': 'seu_token_aqui'} ao arquivo."
-        )
+        raise RuntimeError("TOKEN nao encontrado no config.json.")
     try:
         async with bot:
             await bot.start(token)
