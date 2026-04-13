@@ -269,7 +269,18 @@ async def on_command_error(ctx: commands.Context, error: Exception) -> None:
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("❌ Você não tem permissão para usar este comando.")
         return
-    log.error(f"Erro no comando '{ctx.command}': {error}")
+
+    original_error = getattr(error, "original", error)
+    command_name = ctx.command.qualified_name if ctx.command else "desconhecido"
+    log.exception(f"Erro no comando '{command_name}': {original_error}")
+
+    try:
+        await ctx.send(
+            "O comando encontrou um erro interno e nao conseguiu responder. "
+            "Tente novamente em alguns segundos."
+        )
+    except Exception:
+        pass
 
 # ==========================
 # COMANDOS DE ADMINISTRAÇÃO

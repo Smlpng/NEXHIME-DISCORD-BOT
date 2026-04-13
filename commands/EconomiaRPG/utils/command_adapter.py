@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 
@@ -53,6 +54,28 @@ class CommandContextAdapter:
             if self._original_message is None:
                 self._original_message = await self.interaction.original_response()
             return self._original_message
+        return self._original_message
+
+    async def delete_original_response(self):
+        message = await self.original_response()
+        if message is not None:
+            await message.delete()
+
+
+class InteractionAdapter:
+    def __init__(self, interaction: discord.Interaction):
+        self.ctx = None
+        self.interaction = interaction
+        self.user = interaction.user
+        self.guild = getattr(interaction, "guild", None)
+        self.channel = getattr(interaction, "channel", None)
+        self.response = _ResponseProxy(self)
+        self.followup = _FollowupProxy(self)
+        self._original_message = None
+
+    async def original_response(self):
+        if self._original_message is None:
+            self._original_message = await self.interaction.original_response()
         return self._original_message
 
     async def delete_original_response(self):
