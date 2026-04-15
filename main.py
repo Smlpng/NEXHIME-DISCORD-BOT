@@ -73,13 +73,34 @@ PREFIX_FILE = DB_DIR / "prefixes.json"
 # CONFIG
 # ==========================
 
+def _parse_optional_int(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def load_config() -> dict[str, Any]:
-    if not CONFIG_PATH.exists():
+    file_config: dict[str, Any] = {}
+    if CONFIG_PATH.exists():
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            file_config = json.load(f)
+
+    config = dict(file_config)
+    config["TOKEN"] = os.getenv("TOKEN") or config.get("TOKEN")
+    config["prefix"] = os.getenv("PREFIX") or config.get("prefix") or "!"
+    config["MONGODB_URI"] = os.getenv("MONGODB_URI") or config.get("MONGODB_URI")
+    config["MONGODB_DATABASE"] = os.getenv("MONGODB_DATABASE") or config.get("MONGODB_DATABASE") or "nexhime_bot"
+    config["dev_guild_id"] = _parse_optional_int(os.getenv("DEV_GUILD_ID")) or _parse_optional_int(config.get("dev_guild_id"))
+
+    if not config.get("TOKEN"):
         raise RuntimeError(
-            "config.json nao encontrado. Crie o arquivo com TOKEN, prefix, MONGODB_URI e MONGODB_DATABASE."
+            "TOKEN nao configurado. Defina TOKEN em variavel de ambiente ou no config.json."
         )
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+
+    return config
 
 
 config = load_config()
@@ -311,7 +332,7 @@ async def setprefix(ctx: commands.Context, prefix: str) -> None:
 
 async def main() -> None:
     if not MONGODB_URI:
-        raise RuntimeError("MONGODB_URI nao encontrado no config.json.")
+        raise RuntimeError("MONGODB_URI nao configurado. Defina em variavel de ambiente ou no config.json.")
 
     try:
         bot.mongo_db = initialize_mongodb(config)

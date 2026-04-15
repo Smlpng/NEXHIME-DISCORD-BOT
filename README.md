@@ -34,7 +34,9 @@ Bot de Discord feito em Python (discord.py) com comandos híbridos (prefixo e sl
 pip install -r requirements.txt
 ```
 
-2) Crie o arquivo `config.json` (você pode copiar o `config.example.json`).
+2) Configure as credenciais.
+
+Voce pode usar um arquivo `config.json` local, copiando o `config.example.json`, ou definir variaveis de ambiente com os mesmos nomes.
 
 3) Inicie o bot:
 
@@ -44,13 +46,24 @@ python main.py
 
 ## Configuração
 
-O bot lê `config.json` na raiz do projeto.
+O bot aceita configuracao por variavel de ambiente e, se existir, tambem le `config.json` na raiz do projeto como fallback local.
 
 Campos mais usados:
 
 - `TOKEN`: token do bot no Discord.
 - `prefix`: prefixo padrão (ex: `n!`).
+- `PREFIX`: variante em variavel de ambiente para o prefixo padrao.
+- `MONGODB_URI`: string de conexao do MongoDB Atlas.
+- `MONGODB_DATABASE`: nome do banco MongoDB.
 - `dev_guild_id` (opcional): se definido, sincroniza slash commands primeiro nesse servidor.
+
+Variaveis de ambiente equivalentes:
+
+- `TOKEN`
+- `PREFIX`
+- `MONGODB_URI`
+- `MONGODB_DATABASE`
+- `DEV_GUILD_ID`
 
 Exemplo (baseado em `config.example.json`):
 
@@ -58,11 +71,9 @@ Exemplo (baseado em `config.example.json`):
 {
     "TOKEN": "SEU_TOKEN_AQUI",
     "prefix": "n!",
-    "dev_guild_id": 123456789012345678,
-    "channels": {
-        "explore_log": 123456789012345678,
-        "combat_log": null
-    }
+    "MONGODB_URI": "mongodb+srv://usuario:senha@cluster.mongodb.net/?retryWrites=true&w=majority",
+    "MONGODB_DATABASE": "nexhime_bot",
+    "dev_guild_id": 123456789012345678
 }
 ```
 
@@ -156,3 +167,19 @@ Dados do RPG costumam ficar em JSON (ex: `DataBase/players.json`).
 
 - Se você adicionar um novo comando, garanta que o arquivo tenha `async def setup(bot): ...` para ser carregado automaticamente.
 - Alguns módulos utilitários existem mas podem estar comentados/desativados por padrão (ex: `mov_chat.py`).
+
+## Deploy na Discloud
+
+O projeto agora ja esta preparado para upload na Discloud:
+
+- `discloud.config` define `MAIN=main.py` na raiz, como a plataforma exige.
+- `requirements.txt` foi reduzido para dependencias reais de producao e removidos pacotes locais do Windows que quebrariam no host Linux.
+- O bot nao depende mais obrigatoriamente de `config.json` no deploy.
+
+Antes de enviar o `.zip` para a Discloud:
+
+1. Configure no painel da aplicacao as variaveis `TOKEN`, `MONGODB_URI` e, se quiser, `MONGODB_DATABASE`, `PREFIX` e `DEV_GUILD_ID`.
+2. Nao envie `config.json`, `.venv`, `__pycache__` nem a pasta `.git`.
+3. Compacte a raiz do projeto contendo `main.py`, `requirements.txt`, `discloud.config`, `commands/` e `assets/`.
+
+Se voce preferir testar localmente antes do upload, use `config.example.json` como base para criar seu `config.json` local.
