@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from pymongo.errors import OperationFailure
 
 import mongo
 from mongo import get_mongodb_settings, initialize_mongodb, load_json_document, save_json_document
@@ -33,6 +34,30 @@ class FakeDatabase:
         return self.collections[name]
 
 
+class FakeAdmin:
+    def __init__(self, error=None):
+        self.error = error
+
+    def command(self, name):
+        if self.error is not None:
+            raise self.error
+        return {"ok": 1}
+
+
+class FakeMongoClient:
+    def __init__(self, uri, **kwargs):
+        self.uri = uri
+        self.kwargs = kwargs
+        self.admin = FakeAdmin()
+        self.closed = False
+
+    def __getitem__(self, name):
+        return FakeDatabase()
+
+    def close(self):
+        self.closed = True
+
+
 def test_get_mongodb_settings_uses_config_defaults(monkeypatch):
     monkeypatch.delenv("MONGODB_URI", raising=False)
     monkeypatch.delenv("MONGODB_DATABASE", raising=False)
@@ -48,6 +73,20 @@ def test_initialize_mongodb_returns_none_when_uri_missing(monkeypatch):
     monkeypatch.delenv("MONGODB_DATABASE", raising=False)
 
     assert initialize_mongodb({}) is None
+
+
+def test_initialize_mongodb_raises_clear_error_for_bad_auth(monkeypatch):
+    def fake_client(uri, **kwargs):
+        client = FakeMongoClient(uri, **kwargs)
+        client.admin = FakeAdmin(OperationFailure("bad auth : authentication failed"))
+        return client
+
+    monkeypatch.setattr(mongo, "MongoClient", fake_client)
+    monkeypatch.setattr(mongo, "_client", None)
+    monkeypatch.setattr(mongo, "_database", None)
+
+    with pytest.raises(RuntimeError, match="Falha de autenticacao no MongoDB Atlas"):
+        initialize_mongodb({"MONGODB_URI": "mongodb+srv://example", "MONGODB_DATABASE": "nex"})
 
 
 def test_load_json_document_requires_mongo_connection(monkeypatch):

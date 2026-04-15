@@ -12,10 +12,11 @@ except ImportError:  # pragma: no cover - handled at runtime when certifi is una
 
 try:
     from pymongo import MongoClient
-    from pymongo.errors import ServerSelectionTimeoutError
+    from pymongo.errors import OperationFailure, ServerSelectionTimeoutError
     from pymongo.database import Database
 except ImportError:  # pragma: no cover - handled at runtime when Mongo is enabled
     MongoClient = None
+    OperationFailure = Exception
     ServerSelectionTimeoutError = Exception
     Database = Any
 
@@ -113,6 +114,15 @@ def initialize_mongodb(config: dict[str, Any]) -> Any | None:
     try:
         _client = MongoClient(uri, **client_options)
         _client.admin.command("ping")
+    except OperationFailure as exc:
+        close_mongodb()
+        message = str(exc)
+        if "bad auth" in message.lower() or "authentication failed" in message.lower():
+            raise RuntimeError(
+                "Falha de autenticacao no MongoDB Atlas. Verifique o usuario e a senha do database user, "
+                "confirme se esse usuario existe no Atlas e, se a senha tiver caracteres especiais, aplique URL encoding na senha dentro da MONGODB_URI."
+            ) from exc
+        raise
     except ServerSelectionTimeoutError as exc:
         close_mongodb()
         message = str(exc)
