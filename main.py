@@ -56,6 +56,28 @@ logging.basicConfig(
 
 log = logging.getLogger("bot")
 
+
+def apply_discord_team_permissions_compatibility_patch() -> None:
+    """Compatibilidade para versões antigas do discord.py com payloads sem permissions."""
+    try:
+        from discord import team as discord_team
+    except Exception as exc:
+        log.warning(f"Nao foi possivel carregar discord.team para aplicar compatibilidade: {exc}")
+        return
+
+    if getattr(discord_team.TeamMember, "_nexhime_permissions_patch", False):
+        return
+
+    original_init = discord_team.TeamMember.__init__
+
+    def patched_init(self, team, state, data):
+        if isinstance(data, dict) and "permissions" not in data:
+            data = {**data, "permissions": []}
+        original_init(self, team, state, data)
+
+    discord_team.TeamMember.__init__ = patched_init
+    discord_team.TeamMember._nexhime_permissions_patch = True
+
 # Identidade desta instância (ajuda a detectar múltiplos processos rodando)
 BOT_INSTANCE_ID = f"pid={os.getpid()}@{int(time.time())}"
 
@@ -114,6 +136,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.guilds = True
+
+apply_discord_team_permissions_compatibility_patch()
 
 # ==========================
 # BOT
