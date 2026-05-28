@@ -49,6 +49,35 @@ class Tomate(commands.Cog):
         embed.set_footer(text=f"Espaco restante: {max(capacity - tomatoes, 0)} tomate(s).")
         await ctx.reply(embed=embed, mention_author=False)
 
+    @commands.command(
+        name="tomate_status",
+        aliases=["tomates_status", "status_tomates", "minha_bolsa"],
+        help="Mostra seus tomates, capacidade e espaço restante em uma embed bonita."
+    )
+    async def tomate_status(self, ctx: commands.Context):
+        ensure_profile(ctx.author.id)
+        profile = get_active_hero(ctx.author.id)
+        if profile is None:
+            return await ctx.reply("Nao consegui localizar seu perfil de tomates.", mention_author=False)
+
+        bag_name = str(profile.get("tomato_bag", "Bolsa basica"))
+        capacity = int(profile.get("tomato_capacity", 100))
+        tomatoes = int(profile.get("tomato", 0))
+        remaining = max(capacity - tomatoes, 0)
+
+        embed = discord.Embed(
+            title="🍅 Status da sua bolsa de tomates",
+            description="Confira quantos tomates você tem e quanto ainda cabe na sua bolsa.",
+            color=discord.Color.red(),
+        )
+        embed.set_thumbnail(url=ctx.author.display_avatar.url)
+        embed.add_field(name="Bolsa equipada", value=bag_name, inline=False)
+        embed.add_field(name="Tomates", value=f"{tomatoes}/{capacity}", inline=True)
+        embed.add_field(name="Espaço restante", value=f"{remaining} tomates", inline=True)
+        embed.set_footer(text="Reaja com 🍅 em uma mensagem para jogar um tomate em alguém.")
+
+        await ctx.reply(embed=embed, mention_author=False)
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         # Verifica se o emoji reagido é um tomate
@@ -122,7 +151,7 @@ class Tomate(commands.Cog):
                         remaining_time = int(self.COOLDOWN_TIME - (current_time - last_time))
                         # Mandar mensagem temporária avisando do cooldown
                         try:
-                            aviso = await channel.send(f"⏳ {reactor.mention}, você está sem tomates! Aguarde **{remaining_time} segundos** para arremessar outro.")
+                            aviso = await channel.send(f"⏳ {reactor.mention}, aguarde **{remaining_time} segundos** antes de arremessar outro tomate.")
                             # Deleta a mensagem após 5 segundos para não poluir
                             await aviso.delete(delay=5.0)
                         except discord.HTTPException:
