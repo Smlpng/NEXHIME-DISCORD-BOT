@@ -1,19 +1,24 @@
-import os, random
+import os, json, random
 import discord
 from discord.ext import commands
-from pathlib import Path
-
-from mongo import load_json_document, save_json_document
 
 DB_DIR = "DataBase"
-DOCUMENT_KEY = Path(DB_DIR) / "quotes_guild.json"
+DB_PATH = os.path.join(DB_DIR, "quotes.json")
 
 def _load():
-    data = load_json_document(DOCUMENT_KEY, {})
-    return data if isinstance(data, dict) else {}
+    os.makedirs(DB_DIR, exist_ok=True)
+    if not os.path.exists(DB_PATH):
+        with open(DB_PATH, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+    with open(DB_PATH, "r", encoding="utf-8") as f:
+        try: return json.load(f)
+        except json.JSONDecodeError: return {}
 
 def _save(data):
-    save_json_document(DOCUMENT_KEY, data)
+    tmp = DB_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, DB_PATH)
 
 class Quotes(commands.Cog):
     def __init__(self, bot): self.bot = bot

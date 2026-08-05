@@ -1,10 +1,9 @@
+import json
 from datetime import date
 from pathlib import Path
 
 import discord
 from discord.ext import commands
-
-from mongo import load_json_document, save_json_document
 
 
 DB_PATH = Path("DataBase") / "quiz_diario.json"
@@ -38,8 +37,12 @@ QUESTIONS = [
 
 
 def _load() -> dict:
-    data = load_json_document(DB_PATH, {"answers": {}, "scores": {}})
-    if not isinstance(data, dict):
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not DB_PATH.exists():
+        DB_PATH.write_text(json.dumps({"answers": {}, "scores": {}}, ensure_ascii=False, indent=2), encoding="utf-8")
+    try:
+        data = json.loads(DB_PATH.read_text(encoding="utf-8"))
+    except Exception:
         data = {"answers": {}, "scores": {}}
     data.setdefault("answers", {})
     data.setdefault("scores", {})
@@ -47,7 +50,9 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    save_json_document(DB_PATH, data)
+    tmp = DB_PATH.with_suffix(DB_PATH.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(DB_PATH)
 
 
 def _today_key() -> str:

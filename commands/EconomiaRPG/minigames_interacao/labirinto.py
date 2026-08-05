@@ -7,6 +7,7 @@ from commands.EconomiaRPG.utils.command_adapter import CommandContextAdapter
 from commands.EconomiaRPG.utils.database import get_active_hero, update_active_hero_resources
 from commands.EconomiaRPG.utils.hero_check import economy_profile_created
 from commands.EconomiaRPG.utils.presentation import RPG_PRIMARY_COLOR
+from commands.EconomiaRPG.utils.validators import validate_bet_amount
 
 
 PATHS = ["esquerda", "centro", "direita"]
@@ -104,10 +105,9 @@ class Labirinto(commands.Cog):
         hero = get_active_hero(inte.user.id)
         if hero is None:
             return await inte.response.send_message("Nao consegui localizar seu heroi ativo para entrar no labirinto.")
-        if bet_amount <= 0:
-            return await inte.response.send_message("Informe uma aposta positiva.")
-        if int(hero.get("nex", 0)) < bet_amount:
-            return await inte.response.send_message(f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(hero['nex'])} nex.")
+        bet_validation = validate_bet_amount(inte.user.id, bet_amount, context="entrar no labirinto")
+        if not bet_validation.ok:
+            return await inte.response.send_message(bet_validation.message)
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
             return await inte.response.send_message("Nao foi possivel reservar sua aposta.")
 

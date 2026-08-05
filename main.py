@@ -1,358 +1,116 @@
-# BOT/
-# ├── commands/
-# │   ├── 01_Moderação/
-# │   ├── 02_Entretenimento/
-# │   └── 03_RPG/                 ← todo o conteúdo desta pasta vai aqui
-# │       ├── cogs/
-# │       │   ├── __init__.py
-# │       │   ├── comandos.py
-# │       │   └── commands/
-# │       │       ├── combat/     (dungeon.py, fight.py, pvp.py, raid.py)
-# │       │       ├── equipment/  (equip.py, forge.py, inventory.py)
-# │       │       ├── help/       (help.py)
-# │       │       ├── heroes/
-# │       │       ├── resources/  (bank.py, shop.py, trade.py)
-# │       │       ├── stats/      (advancements.py, dex.py, stats.py)
-# │       │       └── zones/      (change_zone.py, zone.py)
-# │       ├── cogs/game/          (characters, items, zones)
-# │       ├── cogs/utils/         (database, querys, hero_actions …)
-# │       └── data/               (players.json)
-# ├── DataBase/
-# │   ├── bases.json
-# │   └── prefixes.json
-# └── main.py  (Arquivo principal do bot, responsável por carregar os cogs e iniciar o bot)
-
-
-import os
-import sys
-import json
-import ast
 import asyncio
+import importlib.util
 import logging
-import time
-from pathlib import Path
-from typing import Any
-import status
-
+import pathlib
+import re
+import sys
 import discord
 from discord.ext import commands
 
-from mongo import (
-    close_mongodb,
-    get_mongodb_settings,
-    initialize_mongodb,
-    load_json_document,
-    save_json_document,
-)
+import config
+from database import db_manager
 
-# ==========================
-# LOGGING
-# ==========================
-
+# Configuração de Logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
+logger = logging.getLogger("discord_bot.main")
 
-log = logging.getLogger("bot")
+class MongoDiscordBot(commands.Bot):
+    def __init__(self):
+        # Intents padrão + message_content (necessário para comandos de texto)
+        intents = discord.Intents.default()
+        intents.message_content = True
 
-# Identidade desta instância (ajuda a detectar múltiplos processos rodando)
-BOT_INSTANCE_ID = f"pid={os.getpid()}@{int(time.time())}"
-
-# ==========================
-# CAMINHOS
-# ==========================
-
-BASE_DIR = Path(__file__).resolve().parent
-CONFIG_PATH = BASE_DIR / "config.json"
-
-DB_DIR = BASE_DIR / "DataBase"
-PREFIX_FILE = DB_DIR / "prefixes.json"
-
-# ==========================
-# CONFIG
-# ==========================
-
-def _parse_optional_int(value: Any) -> int | None:
-    if value in (None, ""):
-        return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def load_config() -> dict[str, Any]:
-    file_config: dict[str, Any] = {}
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-            file_config = json.load(f)
-
-    config = dict(file_config)
-    config["TOKEN"] = os.getenv("TOKEN") or config.get("TOKEN")
-    config["prefix"] = os.getenv("PREFIX") or config.get("prefix") or "!"
-    config["MONGODB_URI"] = os.getenv("MONGODB_URI") or config.get("MONGODB_URI")
-    config["MONGODB_DATABASE"] = os.getenv("MONGODB_DATABASE") or config.get("MONGODB_DATABASE") or "nexhime_bot"
-    config["dev_guild_id"] = _parse_optional_int(os.getenv("DEV_GUILD_ID")) or _parse_optional_int(config.get("dev_guild_id"))
-
-    if not config.get("TOKEN"):
-        raise RuntimeError(
-            "TOKEN nao configurado. Defina TOKEN em variavel de ambiente ou no config.json."
+        super().__init__(
+            command_prefix=config.COMMAND_PREFIX,
+            intents=intents,
+            help_command=commands.DefaultHelpCommand()
         )
 
-    return config
+    async def setup_hook(self):
+        """Executado antes de o bot se conectar ao Discord."""
+        logger.info("Iniciando conexão com MongoDB Atlas...")
+        db_connected = await db_manager.connect()
+        if not db_connected:
+            logger.warning("⚠️ Conexão com MongoDB falhou ou não configurada. O bot iniciará, mas recursos de BD estarão indisponíveis.")
 
+        # Carrega automaticamente todos os comandos na pasta commands
+        await self.load_all_command_extensions()
 
-config = load_config()
-DEFAULT_PREFIX = config.get("prefix", "!")
-DEV_GUILD_ID = config.get("dev_guild_id")
-MONGODB_URI, MONGODB_DATABASE = get_mongodb_settings(config)
+    async def load_all_command_extensions(self):
+        commands_dir = pathlib.Path(__file__).parent / "commands"
+        logger.info(f"Procurando comandos em: {commands_dir}")
 
-# ==========================
-# PREFIXOS POR SERVIDOR
-# ==========================
+        if not commands_dir.exists():
+            logger.error(f"Diretório de comandos não encontrado: {commands_dir}")
+            return
 
-def load_prefixes() -> dict:
-    data = load_json_document(PREFIX_FILE, {})
-    return data if isinstance(data, dict) else {}
+        module_paths = []
+        for path in commands_dir.rglob("*.py"):
+            if path.name == "__init__.py":
+                continue
 
+            relative_path = path.relative_to(pathlib.Path(__file__).parent)
+            module_name = ".".join(relative_path.with_suffix("").parts)
+            module_name = re.sub(r"[^0-9a-zA-Z_\.]+", "_", module_name)
+            module_paths.append((path, module_name))
 
-def save_prefixes(data: dict) -> None:
-    save_json_document(PREFIX_FILE, data)
+        for path, module_name in sorted(module_paths):
+            try:
+                spec = importlib.util.spec_from_file_location(module_name, path)
+                if spec is None or spec.loader is None:
+                    raise ImportError(f"Não foi possível criar spec para {path}")
 
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
+                spec.loader.exec_module(module)
 
-def get_prefix(bot: commands.Bot, message: discord.Message):
-    if not message.guild:
-        return commands.when_mentioned_or(bot.default_prefix)(bot, message)
-    prefix = bot.prefix_cache.get(str(message.guild.id), bot.default_prefix)
-    return commands.when_mentioned_or(prefix)(bot, message)
+                if hasattr(module, "setup") and callable(module.setup):
+                    await module.setup(self)
+                    logger.info(f"Comando carregado: {module_name}")
+                else:
+                    logger.warning(f"Módulo sem função setup: {module_name}")
+            except Exception as e:
+                logger.error(f"Falha ao carregar comando '{module_name}' de {path}: {e}")
 
-# ==========================
-# INTENTS
-# ==========================
-
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
-intents.guilds = True
-
-# ==========================
-# BOT
-# ==========================
-
-bot = commands.Bot(
-    command_prefix=get_prefix,
-    intents=intents,
-    help_command=None
-)
-
-bot.default_prefix = DEFAULT_PREFIX
-bot.prefix_cache = {}
-bot.prefixes_cache = bot.prefix_cache
-
-# ==========================
-# CARREGAMENTO DE COGS
-# ==========================
-
-def is_extension_module(file_path: Path) -> bool:
-    try:
-        source = file_path.read_text(encoding="utf-8-sig")
-        tree = ast.parse(source, filename=str(file_path))
-    except (OSError, SyntaxError, UnicodeDecodeError) as exc:
-        log.warning(f"[COG SKIP] Não foi possível analisar {file_path}: {exc}")
-        return False
-
-    for node in tree.body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "setup":
-            return True
-    return False
-
-async def load_extensions() -> None:
-    """
-    Carrega recursivamente todos os .py dentro de commands/ usando
-    o nome completo do módulo a partir da raiz do projeto.
-
-    Exemplo:
-      commands/RPG/commands/combat/dungeon.py
-      → módulo carregado como commands.RPG.commands.combat.dungeon
-
-    Isso mantém os imports internos consistentes, como
-    `from commands.RPG.utils.database import ...`.
-    """
-    commands_dir = BASE_DIR / "commands"
-
-    if not commands_dir.exists():
-        log.warning("Pasta 'commands/' não encontrada. Nenhum cog carregado.")
-        return
-
-    base_dir_str = str(BASE_DIR)
-    if base_dir_str not in sys.path:
-        sys.path.insert(0, base_dir_str)
-
-    loaded_modules: set[str] = set()
-
-    for file in sorted(commands_dir.rglob("*.py")):
-        if file.name.startswith("_"):
-            continue
-        if not is_extension_module(file):
-            continue
-
-        module = str(file.relative_to(BASE_DIR)).replace(os.sep, ".")[:-3]
-
-        if module in loaded_modules or module in bot.extensions:
-            log.warning(f"[COG SKIP] já carregado → {module}")
-            continue
-
-        try:
-            await bot.load_extension(module)
-            loaded_modules.add(module)
-            log.info(f"[COG] carregado → {module}")
-        except Exception as e:
-            log.error(f"[COG FAIL] {module} → {e}")
-
-# ==========================
-# SETUP HOOK
-# ==========================
-
-@bot.event
-async def setup_hook() -> None:
-    await load_extensions()
-
-    # Módulos opcionais do bot principal (status, welcome, etc.)
-    # Descomente conforme necessário:
-    try:
-     await status.initialize_status(bot)
-     log.info("Status iniciado.")
-    except Exception as e:
-     log.error(f"Erro no status: {e}")
-
-    # try:
-    #     await welcome.initialize_welcome(bot)
-    #     log.info("Welcome carregado.")
-    # except Exception as e:
-    #     log.error(f"Erro no welcome: {e}")
-
-    # Prefix-only: não sincroniza slash commands.
-
-# ==========================
-# ON READY
-# ==========================
-
-@bot.event
-async def on_ready() -> None:
-    log.info(f"[READY] instance={BOT_INSTANCE_ID} user={bot.user} latency={round(bot.latency * 1000)}ms")
-    cmds = sorted(c.name for c in bot.commands)
-    log.info(f"{len(cmds)} comandos de prefixo carregados: {', '.join(cmds)}")
-    if MONGODB_URI:
-        log.info(f"[READY] MongoDB ativo no banco '{MONGODB_DATABASE}'")
-    else:
-        log.info("[READY] MongoDB inativo.")
-
-
-@bot.event
-async def on_command(ctx: commands.Context) -> None:
-    # Loga toda execução de comando de prefixo/híbrido para detectar duplicidade.
-    # Se aparecer 2x (ou 4x) com o mesmo message.id e a mesma instance, é re-disparo interno.
-    mid = getattr(getattr(ctx, "message", None), "id", None)
-    gid = getattr(getattr(ctx, "guild", None), "id", None)
-    aid = getattr(getattr(ctx, "author", None), "id", None)
-    log.info(f"[CMD] instance={BOT_INSTANCE_ID} name={ctx.command.qualified_name if ctx.command else None} mid={mid} gid={gid} aid={aid}")
-
-# ==========================
-# EVENTOS DE SERVIDOR
-# ==========================
-
-@bot.event
-async def on_guild_join(guild: discord.Guild) -> None:
-    gid = str(guild.id)
-    if gid not in bot.prefix_cache:
-        bot.prefix_cache[gid] = bot.default_prefix
-        save_prefixes(bot.prefix_cache)
-        bot.prefixes_cache = bot.prefix_cache
-
-
-@bot.event
-async def on_guild_remove(guild: discord.Guild) -> None:
-    gid = str(guild.id)
-    if gid in bot.prefix_cache:
-        bot.prefix_cache.pop(gid)
-        save_prefixes(bot.prefix_cache)
-        bot.prefixes_cache = bot.prefix_cache
-
-# ==========================
-# HANDLER DE ERROS GLOBAL
-# ==========================
-
-@bot.event
-async def on_command_error(ctx: commands.Context, error: Exception) -> None:
-    if isinstance(error, commands.CommandNotFound):
-        return
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ Você não tem permissão para usar este comando.")
-        return
-
-    original_error = getattr(error, "original", error)
-    command_name = ctx.command.qualified_name if ctx.command else "desconhecido"
-    log.exception(f"Erro no comando '{command_name}': {original_error}")
-
-    try:
-        await ctx.send(
-            "O comando encontrou um erro interno e nao conseguiu responder. "
-            "Tente novamente em alguns segundos."
+    async def on_ready(self):
+        """Evento de quando o bot está online e conectado ao Discord."""
+        logger.info(f"🤖 Bot online como {self.user} (ID: {self.user.id})")
+        logger.info(f"Prefixo de comando: '{config.COMMAND_PREFIX}'")
+        
+        # Define o status do bot
+        activity = discord.Activity(
+            type=discord.ActivityType.watching,
+            name=f"{config.COMMAND_PREFIX}help | MongoDB Atlas"
         )
-    except Exception:
-        pass
+        await self.change_presence(activity=activity)
 
-# ==========================
-# COMANDOS DE ADMINISTRAÇÃO
-# ==========================
+    async def close(self):
+        """Garante o encerramento correto do bot e da conexão com BD."""
+        logger.info("Encerrando bot...")
+        db_manager.close()
+        await super().close()
 
-@bot.command(hidden=True)
-@commands.guild_only()
-@commands.has_permissions(administrator=True)
-async def debug_cmds(ctx: commands.Context) -> None:
-    """Lista todos os comandos de prefixo carregados."""
-    cmds = sorted(c.name for c in bot.commands)
-    await ctx.send(f"Comandos carregados ({len(cmds)}):\n" + ", ".join(cmds))
+async def main():
+    # Valida configurações básicas
+    warnings = config.validate_config()
+    for warning in warnings:
+        logger.warning(warning)
 
+    if not config.DISCORD_TOKEN or config.DISCORD_TOKEN == "seu_token_do_discord_aqui":
+        logger.error("❌ Não é possível iniciar o bot sem um DISCORD_TOKEN válido no arquivo .env!")
+        logger.info("Edite o arquivo .env e coloque o seu Token do Discord e a sua MONGO_URI.")
+        return
 
-@bot.command()
-@commands.guild_only()
-@commands.has_permissions(manage_guild=True)
-async def setprefix(ctx: commands.Context, prefix: str) -> None:
-    """Altera o prefixo do bot neste servidor."""
-    bot.prefix_cache[str(ctx.guild.id)] = prefix
-    save_prefixes(bot.prefix_cache)
-    bot.prefixes_cache = bot.prefix_cache
-    await ctx.send(f"Prefixo alterado para **{prefix}**")
-
-# ==========================
-# MAIN
-# ==========================
-
-async def main() -> None:
-    if not MONGODB_URI:
-        raise RuntimeError("MONGODB_URI nao configurado. Defina em variavel de ambiente ou no config.json.")
-
-    try:
-        bot.mongo_db = initialize_mongodb(config)
-    except Exception as exc:
-        log.error(f"Erro ao conectar no MongoDB: {exc}")
-        raise
-
-    bot.default_prefix = DEFAULT_PREFIX
-    bot.prefix_cache = load_prefixes()
-    bot.prefixes_cache = bot.prefix_cache
-
-    token = config.get("TOKEN")
-    if not token:
-        raise RuntimeError("TOKEN nao encontrado no config.json.")
-    try:
-        async with bot:
-            await bot.start(token)
-    finally:
-        close_mongodb()
-
+    bot = MongoDiscordBot()
+    async with bot:
+        await bot.start(config.DISCORD_TOKEN)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Bot interrompido pelo usuário.")

@@ -1,21 +1,29 @@
 import discord
 from discord.ext import commands
+import json
 from pathlib import Path
 import time
 
-from mongo import load_json_document, save_json_document
-
 from commands.EconomiaRPG.utils.database import ensure_profile, get_active_hero, update_active_hero_resources
 
-ROOT_DIR = Path(__file__).resolve().parents[3]
-TOMATADAS_FILE = ROOT_DIR / "DataBase" / "tomate.json"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DB_DIR = BASE_DIR / "DataBase"
+TOMATADAS_FILE = DB_DIR / "tomate.json"
 
 def _load_tomatadas() -> dict:
-    data = load_json_document(TOMATADAS_FILE, {})
-    return data if isinstance(data, dict) else {}
+    try:
+        with TOMATADAS_FILE.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 def _save_tomatadas(data: dict):
-    save_json_document(TOMATADAS_FILE, data)
+    DB_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = TOMATADAS_FILE.with_name(TOMATADAS_FILE.name + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(TOMATADAS_FILE)
 
 class Tomate(commands.Cog):
     def __init__(self, bot: commands.Bot):

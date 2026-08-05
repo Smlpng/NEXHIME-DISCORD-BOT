@@ -13,16 +13,16 @@ ITEM_TYPE_LABELS = {
 }
 
 ITEM_TYPE_EMOJIS = {
-    1: "ATK",
-    2: "DEF",
+    1: "âš”ï¸",
+    2: "ðŸ›¡ï¸",
 }
 
 RARITY_LABELS = {
     1: "Comum",
     2: "Incomum",
     3: "Raro",
-    4: "Epico",
-    5: "Lendario",
+    4: "Ã‰pico",
+    5: "LendÃ¡rio",
 }
 
 
@@ -31,7 +31,7 @@ def resolve_zone_name(zone_id: int | None) -> str:
         zone_name = zones_data[zone_id].get("name")
         if zone_name:
             return zone_name
-    return "Nao definida"
+    return "NÃ£o definida"
 
 
 def build_progress_bar(current: int, total: int, size: int = 10) -> str:
@@ -39,7 +39,7 @@ def build_progress_bar(current: int, total: int, size: int = 10) -> str:
         total = 1
     progress = min(max(current / total, 0), 1)
     filled = round(size * progress)
-    return "#" * filled + "-" * (size - filled)
+    return "â–ˆ" * filled + "â–‘" * (size - filled)
 
 
 def add_spacer(embed: discord.Embed) -> None:
@@ -66,7 +66,7 @@ def get_item_type_label(item_type_id: int) -> str:
 
 
 def get_item_type_emoji(item_type_id: int) -> str:
-    return ITEM_TYPE_EMOJIS.get(item_type_id, "ITEM")
+    return ITEM_TYPE_EMOJIS.get(item_type_id, "ðŸŽ’")
 
 
 def get_rarity_label(rarity: int | None) -> str:
@@ -76,23 +76,23 @@ def get_rarity_label(rarity: int | None) -> str:
 def format_item_summary(item_row: dict, equipped_item_id: int | None = None) -> str:
     item = build_item_instance(item_row["type"], item_row["item_id"], level=item_row.get("level", 1))
     if item is None:
-        return "Item invalido ou removido do catalogo."
+        return "Item invÃ¡lido ou removido do catÃ¡logo."
 
     equipped_suffix = " | Equipado" if equipped_item_id == item_row["item_id"] else ""
     special_text = item.attack_description if item.attack_description and item.attack_description != "None" else "Sem habilidade especial"
     return (
         f"{get_item_type_emoji(item_row['type'])} **{item.name}**{equipped_suffix}\n"
-        f"Nivel {item_row['level']} | {get_rarity_label(getattr(item, 'rarity', None))}\n"
-        f"Bonus: {item.boosts}\n"
+        f"NÃ­vel {item_row['level']} | {get_rarity_label(getattr(item, 'rarity', None))}\n"
+        f"BÃ´nus: {item.boosts}\n"
         f"Especial: {special_text}"
     )
 
 
 def build_inventory_embed(display_name: str, inventory_rows: list[dict], hero_data: dict | None = None) -> discord.Embed:
-    embed = discord.Embed(title=f"Inventario de {display_name}", color=RPG_PRIMARY_COLOR)
+    embed = discord.Embed(title=f"InventÃ¡rio de {display_name}", color=RPG_PRIMARY_COLOR)
 
     if not inventory_rows:
-        embed.description = "Seu inventario esta vazio no momento. Passe na loja, lute ou melhore itens na forja para comecar a montar seu arsenal."
+        embed.description = "Seu inventÃ¡rio estÃ¡ vazio no momento. Passe na loja, lute ou melhore itens na forja para comeÃ§ar a montar seu arsenal."
         return embed
 
     grouped_rows = {1: [], 2: [], 0: []}

@@ -1,24 +1,32 @@
 import discord
 from discord.ext import commands
+import json
 from pathlib import Path
 import time
 
-from mongo import load_json_document, save_json_document
-
 from commands.EconomiaRPG.utils.database import ensure_profile, get_active_hero, update_active_hero_resources
 
-ROOT_DIR = Path(__file__).resolve().parents[3]
-FLORES_FILE = ROOT_DIR / "DataBase" / "flor.json"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DB_DIR = BASE_DIR / "DataBase"
+FLORES_FILE = DB_DIR / "flor.json"
 FLOWER_EMOJIS = {"🌹", "🌸", "🌺", "🌻", "🌷", "💐", "🪻", "🥀"}
 
 
 def _load_flores() -> dict:
-    data = load_json_document(FLORES_FILE, {})
-    return data if isinstance(data, dict) else {}
+    try:
+        with FLORES_FILE.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 
 def _save_flores(data: dict):
-    save_json_document(FLORES_FILE, data)
+    DB_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = FLORES_FILE.with_name(FLORES_FILE.name + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(FLORES_FILE)
 
 
 class Flor(commands.Cog):

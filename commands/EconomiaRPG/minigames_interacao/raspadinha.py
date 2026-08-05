@@ -9,7 +9,7 @@ from commands.EconomiaRPG.utils.hero_check import economy_profile_created
 from commands.EconomiaRPG.utils.presentation import RPG_PRIMARY_COLOR
 
 
-SCRATCH_SYMBOLS = ["ðŸª™", "ðŸ’Ž", "ðŸ‘‘", "ðŸ€", "â­", "ðŸ’€"]
+SCRATCH_SYMBOLS = ["🪙", "💎", "👑", "🍀", "⭐", "💀"]
 SCRATCH_SIZE = 6
 SCRATCH_COLUMNS = 3
 
@@ -47,9 +47,9 @@ def _calculate_multiplier(cards: list[str]) -> float:
 
 class ScratchButton(discord.ui.Button):
     def __init__(self, index: int, revealed: bool, symbol: str, finished: bool):
-        emoji = symbol if revealed else "ðŸ§§"
-        style = discord.ButtonStyle.success if revealed and symbol != "ðŸ’€" else discord.ButtonStyle.secondary
-        if revealed and symbol == "ðŸ’€":
+        emoji = symbol if revealed else "❔"
+        style = discord.ButtonStyle.success if revealed and symbol != "💀" else discord.ButtonStyle.secondary
+        if revealed and symbol == "💀":
             style = discord.ButtonStyle.danger
 
         super().__init__(label="\u200b", emoji=emoji, style=style, row=index // SCRATCH_COLUMNS, disabled=revealed or finished)
@@ -93,7 +93,7 @@ class ScratchView(discord.ui.View):
         for row_start in range(0, SCRATCH_SIZE, SCRATCH_COLUMNS):
             row = []
             for index in range(row_start, row_start + SCRATCH_COLUMNS):
-                row.append(self.cards[index] if index in self.revealed_cards or self.finished else "â”")
+                    row.append(self.cards[index] if index in self.revealed_cards or self.finished else "❔")
             rows.append(" ".join(row))
         return rows
 
@@ -112,7 +112,7 @@ class ScratchView(discord.ui.View):
 
     def build_embed(self) -> discord.Embed:
         color = RPG_PRIMARY_COLOR if not self.finished else discord.Color.green()
-        embed = discord.Embed(title="ðŸ§¾ Raspadinha", description="\n".join(self._visible_rows()), color=color)
+        embed = discord.Embed(title="🎟 Raspadinha", description="\n".join(self._visible_rows()), color=color)
         embed.add_field(name="Aposta", value=f"{_format_nex(self.bet_amount)} nex", inline=True)
         embed.add_field(name="Raspados", value=f"{len(self.revealed_cards)}/{SCRATCH_SIZE}", inline=True)
         embed.add_field(name="Carteira", value=f"{_format_nex(self._wallet_balance())} nex", inline=True)
@@ -130,7 +130,7 @@ class ScratchView(discord.ui.View):
         if self.finished:
             replay_button = discord.ui.Button(
                 label="Nova raspadinha",
-                emoji="ðŸŽŸï¸",
+                    emoji="🎟",
                 style=discord.ButtonStyle.success,
                 row=2,
             )
@@ -140,7 +140,7 @@ class ScratchView(discord.ui.View):
 
         reveal_button = discord.ui.Button(
             label="Raspar aleatorio",
-            emoji="ðŸŽ²",
+                emoji="🎲",
             style=discord.ButtonStyle.primary,
             row=2,
             disabled=len(self.revealed_cards) >= SCRATCH_SIZE,

@@ -16,14 +16,14 @@ TRIBES = [
 ]
 
 TRIBE_ROLE_IDS = {
-    "Tribo da Folhagem": 1454489963151229080,
-    "Tribo do Coracao Vulcanico": 1454489966070595877,
-    "Tribo do Vazio Estelar": 1454489964325769413,
-    "Tribo do Eco Primordial": 1454489970336071852,
+    "Tribo da Folhagem": 1534589363470733513,
+    "Tribo do Coracao Vulcanico": 1534589364947128330,
+    "Tribo do Vazio Estelar": 1534589366515663068,
+    "Tribo do Eco Primordial": 1534589367803187340,
 }
 
 TRIBE_ROLE_CHANNEL_IDS = {
-    1456859390706716867,
+    1534587984723312712,
 }
 
 

@@ -1,9 +1,8 @@
+import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
-
-from mongo import load_json_document
 
 
 WARN_DB = Path("DataBase") / "mod_state.json"
@@ -11,8 +10,12 @@ NOTE_DB = Path("DataBase") / "mod_notes.json"
 
 
 def _load_json(path: Path) -> dict:
-    data = load_json_document(path, {})
-    return data if isinstance(data, dict) else {}
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
 
 
 class Audit(commands.Cog):

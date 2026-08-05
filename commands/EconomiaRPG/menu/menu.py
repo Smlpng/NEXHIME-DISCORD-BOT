@@ -5,7 +5,7 @@ from discord.ui import Button, Select, View
 from commands.EconomiaRPG.utils.database import ensure_profile, get_active_hero, get_bank_balance, has_selected_class, list_active_inventory
 from commands.EconomiaRPG.utils.hero_actions import load_hero
 from commands.EconomiaRPG.characters.ability_info import abilities_embed
-from commands.EconomiaRPG.utils.command_adapter import CommandContextAdapter, InteractionAdapter
+from commands.EconomiaRPG.utils.command_adapter import CommandContextAdapter
 from commands.EconomiaRPG.utils.create import create_hero
 from commands.EconomiaRPG.utils.presentation import (
     RPG_PRIMARY_COLOR,
@@ -30,9 +30,9 @@ class Stats(commands.Cog):
                             attack, defense, magic, magic_resistance, weapon_name, armor_name):
         bank_balance = get_bank_balance(inte.user.id)
         zone_name = resolve_zone_name(data.get("zone_id"))
-        primate_race = data.get("race") or "Nao definida"
-        tribe_name = data.get("tribe") or "Nao definida"
-        title_name = data.get("title") or "Sem titulo"
+        primate_race = data.get("race") or "Não definida"
+        tribe_name = data.get("tribe") or "Não definida"
+        title_name = data.get("title") or "Sem título"
         created_at = self._format_timestamp(getattr(inte.user, "created_at", None))
         joined_at = self._format_timestamp(getattr(inte.user, "joined_at", None))
         progress_bar = build_progress_bar(xp_value, xp_needed)
@@ -42,56 +42,56 @@ class Stats(commands.Cog):
             color=RPG_PRIMARY_COLOR,
         )
         embed.add_field(
-            name="Economia",
+            name="💰 Economia",
             value=f"**Carteira:** {data['nex']}\n**Banco:** {bank_balance}",
             inline=False,
         )
         add_spacer(embed)
-        embed.add_field(name="Classe", value=class_name, inline=True)
-        embed.add_field(name="Especie", value=primate_race, inline=True)
-        embed.add_field(name="Tribo", value=tribe_name, inline=True)
-        embed.add_field(name="Titulo", value=title_name, inline=True)
-        embed.add_field(name="Local", value=zone_name, inline=False)
+        embed.add_field(name="🛡️ Classe", value=class_name, inline=True)
+        embed.add_field(name="🧬 Espécie", value=primate_race, inline=True)
+        embed.add_field(name="🏹 Tribo", value=tribe_name, inline=True)
+        embed.add_field(name="🏷️ Título", value=title_name, inline=True)
+        embed.add_field(name="🗺️ Local", value=zone_name, inline=False)
         add_spacer(embed)
         embed.add_field(
-            name="Progresso",
-            value=f"**Nivel:** {level}\n**XP:** {xp_value}/{xp_needed}\n`{progress_bar}`\n",
+            name="📈 Progresso",
+            value=f"**Nível:** {level}\n**XP:** {xp_value}/{xp_needed}\n`{progress_bar}`\n",
             inline=False,
         )
         add_spacer(embed)
-        embed.add_field(name="HP", value=hp_text, inline=True)
-        embed.add_field(name="Energia", value=energy_text, inline=True)
+        embed.add_field(name="❤️ HP", value=hp_text, inline=True)
+        embed.add_field(name="⚡ Energia", value=energy_text, inline=True)
         add_spacer(embed)
         embed.add_field(
-            name="Atributos",
+            name="📊 Atributos",
             value=(
-                f"**Forca:** {attack}    **Defesa:** {defense}\n"
-                f"**Inteligencia:** {magic}    **Res. magica:** {magic_resistance}\n"
+                f"💪 **Força:** {attack}\u2003\u2003\u2003\u2003🛡️ **Defesa:** {defense}\n"
+                f"🧠 **Inteligência:** {magic}\u2003\u2003✨ **Res. mágica:** {magic_resistance}\n"
             ),
             inline=False,
         )
         add_spacer(embed)
         embed.add_field(
-            name="Recursos",
+            name="🪙 Recursos",
             value=(
-                f"**Madeira:** {data['wood']}\n"
-                f"**Ferro:** {data['iron']}\n"
-                f"**Runas:** {data['runes']}"
+                f"🪵 **Madeira:** {data['wood']}\n"
+                f"⛏️ **Ferro:** {data['iron']}\n"
+                f"🔮 **Runas:** {data['runes']}"
             ),
             inline=True,
         )
         embed.add_field(
-            name="Equipamentos",
+            name="🧰 Equipamentos",
             value=(
                 f"**Arma:** {weapon_name}\n"
                 f"**Armadura:** {armor_name}\n"
-                "**Acessorio:** --"
+                "**Acessório:** --"
             ),
             inline=True,
         )
         add_spacer(embed)
         embed.add_field(
-            name="Datas",
+            name="🕰️ Datas",
             value=(
                 f"**Conta criada:** {created_at}\n"
                 f"**Entrou no servidor:** {joined_at}"
@@ -116,9 +116,9 @@ class Stats(commands.Cog):
         embed.add_field(
             name="Recursos",
             value=(
-                f"Madeira: {data['wood']}\n"
-                f"Ferro: {data['iron']}\n"
-                f"Runas: {data['runes']}"
+                f"ðŸŒ² Madeira: {data['wood']}\n"
+                f"â›ï¸ Ferro: {data['iron']}\n"
+                f"ðŸ§¿ Runas: {data['runes']}"
             ),
             inline=False,
         )
@@ -144,7 +144,7 @@ class Stats(commands.Cog):
     @commands.command(
         name="escolher_classe",
         aliases=["choose_class"],
-        help="Escolha a classe do seu herÃ³i no RPG.",
+        help="Escolha a classe do seu herói no RPG.",
     )
     async def escolher_classe(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
@@ -164,10 +164,10 @@ class Stats(commands.Cog):
                 self.stats_obj = stats_obj
                 
                 options = [
-                    SelectOption(value="perfil", label="Perfil", emoji="\U0001F9EA"),
-                    SelectOption(value="economia", label="Economia", emoji="\U0001F4B0"),
-                    SelectOption(value="inventario", label="Inventario", emoji="\U0001F392"),
-                    SelectOption(value="habilidades", label="Habilidades", emoji="\U0001F300")
+                    SelectOption(value="perfil", label="Perfil", emoji='👤'),
+                    SelectOption(value="economia", label="Economia", emoji='💰'),
+                    SelectOption(value="inventario", label="Inventário", emoji='🎒'),
+                    SelectOption(value="habilidades", label="Habilidades", emoji='✨')
                 ]
                 
                     
@@ -176,7 +176,7 @@ class Stats(commands.Cog):
         
             async def callback(self, interaction):
                 if interaction.user.id != inte.user.id:
-                    await interaction.response.send_message("Apenas quem abriu este menu pode trocar de pagina aqui.", ephemeral=True)
+                    await interaction.response.send_message("Apenas quem abriu este menu pode trocar de página aqui.", ephemeral=True)
                     return
                 embed = self.stats_obj.load_menu_page(self.values[0], inte)
                 await interaction.response.edit_message(embed=embed, view=self.view)
@@ -189,7 +189,8 @@ class Stats(commands.Cog):
             async def escolher_classe_callback(interaction: discord.Interaction):
                 if interaction.user.id != inte.user.id:
                     return
-                await create_hero(InteractionAdapter(interaction))
+                await interaction.response.defer(ephemeral=True)
+                await create_hero(inte)
 
             escolher_classe_button = Button(label="Escolher classe", style=discord.ButtonStyle.primary)
             escolher_classe_button.callback = escolher_classe_callback
@@ -233,7 +234,7 @@ class Stats(commands.Cog):
         embed = self._build_status_embed(
             inte,
             data=data,
-            class_name="Nao escolhida",
+            class_name="Não escolhida",
             level=data["level"],
             xp_value=data["xp"],
             xp_needed=10,
@@ -248,21 +249,21 @@ class Stats(commands.Cog):
             armor_name="--",
         )
         embed.add_field(
-            name="Proximo passo",
-            value="Escolher uma classe e opcional. Quando quiser, use o comando de escolher classe para definir como seu heroi vai lutar.",
+            name="Próximo passo",
+            value="Escolher uma classe é opcional. Quando quiser, use o comando de escolher classe para definir como seu herói vai lutar.",
             inline=False,
         )
-        embed.set_footer(text="Seu perfil ja foi criado. A classe fica a seu criterio.")
+        embed.set_footer(text="Seu perfil já foi criado. A classe fica a seu critério.")
         return embed
     
     
     def load_ability_info(self, inte):
         if not has_selected_class(inte.user.id):
             embed = Embed(title=f"Menu de {inte.user.name}", color=discord.Color.blue())
-            embed.add_field(name="Habilidades", value="Voce ainda nao escolheu uma classe.", inline=False)
+            embed.add_field(name="Habilidades ✨", value="Você ainda não escolheu uma classe.", inline=False)
             embed.add_field(
                 name="Dica",
-                value="A classe e opcional. Escolha quando quiser para liberar as habilidades do heroi.",
+                value="A classe é opcional. Escolha quando quiser para liberar as habilidades do herói.",
                 inline=False,
             )
             return embed

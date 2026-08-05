@@ -5,9 +5,8 @@ import requests
 from io import BytesIO
 import random
 import textwrap
+import json
 from pathlib import Path
-
-from mongo import load_json_document, save_json_document
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DB_DIR = BASE_DIR / "DataBase"
@@ -18,7 +17,12 @@ TWEET_CHANNEL_ID = 1488553040553185310
 
 
 def load_tweet_redirects() -> dict[str, dict]:
-    data = load_json_document(TWEET_REDIRECT_FILE, {})
+    try:
+        with TWEET_REDIRECT_FILE.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return {}
+
     if not isinstance(data, dict):
         return {}
 
@@ -47,7 +51,9 @@ def load_tweet_redirects() -> dict[str, dict]:
 
 
 def save_tweet_redirects(data: dict[str, dict]) -> None:
-    save_json_document(TWEET_REDIRECT_FILE, data)
+    DB_DIR.mkdir(parents=True, exist_ok=True)
+    with TWEET_REDIRECT_FILE.open("w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=2)
 
 
 class Tweet(commands.Cog):
