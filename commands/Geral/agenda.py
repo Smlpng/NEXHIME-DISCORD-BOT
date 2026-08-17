@@ -126,7 +126,7 @@ class Agenda(commands.Cog):
                 if not (event["id"] == event_id and event["guild_id"] == ctx.guild.id and (event["author_id"] == ctx.author.id or ctx.author.guild_permissions.manage_guild))
             ]
             if len(data["events"]) == before:
-                return await ctx.reply("Evento nao encontrado ou sem permissao para remover.", mention_author=False)
+                return await ctx.reply("Evento não encontrado ou sem permissão para remover.", mention_author=False)
             _save(data)
             return await ctx.reply(f"Evento #{event_id} removido da agenda.", mention_author=False)
 

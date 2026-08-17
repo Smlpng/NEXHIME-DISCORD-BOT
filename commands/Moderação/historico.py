@@ -22,7 +22,7 @@ class Historico(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="historico", aliases=["modhistory"], help="Mostra o historico basico de moderacao de um membro.")
+    @commands.command(name="histórico", aliases=["modhistory"], help="Mostra o histórico basico de moderacao de um membro.")
     @commands.has_permissions(manage_messages=True)
     async def historico(self, ctx: commands.Context, membro: discord.Member):
         data = _load_warns()

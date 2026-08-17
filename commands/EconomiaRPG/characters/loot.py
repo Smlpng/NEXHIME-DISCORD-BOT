@@ -46,7 +46,7 @@ class Loot():
             message = message + f" {self.runes} runas"
         message = message + f"\ne {name} ganhou {self.xp} de XP"
         if level_up:
-            message += f"\n{name} subiu de nivel"
+            message += f"\n{name} subiu de nível"
             
         # If new equipment load it
         if self.equipment:

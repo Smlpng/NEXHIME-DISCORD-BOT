@@ -3,7 +3,7 @@
     {
       "id": 1,
       "user_id": 773954862223851560,
-      "race": null,
+      "race": "Gorila",
       "tribe": "Tribo do Vazio Estelar",
       "title": null,
       "titles": [],
@@ -12,8 +12,8 @@
       "xp": 0,
       "nex": 0,
       "bank": 0,
-      "wood": 0,
-      "iron": 0,
+      "wood": 3,
+      "iron": 1,
       "runes": 0,
       "tomato_bag": "Bolsa basica",
       "tomato_capacity": 100,
@@ -29,7 +29,7 @@
     {
       "id": 2,
       "user_id": 1440885863461687336,
-      "race": null,
+      "race": "Orangotango",
       "tribe": "Tribo do Eco Primordial",
       "title": null,
       "titles": [],
@@ -70,7 +70,9 @@
   ],
   "dex": [],
   "quest_log": {},
-  "daily_claims": {},
+  "daily_claims": {
+    "773954862223851560": 1786975605.2399166
+  },
   "meta": {
     "next_ids": {
       "hero": 3,

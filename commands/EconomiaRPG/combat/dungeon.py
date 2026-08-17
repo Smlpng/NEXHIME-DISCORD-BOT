@@ -35,7 +35,7 @@ class Dungeon(commands.Cog):
         elif cooperative == 2:
             hero = load_hero(inte.user.id, name=inte.user.name)
             if hero.level < 5:
-                return await inte.response.send_message("E necessario estar no nivel 5 para entrar em uma dungeon.")
+                return await inte.response.send_message("E necessario estar no nível 5 para entrar em uma dungeon.")
             await inte.response.send_message("Carregando...")
             zone_id = get_zone(inte.user.id)
             enemies = get_dungeon_from_zone(zone_id)
@@ -53,7 +53,7 @@ class Dungeon(commands.Cog):
         
         hero = load_hero(inte.user.id, name=inte.user.name)
         if hero.level < 5:
-            return await inte.response.send_message("E necessario estar no nivel 5 para entrar em uma dungeon.", ephemeral=True)
+            return await inte.response.send_message("E necessario estar no nível 5 para entrar em uma dungeon.", ephemeral=True)
         
         zone_id = get_zone(player_id)
         bonus = 1.75

@@ -11,7 +11,7 @@ def abilities_embed(hero: object, inte):
         case "Mago":
             embed.add_field(name="Chama magica", value="**Causa dano de fogo**\nPODER: 10\nCUSTO: 5", inline=False)
             if hero.level >= 10:
-                embed.add_field(name="Cura", value="**Recupera vida com base na magia do usuario**\nCUSTO: 10", inline=False)
+                embed.add_field(name="Cura", value="**Recupera vida com base na magia do usuário**\nCUSTO: 10", inline=False)
             if hero.level >= 25:
                 embed.add_field(name="Feitico ancestral", value="**Causa dano massivo**\nPODER: 10\nCUSTO: 20", inline=False)
         case "Assassino":
@@ -19,7 +19,7 @@ def abilities_embed(hero: object, inte):
             if hero.level >= 10:
                 embed.add_field(name="Sacrificio", value="**Sacrifica vida para causar dano massivo**\nPODER: 35\nCUSTO: 33% da vida", inline=False)
             if hero.level >= 25:
-                embed.add_field(name="Quebra-escudo", value="**Reduz a defesa do inimigo com base na magia do usuario**\nCUSTO: 10", inline=False)
+                embed.add_field(name="Quebra-escudo", value="**Reduz a defesa do inimigo com base na magia do usuário**\nCUSTO: 10", inline=False)
         case "Tanque":
             embed.add_field(name="Esmagar", value="**Esmaga o inimigo**\nPODER: 20\nCUSTO: 10", inline=False)
             if hero.level >= 10:

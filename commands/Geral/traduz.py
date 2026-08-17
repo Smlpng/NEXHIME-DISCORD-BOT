@@ -27,7 +27,7 @@ class Traduz(commands.Cog):
         except Exception:
             resultado = None
         if not resultado:
-            return await ctx.reply("Nao foi possivel traduzir esse texto agora.")
+            return await ctx.reply("Não foi possível traduzir esse texto agora.")
         embed = discord.Embed(title="Traducao", color=discord.Color.blurple())
         embed.add_field(name="Original", value=texto[:1024], inline=False)
         embed.add_field(name=f"Traduzido ({idioma})", value=resultado[:1024], inline=False)

@@ -84,10 +84,10 @@ class Sugestao(commands.Cog):
             if ctx.guild is None:
                 return await ctx.reply("Esse ajuste so funciona em servidores.", mention_author=False)
             if not ctx.author.guild_permissions.manage_guild:
-                return await ctx.reply("Voce precisa de permissao para configurar o canal de sugestoes.", mention_author=False)
+                return await ctx.reply("Você precisa de permissão para configurar o canal de sugestoes.", mention_author=False)
             channel = ctx.message.channel_mentions[0] if ctx.message.channel_mentions else None
             if channel is None:
-                return await ctx.reply("Use: sugestao config #canal", mention_author=False)
+                return await ctx.reply("Use: sugestão config #canal", mention_author=False)
             data["channels"][str(ctx.guild.id)] = channel.id
             _save(data)
             return await ctx.reply(f"Canal de sugestoes configurado para {channel.mention}.", mention_author=False)
@@ -98,7 +98,7 @@ class Sugestao(commands.Cog):
             rows = [row for row in data["suggestions"] if row.get("guild_id") == ctx.guild.id][-10:]
             embed = discord.Embed(title="Sugestoes recentes", color=discord.Color.green())
             if not rows:
-                embed.description = "Nenhuma sugestao registrada ainda."
+                embed.description = "Nenhuma sugestão registrada ainda."
             else:
                 embed.description = "\n\n".join(
                     f"**#{row['id']} - {row.get('title', 'Sem titulo')}** - <@{row['author_id']}>\n{row.get('description', row.get('content', ''))}"
@@ -108,11 +108,11 @@ class Sugestao(commands.Cog):
 
         content = " ".join(([acao] if acao else []) + list(args)).strip()
         if not content:
-            return await ctx.reply("Use: sugestao Titulo | Descricao", mention_author=False)
+            return await ctx.reply("Use: sugestão Titulo | Descricao", mention_author=False)
 
         parsed = _split_suggestion_text(content)
         if parsed is None:
-            return await ctx.reply("Formato invalido. Use: sugestao Titulo | Descricao", mention_author=False)
+            return await ctx.reply("Formato invalido. Use: sugestão Titulo | Descricao", mention_author=False)
 
         title, description = parsed
 
@@ -135,7 +135,7 @@ class Sugestao(commands.Cog):
 
         forum_channel = await self._get_forum_channel(ctx.guild)
         if forum_channel is None:
-            return await ctx.reply("Nao consegui localizar o fórum de sugestões configurado no servidor.", mention_author=False)
+            return await ctx.reply("Não consegui localizar o fórum de sugestões configurado no servidor.", mention_author=False)
 
         embed = self._build_suggestion_embed(ctx, suggestion)
         thread_name = f"#{suggestion['id']} - {title}"[:100]
@@ -143,7 +143,7 @@ class Sugestao(commands.Cog):
         try:
             thread = await forum_channel.create_thread(name=thread_name, embed=embed)
         except discord.Forbidden:
-            return await ctx.reply("Nao tenho permissao para criar posts no fórum de sugestões.", mention_author=False)
+            return await ctx.reply("Não tenho permissão para criar posts no fórum de sugestões.", mention_author=False)
         except discord.HTTPException as error:
             return await ctx.reply(f"Falha ao criar a sugestão no fórum: {error}", mention_author=False)
 
@@ -154,7 +154,7 @@ class Sugestao(commands.Cog):
         data["suggestions"].append(suggestion)
         _save(data)
 
-        await ctx.reply(f"Sugestao registrada com o ID #{suggestion['id']}.", mention_author=False)
+        await ctx.reply(f"Sugestão registrada com o ID #{suggestion['id']}.", mention_author=False)
 
 
 async def setup(bot):

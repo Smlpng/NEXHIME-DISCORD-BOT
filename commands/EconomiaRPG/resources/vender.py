@@ -36,20 +36,20 @@ class Vender(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa ter um heroi ativo para vender recursos.")
+            return await inte.response.send_message("Você precisa ter um herói ativo para vender recursos.")
         if quantidade <= 0:
             return await inte.response.send_message("A quantidade precisa ser maior que zero.")
 
         resource_key = RESOURCE_MAP.get(recurso.lower())
         if resource_key is None:
-            return await inte.response.send_message("Voce pode vender madeira, ferro ou runas.")
+            return await inte.response.send_message("Você pode vender madeira, ferro ou runas.")
         if int(hero.get(resource_key, 0)) < quantidade:
-            return await inte.response.send_message("Voce nao tem essa quantidade para vender.")
+            return await inte.response.send_message("Você não tem essa quantidade para vender.")
 
         total = quantidade * SELL_PRICES[recurso.lower()]
         success = update_active_hero_resources(inte.user.id, nex=total, **{resource_key: -quantidade})
         if not success:
-            return await inte.response.send_message("Nao foi possivel concluir a venda.")
+            return await inte.response.send_message("Não foi possível concluir a venda.")
 
         hero = get_active_hero(inte.user.id)
         embed = discord.Embed(title="Venda concluida", color=RPG_PRIMARY_COLOR)
@@ -59,24 +59,24 @@ class Vender(commands.Cog):
         embed.add_field(name="Carteira", value=f"{hero['nex']} nex", inline=False)
         await inte.response.send_message(embed=embed)
 
-    @commands.command(name="venderall", aliases=["sellall"], help="Vende toda a madeira e ferro do heroi ativo.")
+    @commands.command(name="venderall", aliases=["sellall"], help="Vende toda a madeira e ferro do herói ativo.")
     async def venderall(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa ter um heroi ativo para vender recursos.")
+            return await inte.response.send_message("Você precisa ter um herói ativo para vender recursos.")
 
         wood = int(hero.get("wood", 0))
         iron = int(hero.get("iron", 0))
         runes = int(hero.get("runes", 0))
         if wood <= 0 and iron <= 0 and runes <= 0:
-            return await inte.response.send_message("Voce nao tem recursos para vender agora.")
+            return await inte.response.send_message("Você não tem recursos para vender agora.")
 
         total = wood * SELL_PRICES["wood"] + iron * SELL_PRICES["iron"] + runes * SELL_PRICES["runes"]
         success = update_active_hero_resources(inte.user.id, nex=total, wood=-wood, iron=-iron, runes=-runes)
         if not success:
-            return await inte.response.send_message("Nao foi possivel concluir a venda em lote.")
+            return await inte.response.send_message("Não foi possível concluir a venda em lote.")
 
         hero = get_active_hero(inte.user.id)
         embed = discord.Embed(title="Venda em lote", color=RPG_PRIMARY_COLOR)

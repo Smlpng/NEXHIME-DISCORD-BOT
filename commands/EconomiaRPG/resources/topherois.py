@@ -26,11 +26,11 @@ class TopHerois(commands.Cog):
 
     @commands.command(name="topherois", aliases=["herorank", "rankherois"])
     async def topherois(self, ctx):
-        """Ranking de progressao geral dos herois ativos."""
+        """Ranking de progressao geral dos heróis ativos."""
         inte = CommandContextAdapter(ctx)
         rows = list_hero_progress_leaderboard(limit=10)
         if not rows:
-            return await inte.response.send_message("Ainda nao ha herois suficientes para montar o ranking.")
+            return await inte.response.send_message("Ainda não ha heróis suficientes para montar o ranking.")
 
         medals = {1: "ðŸ¥‡", 2: "ðŸ¥ˆ", 3: "ðŸ¥‰"}
         lines = []
@@ -42,8 +42,8 @@ class TopHerois(commands.Cog):
                 f"Nivel {row['level']} | XP {row['xp']} | Abates {row['kills']} | Melhorias {row['upgrades']} | Bestiario {row['seen']} | Score {row['score']}"
             )
 
-        embed = discord.Embed(title="Top Herois", description="\n\n".join(lines), color=RPG_PRIMARY_COLOR)
-        embed.set_footer(text="Score baseado em nivel, XP, abates, melhorias e progresso no bestiario.")
+        embed = discord.Embed(title="Top Heróis", description="\n\n".join(lines), color=RPG_PRIMARY_COLOR)
+        embed.set_footer(text="Score baseado em nível, XP, abates, melhorias e progresso no bestiario.")
         await inte.response.send_message(embed=embed)
 
 

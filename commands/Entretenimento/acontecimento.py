@@ -7,7 +7,7 @@ EVENTS = [
     "Uma chuva de bananas caiu do nada sobre o servidor.",
     "Um bardo apareceu e comecou a narrar o chat como se fosse um anime.",
     "Um portal abriu e trouxe um goblin vendendo pao de alho encantado.",
-    "Todo mundo recebeu uma missao secreta que ninguem entendeu direito.",
+    "Todo mundo recebeu uma missão secreta que ninguem entendeu direito.",
     "Um dragao passou voando e ignorou completamente a staff.",
     "O relampago caiu, mas por algum motivo so acertou os emojis.",
 ]

@@ -56,7 +56,7 @@ class MemoryView(discord.ui.View):
         if len(self.revealed) == len(self.cards):
             self.stop()
             if self.message is not None:
-                await self.message.edit(content="Voce completou o jogo da memoria.", view=self)
+                await self.message.edit(content="Você completou o jogo da memoria.", view=self)
 
     async def _refresh(self, interaction: discord.Interaction | None):
         for child in self.children:

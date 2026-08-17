@@ -87,7 +87,7 @@ class MinesGameView(discord.ui.View):
 
 	async def interaction_check(self, interaction: discord.Interaction) -> bool:
 		if interaction.user.id != self.user_id:
-			await interaction.response.send_message("Apenas quem iniciou esta partida pode jogar nela.", ephemeral=True)
+			await interaction.response.send_message("Apenas quem iniciou está partida pode jogar nela.", ephemeral=True)
 			return False
 		return True
 
@@ -121,29 +121,29 @@ class MinesGameView(discord.ui.View):
 
 	def _status_text(self) -> str:
 		if self.finish_reason == "lost":
-			return "Voce encontrou uma mina e perdeu a aposta inteira."
+			return "Você encontrou uma mina e perdeu a aposta inteira."
 		if self.finish_reason == "cashout":
 			lucro = self.final_payout - self.bet_amount
 			return (
-				f"Voce retirou {self.safe_reveals} pedra(s) preciosa(s) e saiu com "
+				f"Você retirou {self.safe_reveals} pedra(s) preciosa(s) e saiu com "
 				f"{_format_nex(self.final_payout)} nex ({'+' if lucro >= 0 else ''}{_format_nex(lucro)})."
 			)
 		if self.finish_reason == "cleared":
 			lucro = self.final_payout - self.bet_amount
 			return (
-				f"Voce limpou todo o tabuleiro e recebeu {_format_nex(self.final_payout)} nex "
+				f"Você limpou todo o tabuleiro e recebeu {_format_nex(self.final_payout)} nex "
 				f"({'+' if lucro >= 0 else ''}{_format_nex(lucro)})."
 			)
 		if self.finish_reason == "timeout":
 			lucro = self.final_payout - self.bet_amount
 			return (
-				f"A partida expirou e o saque foi feito automaticamente em {_format_nex(self.final_payout)} nex "
+				f"A partida expirou e o saque foi feito automáticamente em {_format_nex(self.final_payout)} nex "
 				f"({'+' if lucro >= 0 else ''}{_format_nex(lucro)})."
 			)
 		if self.finish_reason == "timeout_refund":
-			return "A partida expirou antes da primeira jogada, entao a aposta foi devolvida automaticamente."
+			return "A partida expirou antes da primeira jogada, entao a aposta foi devolvida automáticamente."
 		if self.finish_reason == "refund":
-			return "A aposta foi devolvida porque voce encerrou a partida sem abrir nenhuma casa."
+			return "A aposta foi devolvida porque você encerrou a partida sem abrir nenhuma casa."
 		return "Abra casas seguras para aumentar o multiplicador, mas saia antes de achar uma mina."
 
 	def build_embed(self) -> discord.Embed:
@@ -248,9 +248,9 @@ class MinesGameView(discord.ui.View):
 	async def reveal_tile(self, interaction: discord.Interaction, tile_index: int) -> None:
 		if self.finished or tile_index in self.revealed_tiles:
 			if interaction.response.is_done():
-				await interaction.followup.send("Essa casa ja foi aberta.", ephemeral=True)
+				await interaction.followup.send("Essa casa já foi aberta.", ephemeral=True)
 			else:
-				await interaction.response.send_message("Essa casa ja foi aberta.", ephemeral=True)
+				await interaction.response.send_message("Essa casa já foi aberta.", ephemeral=True)
 			return
 
 		self.revealed_tiles.add(tile_index)
@@ -321,10 +321,10 @@ class Mines(commands.Cog):
 
 		hero = get_active_hero(inte.user.id)
 		if hero is None:
-			return await inte.response.send_message("Nao consegui localizar seu heroi ativo para iniciar a partida.")
+			return await inte.response.send_message("Não consegui localizar seu herói ativo para iniciar a partida.")
 
 		if inte.user.id in self.active_games:
-			return await inte.response.send_message("Voce ja tem uma partida de mines aberta. Termine a atual antes de iniciar outra.")
+			return await inte.response.send_message("Você já tem uma partida de mines aberta. Termine a atual antes de iniciar outra.")
 
 		bet_validation = validate_bet_amount(inte.user.id, bet_amount, context="esse jogo")
 		if not bet_validation.ok:
@@ -336,7 +336,7 @@ class Mines(commands.Cog):
 
 		paid = update_active_hero_resources(inte.user.id, nex=-bet_amount)
 		if not paid:
-			return await inte.response.send_message("Nao foi possivel reservar sua aposta. Tente novamente.")
+			return await inte.response.send_message("Não foi possível reservar sua aposta. Tente novamente.")
 
 		view = MinesGameView(self, inte.user.id, bet_amount, mines_count)
 		self.active_games[inte.user.id] = view
@@ -345,13 +345,13 @@ class Mines(commands.Cog):
 
 	async def restart_game(self, interaction: discord.Interaction, bet_amount: int, mines_count: int) -> None:
 		if interaction.user.id in self.active_games:
-			await interaction.response.send_message("Voce ja tem uma partida em andamento.", ephemeral=True)
+			await interaction.response.send_message("Você já tem uma partida em andamento.", ephemeral=True)
 			return
 
 		hero = get_active_hero(interaction.user.id)
 		wallet = int(hero.get("nex", 0)) if hero else 0
 		if hero is None:
-			await interaction.response.send_message("Nao consegui localizar seu heroi ativo.", ephemeral=True)
+			await interaction.response.send_message("Não consegui localizar seu herói ativo.", ephemeral=True)
 			return
 		if wallet < bet_amount:
 			await interaction.response.send_message(
@@ -362,7 +362,7 @@ class Mines(commands.Cog):
 
 		paid = update_active_hero_resources(interaction.user.id, nex=-bet_amount)
 		if not paid:
-			await interaction.response.send_message("Nao foi possivel reservar a nova aposta.", ephemeral=True)
+			await interaction.response.send_message("Não foi possível reservar a nova aposta.", ephemeral=True)
 			return
 
 		view = MinesGameView(self, interaction.user.id, bet_amount, mines_count)

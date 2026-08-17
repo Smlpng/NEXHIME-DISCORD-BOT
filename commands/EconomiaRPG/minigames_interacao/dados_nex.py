@@ -28,18 +28,18 @@ class DadosNex(commands.Cog):
 
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo para o duelo de dados.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo para o duelo de dados.")
         if bet_amount <= 0:
             return await inte.response.send_message("Informe uma aposta positiva. Ex: !dados 600")
 
         wallet = int(hero.get("nex", 0))
         if wallet < bet_amount:
             return await inte.response.send_message(
-                f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex."
+                f"Você não tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex."
             )
 
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            return await inte.response.send_message("Nao foi possivel reservar sua aposta. Tente novamente.")
+            return await inte.response.send_message("Não foi possível reservar sua aposta. Tente novamente.")
 
         player_roll = random.randint(1, 6)
         dealer_roll = random.randint(1, 6)
@@ -50,7 +50,7 @@ class DadosNex(commands.Cog):
             multiplier = 2.2 if player_roll == 6 and dealer_roll == 1 else 1.9
             payout = int(round(bet_amount * multiplier))
             update_active_hero_resources(inte.user.id, nex=payout)
-            result_text = f"Voce venceu o duelo e recebeu {_format_nex(payout)} nex."
+            result_text = f"Você venceu o duelo e recebeu {_format_nex(payout)} nex."
         elif player_roll == dealer_roll:
             payout = bet_amount
             update_active_hero_resources(inte.user.id, nex=payout)
@@ -64,7 +64,7 @@ class DadosNex(commands.Cog):
         embed.add_field(name="Dealer", value=str(dealer_roll), inline=True)
         embed.add_field(name="Carteira", value=f"{_format_nex(updated_hero['nex'])} nex", inline=True)
         embed.add_field(name="Resultado", value=result_text, inline=False)
-        embed.set_footer(text="6 contra 1 paga bonus maximo. Empate devolve a aposta.")
+        embed.set_footer(text="6 contra 1 paga bonus máximo. Empate devolve a aposta.")
         await inte.response.send_message(embed=embed)
 
 

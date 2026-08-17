@@ -37,7 +37,7 @@ QUESTS = {
     },
     "mercador_do_bando": {
         "name": "Mercador do Bando",
-        "description": "Gaste 200 nex com o seu heroi.",
+        "description": "Gaste 200 nex com o seu herói.",
         "type": "nex_spent",
         "goal": 200,
         "requirements": {"level": 1},
@@ -116,7 +116,7 @@ def build_progress_text(user_id: int, quest: dict, active_data: dict) -> tuple[b
 def check_requirements(hero: dict, quest: dict) -> tuple[bool, str | None]:
     level_required = int(quest.get("requirements", {}).get("level", 1))
     if int(hero.get("level", 1)) < level_required:
-        return False, f"Voce precisa estar no nivel {level_required} para aceitar essa missao."
+        return False, f"Você precisa estar no nível {level_required} para aceitar essa missão."
     return True, None
 
 
@@ -147,13 +147,13 @@ class Quests(commands.Cog):
 
     @commands.command(name="quests")
     async def quests(self, ctx, acao: str | None = None, *, alvo: str | None = None):
-        """Gerencia as missoes adaptadas ao RPG atual."""
+        """Gerencia as missões adaptadas ao RPG atual."""
         inte = CommandContextAdapter(ctx)
         ensure_profile(inte.user.id)
         hero = get_active_hero(inte.user.id)
 
         if hero is None:
-            return await inte.response.send_message("Seu perfil ainda nao esta pronto para usar quests.")
+            return await inte.response.send_message("Seu perfil ainda não está pronto para usar quests.")
 
         quest_log = get_active_quest_log(inte.user.id) or {"active": {}, "completed": []}
 
@@ -171,16 +171,16 @@ class Quests(commands.Cog):
 
         quest_id, quest = resolve_quest(alvo)
         if quest is None:
-            return await inte.response.send_message("Missao nao encontrada.")
+            return await inte.response.send_message("Missao não encontrada.")
 
         if action == "ver":
             return await inte.response.send_message(embed=self.build_details_embed(inte.user.id, quest_id, quest, quest_log))
 
         if action == "aceitar":
             if quest_id in quest_log["completed"]:
-                return await inte.response.send_message("Voce ja concluiu essa missao.")
+                return await inte.response.send_message("Você já concluiu essa missão.")
             if quest_id in quest_log["active"]:
-                return await inte.response.send_message("Essa missao ja esta ativa.")
+                return await inte.response.send_message("Essa missão já está ativa.")
 
             valid, message = check_requirements(hero, quest)
             if not valid:
@@ -200,7 +200,7 @@ class Quests(commands.Cog):
 
         if action == "cancelar":
             if quest_id not in quest_log["active"]:
-                return await inte.response.send_message("Essa missao nao esta ativa.")
+                return await inte.response.send_message("Essa missão não está ativa.")
             quest_log["active"].pop(quest_id, None)
             save_active_quest_log(inte.user.id, quest_log)
             return await inte.response.send_message(f"Missao cancelada: {quest['name']}.")
@@ -208,11 +208,11 @@ class Quests(commands.Cog):
         if action == "entregar":
             active_data = quest_log["active"].get(quest_id)
             if active_data is None:
-                return await inte.response.send_message("Essa missao nao esta ativa.")
+                return await inte.response.send_message("Essa missão não está ativa.")
 
             complete, progress_text = build_progress_text(inte.user.id, quest, active_data)
             if not complete:
-                return await inte.response.send_message(f"Voce ainda nao completou essa missao. {progress_text}")
+                return await inte.response.send_message(f"Você ainda não completou essa missão. {progress_text}")
 
             reward_text = grant_rewards(inte.user.id, quest)
             quest_log["active"].pop(quest_id, None)
@@ -240,7 +240,7 @@ class Quests(commands.Cog):
         completed = quest_log.get("completed", [])
         embed.add_field(
             name="Concluidas",
-            value="\n".join(f"- {QUESTS[quest_id]['name']}" for quest_id in completed[:10]) or "Nenhuma missao concluida ainda.",
+            value="\n".join(f"- {QUESTS[quest_id]['name']}" for quest_id in completed[:10]) or "Nenhuma missão concluida ainda.",
             inline=False,
         )
         embed.set_footer(text="Use quests ver <id>, quests aceitar <id> ou quests entregar <id>.")
@@ -270,7 +270,7 @@ class Quests(commands.Cog):
             valid, _ = check_requirements(hero, quest)
             if valid:
                 lines.append(f"- {quest_id}: {quest['name']}")
-        return "\n".join(lines) or "Nenhuma missao disponivel agora."
+        return "\n".join(lines) or "Nenhuma missão disponivel agora."
 
     def _build_active_text(self, user_id: int, quest_log: dict) -> str:
         lines = []
@@ -280,7 +280,7 @@ class Quests(commands.Cog):
                 continue
             _, progress_text = build_progress_text(user_id, quest, active_data)
             lines.append(f"- {quest['name']}: {progress_text}")
-        return "\n".join(lines) or "Nenhuma missao ativa."
+        return "\n".join(lines) or "Nenhuma missão ativa."
 
 
 def grant_rewards_preview(quest: dict) -> str:

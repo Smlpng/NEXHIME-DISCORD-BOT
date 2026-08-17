@@ -4,7 +4,7 @@ async def hero_created(inte):
     ensure_profile(inte.user.id)
     if not has_active_hero(inte.user.id) or not has_selected_class(inte.user.id):
         await inte.response.send_message(
-            "Seu perfil ja existe, mas voce ainda nao escolheu uma classe. Use !menu para abrir seu perfil e escolher quando quiser."
+            "Seu perfil já existe, mas você ainda não escolheu uma classe. Use !menu para abrir seu perfil e escolher quando quiser."
         )
         return False
     else:

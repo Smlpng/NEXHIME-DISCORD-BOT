@@ -74,7 +74,7 @@ class AutoMod(commands.Cog):
         data[str(guild_id)] = conf
         _save(data)
 
-    @commands.command(name="automod", help="Configura protecoes automaticas de spam, caps, mencoes e blacklist.")
+    @commands.command(name="automod", help="Configura protecoes automáticas de spam, caps, mencoes e blacklist.")
     @commands.has_permissions(manage_guild=True)
     async def automod(self, ctx: commands.Context, acao: str | None = None, subacao: str | None = None, *resto):
         if ctx.guild is None:
@@ -209,7 +209,7 @@ class AutoMod(commands.Cog):
                 return await self._punish(message, "caps lock excessivo")
 
         if URL_RE.search(content) and "discord.gg/" in lowered:
-            return await self._punish(message, "convite nao autorizado")
+            return await self._punish(message, "convite não autorizado")
 
         now = time.time()
         key = (message.guild.id, message.author.id)

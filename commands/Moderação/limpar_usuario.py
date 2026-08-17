@@ -7,7 +7,7 @@ class LimparUsuario(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        name="limpar_usuario",
+        name="limpar_usuário",
         aliases=["clear_user", "purge_user"],
         help="Limpa N mensagens de um usuário no canal (máx 100).",
     )

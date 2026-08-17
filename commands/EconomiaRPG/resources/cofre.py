@@ -42,7 +42,7 @@ class Cofre(commands.Cog):
         await economy_profile_created(inte)
         data = _load().get(str(inte.user.id))
         if not data:
-            return await inte.response.send_message("Voce nao tem nenhum valor guardado no cofre.")
+            return await inte.response.send_message("Você não tem nenhum valor guardado no cofre.")
         ready_at = int(data["ready_at"])
         amount = int(data["amount"])
         await inte.response.send_message(f"Seu cofre atual guarda {amount} nex e libera <t:{ready_at}:R>.")
@@ -53,15 +53,15 @@ class Cofre(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa de um heroi ativo para usar o cofre.")
+            return await inte.response.send_message("Você precisa de um herói ativo para usar o cofre.")
         if amount <= 0:
             return await inte.response.send_message("Informe um valor positivo.")
         if _load().get(str(inte.user.id)):
-            return await inte.response.send_message("Voce ja possui um deposito ativo no cofre. Saque antes de abrir outro.")
+            return await inte.response.send_message("Você já possui um deposito ativo no cofre. Saque antes de abrir outro.")
         if int(hero.get("nex", 0)) < amount:
-            return await inte.response.send_message("Voce nao tem nex suficiente na carteira.")
+            return await inte.response.send_message("Você não tem nex suficiente na carteira.")
         if not update_active_hero_resources(inte.user.id, nex=-amount):
-            return await inte.response.send_message("Nao foi possivel mover esse valor para o cofre.")
+            return await inte.response.send_message("Não foi possível mover esse valor para o cofre.")
 
         db = _load()
         db[str(inte.user.id)] = {
@@ -79,9 +79,9 @@ class Cofre(commands.Cog):
         db = _load()
         entry = db.get(str(inte.user.id))
         if not entry:
-            return await inte.response.send_message("Voce nao tem deposito ativo no cofre.")
+            return await inte.response.send_message("Você não tem deposito ativo no cofre.")
         if int(entry["ready_at"]) > int(time.time()):
-            return await inte.response.send_message(f"Seu cofre ainda esta fechado. Libera <t:{int(entry['ready_at'])}:R>.")
+            return await inte.response.send_message(f"Seu cofre ainda está fechado. Libera <t:{int(entry['ready_at'])}:R>.")
 
         amount = int(entry["amount"])
         final_amount = int(round(amount * (1 + BONUS_RATE)))

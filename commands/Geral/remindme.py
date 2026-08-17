@@ -68,7 +68,7 @@ class RemindMe(commands.Cog):
     async def lembretes(self, ctx: commands.Context):
         reminders = [entry for entry in _load() if entry.get("user_id") == ctx.author.id]
         if not reminders:
-            return await ctx.reply("Voce nao possui lembretes ativos.", mention_author=False)
+            return await ctx.reply("Você não possui lembretes ativos.", mention_author=False)
         description = "\n".join(
             f"**#{entry['id']}** - <t:{entry['due_at']}:R>\n{entry['message']}"
             for entry in reminders[:20]

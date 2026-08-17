@@ -24,7 +24,7 @@ QUESTIONS = [
         "answer": "B",
     },
     {
-        "question": "Qual comando do RPG mostra o inventario do heroi?",
+        "question": "Qual comando do RPG mostra o inventario do herói?",
         "options": ["equip", "inventory", "forge", "raid"],
         "answer": "B",
     },
@@ -92,7 +92,7 @@ class QuizDiario(commands.Cog):
 
         answers = data["answers"].setdefault(today, {})
         if str(ctx.author.id) in answers:
-            return await ctx.reply("Voce ja respondeu o quiz de hoje.", mention_author=False)
+            return await ctx.reply("Você já respondeu o quiz de hoje.", mention_author=False)
 
         correct = action == question["answer"]
         answers[str(ctx.author.id)] = action

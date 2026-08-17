@@ -28,7 +28,7 @@ class AutoRole(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.group(name="autorole", invoke_without_command=True, help="Configura o cargo automatico de entrada.")
+    @commands.group(name="autorole", invoke_without_command=True, help="Configura o cargo automático de entrada.")
     @commands.has_permissions(manage_roles=True)
     async def autorole(self, ctx: commands.Context):
         data = _load()
@@ -40,7 +40,7 @@ class AutoRole(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     async def autorole_set(self, ctx: commands.Context, cargo: discord.Role):
         if ctx.guild.me.top_role <= cargo:
-            return await ctx.reply("Eu nao consigo aplicar esse cargo por causa da hierarquia.")
+            return await ctx.reply("Eu não consigo aplicar esse cargo por causa da hierarquia.")
         data = _load()
         data[str(ctx.guild.id)] = cargo.id
         _save(data)

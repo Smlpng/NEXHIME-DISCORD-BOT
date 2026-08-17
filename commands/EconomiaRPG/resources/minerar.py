@@ -43,14 +43,14 @@ class Minerar(commands.Cog):
 
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa de um heroi ativo para minerar.")
+            return await inte.response.send_message("Você precisa de um herói ativo para minerar.")
 
         data = _load()
         now_ts = int(time.time())
         last_ts = int(data.get(str(inte.user.id), 0) or 0)
         if last_ts + COOLDOWN_SECONDS > now_ts:
             return await inte.response.send_message(
-                f"Voce ja minerou recentemente. Tente novamente <t:{last_ts + COOLDOWN_SECONDS}:R>.",
+                f"Você já minerou recentemente. Tente novamente <t:{last_ts + COOLDOWN_SECONDS}:R>.",
                 ephemeral=True,
             )
 

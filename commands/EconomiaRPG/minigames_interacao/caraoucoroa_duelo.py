@@ -28,15 +28,15 @@ class CoinDuelInviteView(discord.ui.View):
         challenger = get_active_hero(self.challenger.id)
         target = get_active_hero(self.target.id)
         if challenger is None or target is None:
-            return await interaction.response.edit_message(content="Um dos jogadores nao possui heroi ativo.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Um dos jogadores não possui herói ativo.", embed=None, view=None)
         if int(challenger.get("nex", 0)) < self.bet_amount or int(target.get("nex", 0)) < self.bet_amount:
-            return await interaction.response.edit_message(content="Um dos jogadores nao tem saldo suficiente para cobrir a aposta.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Um dos jogadores não tem saldo suficiente para cobrir a aposta.", embed=None, view=None)
 
         if not update_active_hero_resources(self.challenger.id, nex=-self.bet_amount):
-            return await interaction.response.edit_message(content="Nao foi possivel reservar a aposta do desafiante.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Não foi possível reservar a aposta do desafiante.", embed=None, view=None)
         if not update_active_hero_resources(self.target.id, nex=-self.bet_amount):
             update_active_hero_resources(self.challenger.id, nex=self.bet_amount)
-            return await interaction.response.edit_message(content="Nao foi possivel reservar a aposta do oponente.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Não foi possível reservar a aposta do oponente.", embed=None, view=None)
 
         winner = random.choice([self.challenger, self.target])
         face = random.choice(["cara", "coroa"])
@@ -64,18 +64,18 @@ class CaraOuCoroaDuelo(commands.Cog):
         await economy_profile_created(inte)
 
         if membro.bot:
-            return await inte.response.send_message("Voce nao pode desafiar bots.")
+            return await inte.response.send_message("Você não pode desafiar bots.")
         if membro.id == inte.user.id:
-            return await inte.response.send_message("Voce nao pode desafiar a si mesmo.")
+            return await inte.response.send_message("Você não pode desafiar a si mesmo.")
         if bet_amount <= 0:
             return await inte.response.send_message("Informe uma aposta positiva.")
 
         challenger = get_active_hero(inte.user.id)
         target = get_active_hero(membro.id)
         if challenger is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo.")
         if target is None:
-            return await inte.response.send_message(f"{membro.display_name} ainda nao possui heroi ativo.")
+            return await inte.response.send_message(f"{membro.display_name} ainda não possui herói ativo.")
 
         view = CoinDuelInviteView(inte.user, membro, bet_amount)
         embed = discord.Embed(title="🪙 Duelo de moeda", color=RPG_PRIMARY_COLOR)

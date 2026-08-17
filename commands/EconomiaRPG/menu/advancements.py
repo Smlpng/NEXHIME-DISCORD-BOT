@@ -10,7 +10,7 @@ class Advancements(commands.Cog):
 
     @commands.command(name='advancements')
     async def advancements(self, ctx):
-        """Mostra o progresso do heroi."""
+        """Mostra o progresso do herói."""
         inte = CommandContextAdapter(ctx)
         if not await hero_created(inte):
             return

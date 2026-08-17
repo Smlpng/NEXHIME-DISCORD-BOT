@@ -46,7 +46,7 @@ class TowerView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message("Apenas quem iniciou esta torre pode continuar a subida.", ephemeral=True)
+            await interaction.response.send_message("Apenas quem iniciou está torre pode continuar a subida.", ephemeral=True)
             return False
         return True
 
@@ -67,18 +67,18 @@ class TowerView(discord.ui.View):
     def _status_text(self) -> str:
         if self.finish_reason == "cashout":
             lucro = self.final_payout - self.bet_amount
-            return f"Voce sacou {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
+            return f"Você sacou {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
         if self.finish_reason == "loss":
-            return "Voce encontrou a casa quebrada da torre e perdeu a aposta."
+            return "Você encontrou a casa quebrada da torre e perdeu a aposta."
         if self.finish_reason == "cleared":
             lucro = self.final_payout - self.bet_amount
-            return f"Voce chegou ao topo e recebeu {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
+            return f"Você chegou ao topo e recebeu {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
         if self.finish_reason == "refund":
-            return "A aposta foi devolvida porque voce saiu antes da primeira escolha."
+            return "A aposta foi devolvida porque você saiu antes da primeira escolha."
         if self.finish_reason == "timeout":
             lucro = self.final_payout - self.bet_amount
-            return f"Tempo esgotado. O saque automatico fechou em {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
-        return "Suba nivel por nivel. Cada acerto aumenta o multiplicador, mas um erro derruba tudo."
+            return f"Tempo esgotado. O saque automático fechou em {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
+        return "Suba nível por nível. Cada acerto aumenta o multiplicador, mas um erro derruba tudo."
 
     def build_embed(self) -> discord.Embed:
         color = RPG_PRIMARY_COLOR
@@ -196,20 +196,20 @@ class Torre(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            await inte.response.send_message("Nao consegui localizar seu heroi ativo para iniciar a torre.")
+            await inte.response.send_message("Não consegui localizar seu herói ativo para iniciar a torre.")
             return
         if inte.user.id in self.active_games:
-            await inte.response.send_message("Voce ja tem uma partida de torre aberta.")
+            await inte.response.send_message("Você já tem uma partida de torre aberta.")
             return
         if bet_amount <= 0:
             await inte.response.send_message("Informe uma aposta positiva. Ex: !torre 500")
             return
         wallet = int(hero.get("nex", 0))
         if wallet < bet_amount:
-            await inte.response.send_message(f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
+            await inte.response.send_message(f"Você não tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
             return
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            await inte.response.send_message("Nao foi possivel reservar sua aposta. Tente novamente.")
+            await inte.response.send_message("Não foi possível reservar sua aposta. Tente novamente.")
             return
 
         view = TowerView(self, inte.user.id, bet_amount)
@@ -219,12 +219,12 @@ class Torre(commands.Cog):
 
     async def restart_game(self, interaction: discord.Interaction, bet_amount: int) -> None:
         if interaction.user.id in self.active_games:
-            await interaction.response.send_message("Voce ja tem uma partida em andamento.", ephemeral=True)
+            await interaction.response.send_message("Você já tem uma partida em andamento.", ephemeral=True)
             return
         hero = get_active_hero(interaction.user.id)
         wallet = int(hero.get("nex", 0)) if hero else 0
         if hero is None:
-            await interaction.response.send_message("Nao consegui localizar seu heroi ativo.", ephemeral=True)
+            await interaction.response.send_message("Não consegui localizar seu herói ativo.", ephemeral=True)
             return
         if wallet < bet_amount:
             await interaction.response.send_message(
@@ -233,7 +233,7 @@ class Torre(commands.Cog):
             )
             return
         if not update_active_hero_resources(interaction.user.id, nex=-bet_amount):
-            await interaction.response.send_message("Nao foi possivel reservar a nova aposta.", ephemeral=True)
+            await interaction.response.send_message("Não foi possível reservar a nova aposta.", ephemeral=True)
             return
 
         view = TowerView(self, interaction.user.id, bet_amount)

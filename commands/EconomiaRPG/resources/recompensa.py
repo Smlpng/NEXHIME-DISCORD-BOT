@@ -42,7 +42,7 @@ class Recompensa(commands.Cog):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         if get_active_hero(inte.user.id) is None:
-            return await inte.response.send_message("Voce precisa de um heroi ativo para usar recompensas.")
+            return await inte.response.send_message("Você precisa de um herói ativo para usar recompensas.")
 
         action = (acao or "listar").strip().lower()
         data = _load()
@@ -51,7 +51,7 @@ class Recompensa(commands.Cog):
             open_bounties = [row for row in data["bounties"] if row.get("status") == "open"][:10]
             embed = discord.Embed(title="Quadro de Recompensas", color=RPG_PRIMARY_COLOR)
             if not open_bounties:
-                embed.description = "Nao ha recompensas abertas no momento."
+                embed.description = "Não ha recompensas abertas no momento."
             else:
                 lines = []
                 for row in open_bounties:
@@ -83,7 +83,7 @@ class Recompensa(commands.Cog):
             if valor <= 0:
                 return await inte.response.send_message("Informe um valor positivo para a recompensa.")
             if not update_active_hero_resources(inte.user.id, nex=-valor):
-                return await inte.response.send_message("Voce nao tem nex suficiente na carteira para abrir essa recompensa.")
+                return await inte.response.send_message("Você não tem nex suficiente na carteira para abrir essa recompensa.")
 
             bounty = {
                 "id": data["next_id"],
@@ -104,7 +104,7 @@ class Recompensa(commands.Cog):
             identifier = int(args[0])
             bounty = next((row for row in data["bounties"] if row["id"] == identifier and row.get("status") == "open"), None)
             if bounty is None:
-                return await inte.response.send_message("Recompensa nao encontrada.")
+                return await inte.response.send_message("Recompensa não encontrada.")
             if bounty["author_id"] != inte.user.id:
                 return await inte.response.send_message("Somente o criador pode cancelar essa recompensa.")
             update_active_hero_resources(inte.user.id, nex=bounty["amount"])
@@ -119,11 +119,11 @@ class Recompensa(commands.Cog):
             vencedor = ctx.message.mentions[0]
             bounty = next((row for row in data["bounties"] if row["id"] == bounty_id and row.get("status") == "open"), None)
             if bounty is None:
-                return await inte.response.send_message("Recompensa nao encontrada.")
+                return await inte.response.send_message("Recompensa não encontrada.")
             if bounty["author_id"] != inte.user.id and not ctx.author.guild_permissions.manage_guild:
                 return await inte.response.send_message("Somente o criador da recompensa ou a staff podem conclui-la.")
             if get_active_hero(vencedor.id) is None:
-                return await inte.response.send_message("O vencedor precisa ter um heroi ativo para receber a recompensa.")
+                return await inte.response.send_message("O vencedor precisa ter um herói ativo para receber a recompensa.")
             update_active_hero_resources(vencedor.id, nex=bounty["amount"])
             bounty["status"] = "claimed"
             bounty["winner_id"] = vencedor.id

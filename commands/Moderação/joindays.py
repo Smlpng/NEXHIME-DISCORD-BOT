@@ -6,7 +6,7 @@ class JoinDays(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="joindays", aliases=["idadeconta", "idadeguild"], help="Mostra ha quantos dias um usuario criou a conta e entrou no servidor.")
+    @commands.command(name="joindays", aliases=["idadeconta", "idadeguild"], help="Mostra ha quantos dias um usuário criou a conta e entrou no servidor.")
     async def joindays(self, ctx: commands.Context, membro: discord.Member | None = None):
         target = membro or ctx.author
         now = discord.utils.utcnow()

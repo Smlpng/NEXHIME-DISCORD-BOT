@@ -36,20 +36,20 @@ class Coletar(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="coletar", aliases=["gather"], help="Coleta recursos periodicamente conforme a zona do heroi.")
+    @commands.command(name="coletar", aliases=["gather"], help="Coleta recursos periodicamente conforme a zona do herói.")
     async def coletar(self, ctx: commands.Context):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa ter um heroi ativo para coletar recursos.")
+            return await inte.response.send_message("Você precisa ter um herói ativo para coletar recursos.")
 
         data = _load()
         now_ts = int(time.time())
         last_ts = int(data.get(str(inte.user.id), 0) or 0)
         if last_ts + COOLDOWN_SECONDS > now_ts:
             return await inte.response.send_message(
-                f"Voce ja coletou recentemente. Tente novamente <t:{last_ts + COOLDOWN_SECONDS}:R>.",
+                f"Você já coletou recentemente. Tente novamente <t:{last_ts + COOLDOWN_SECONDS}:R>.",
                 ephemeral=True,
             )
 

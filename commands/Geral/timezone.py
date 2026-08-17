@@ -42,7 +42,7 @@ class Timezone(commands.Cog):
         data = _load()
         current = data.get(str(ctx.author.id))
         if current is None:
-            return await ctx.reply("Voce ainda nao configurou timezone. Use `!timezone set America/Sao_Paulo`.")
+            return await ctx.reply("Você ainda não configurou timezone. Use `!timezone set America/Sao_Paulo`.")
         await ctx.reply(f"Seu timezone atual e `{current}`.")
 
     @timezone.command(name="set", help="Define seu timezone. Ex: !timezone set America/Sao_Paulo")
@@ -63,18 +63,18 @@ class Timezone(commands.Cog):
             data.pop(str(ctx.author.id), None)
             _save(data)
             return await ctx.reply("Seu timezone foi removido.")
-        await ctx.reply("Voce nao tinha timezone salvo.")
+        await ctx.reply("Você não tinha timezone salvo.")
 
-    @commands.command(name="horario", aliases=["timeuser", "localtime"], help="Mostra o horario local de um usuario que configurou timezone.")
+    @commands.command(name="horario", aliases=["timeuser", "localtime"], help="Mostra o horario local de um usuário que configurou timezone.")
     async def horario(self, ctx: commands.Context, membro: discord.Member | None = None):
         target = membro or ctx.author
         data = _load()
         timezone_name = data.get(str(target.id))
         if timezone_name is None:
-            return await ctx.reply("Esse usuario ainda nao configurou timezone.")
+            return await ctx.reply("Esse usuário ainda não configurou timezone.")
         tz = self._resolve_timezone(timezone_name)
         if tz is None:
-            return await ctx.reply("O timezone salvo para esse usuario esta invalido.")
+            return await ctx.reply("O timezone salvo para esse usuário está invalido.")
         now_local = datetime.now(tz)
         embed = discord.Embed(title=f"Horario local de {target}", color=discord.Color.blurple())
         embed.add_field(name="Timezone", value=timezone_name, inline=False)

@@ -13,14 +13,14 @@ class Bestiario(commands.Cog):
 
     @commands.command(name="bestiario", aliases=["bestiary", "dexzona"])
     async def bestiario(self, ctx, zona: int | None = None):
-        """Mostra os inimigos ja vistos na zona atual ou em uma zona especifica."""
+        """Mostra os inimigos já vistos na zona atual ou em uma zona especifica."""
         inte = CommandContextAdapter(ctx)
         if not await hero_created(inte):
             return
 
         zone_id = zona if zona is not None else get_active_zone_id(inte.user.id)
         if zone_id is None:
-            return await inte.response.send_message("Nao foi possivel identificar a zona do seu heroi.")
+            return await inte.response.send_message("Não foi possível identificar a zona do seu herói.")
 
         seen = list_seen_enemies_by_zone(inte.user.id, zone_id)
         total = count_enemies_in_zone(zone_id)

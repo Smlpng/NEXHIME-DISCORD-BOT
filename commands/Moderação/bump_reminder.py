@@ -104,7 +104,7 @@ class BumpReminder(commands.Cog):
                 if channel is not None:
                     await channel.send(
                         f"<@{user_id}> ⏰ Já se passaram 2 horas! "
-                        f"Está na hora de fazer o `/bump` de novo! Se você não deseja mais receber este lembrete, use `n!stop_bump`."
+                        f"Está na hora de fazer o `/bump` de novo! Se você não desejá mais receber este lembrete, use `n!stop_bump`."
                     )
 
                 next_delay = BUMP_DELAY

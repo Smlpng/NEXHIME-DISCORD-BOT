@@ -17,7 +17,7 @@ class Bolsa(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa ter um heroi ativo para abrir a bolsa.")
+            return await inte.response.send_message("Você precisa ter um herói ativo para abrir a bolsa.")
 
         bank = get_bank_balance(inte.user.id)
         embed = discord.Embed(title=f"Bolsa de {inte.user.display_name}", color=RPG_PRIMARY_COLOR)

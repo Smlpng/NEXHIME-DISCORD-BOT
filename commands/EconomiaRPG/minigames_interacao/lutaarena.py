@@ -29,15 +29,15 @@ class ArenaInviteView(discord.ui.View):
         hero_a = get_active_hero(self.challenger.id)
         hero_b = get_active_hero(self.target.id)
         if hero_a is None or hero_b is None:
-            return await interaction.response.edit_message(content="Um dos jogadores nao possui heroi ativo.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Um dos jogadores não possui herói ativo.", embed=None, view=None)
         if int(hero_a.get("nex", 0)) < self.bet_amount or int(hero_b.get("nex", 0)) < self.bet_amount:
-            return await interaction.response.edit_message(content="Um dos jogadores nao tem saldo para entrar na arena.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Um dos jogadores não tem saldo para entrar na arena.", embed=None, view=None)
 
         if not update_active_hero_resources(self.challenger.id, nex=-self.bet_amount):
-            return await interaction.response.edit_message(content="Nao foi possivel reservar a aposta do desafiante.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Não foi possível reservar a aposta do desafiante.", embed=None, view=None)
         if not update_active_hero_resources(self.target.id, nex=-self.bet_amount):
             update_active_hero_resources(self.challenger.id, nex=self.bet_amount)
-            return await interaction.response.edit_message(content="Nao foi possivel reservar a aposta do oponente.", embed=None, view=None)
+            return await interaction.response.edit_message(content="Não foi possível reservar a aposta do oponente.", embed=None, view=None)
 
         score_a = random.randint(15, 40) + int(hero_a.get("level", 1)) * 2
         score_b = random.randint(15, 40) + int(hero_b.get("level", 1)) * 2
@@ -71,16 +71,16 @@ class LutaArena(commands.Cog):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         if membro.bot:
-            return await inte.response.send_message("Voce nao pode desafiar bots.")
+            return await inte.response.send_message("Você não pode desafiar bots.")
         if membro.id == inte.user.id:
-            return await inte.response.send_message("Voce nao pode lutar contra si mesmo.")
+            return await inte.response.send_message("Você não pode lutar contra si mesmo.")
         bet_validation = validate_bet_amount(inte.user.id, bet_amount, context="entrar na arena")
         if not bet_validation.ok:
             return await inte.response.send_message(bet_validation.message)
         if get_active_hero(inte.user.id) is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo.")
         if get_active_hero(membro.id) is None:
-            return await inte.response.send_message(f"{membro.display_name} ainda nao possui heroi ativo.")
+            return await inte.response.send_message(f"{membro.display_name} ainda não possui herói ativo.")
 
         view = ArenaInviteView(inte.user, membro, bet_amount)
         embed = discord.Embed(title="⚔️ Convite para a arena", color=RPG_PRIMARY_COLOR)

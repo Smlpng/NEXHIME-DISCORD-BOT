@@ -33,7 +33,7 @@ class AntiInvite(commands.Cog):
     async def antiinvite(self, ctx: commands.Context):
         data = _load()
         enabled = bool(data.get(str(ctx.guild.id), False))
-        await ctx.reply(f"O antiinvite esta {'ativado' if enabled else 'desativado'} neste servidor.")
+        await ctx.reply(f"O antiinvite está {'ativado' if enabled else 'desativado'} neste servidor.")
 
     @antiinvite.command(name="on")
     @commands.has_permissions(manage_guild=True)
@@ -69,7 +69,7 @@ class AntiInvite(commands.Cog):
             return
         try:
             await message.channel.send(
-                f"{message.author.mention}, convites de Discord nao sao permitidos aqui.",
+                f"{message.author.mention}, convites de Discord não sao permitidos aqui.",
                 delete_after=6,
             )
         except discord.HTTPException:

@@ -57,7 +57,7 @@ class Forca(commands.Cog):
                 await ctx.send("Envie apenas uma letra por vez.", delete_after=4)
                 continue
             if guess in guessed_letters or guess in wrong_letters:
-                await ctx.send("Essa letra ja foi usada.", delete_after=4)
+                await ctx.send("Essa letra já foi usada.", delete_after=4)
                 continue
 
             if guess in word:

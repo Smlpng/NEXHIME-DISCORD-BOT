@@ -26,7 +26,7 @@ class DuelView(discord.ui.View):
             await interaction.response.send_message("Somente o desafiado pode aceitar.", ephemeral=True)
             return
         if self.started:
-            await interaction.response.send_message("O duelo ja foi iniciado.", ephemeral=True)
+            await interaction.response.send_message("O duelo já foi iniciado.", ephemeral=True)
             return
 
         self.started = True
@@ -43,7 +43,7 @@ class DuelView(discord.ui.View):
                 await fire_interaction.response.send_message("Apenas os duelistas podem atirar.", ephemeral=True)
                 return
             if self.winner_id is not None:
-                await fire_interaction.response.send_message("O duelo ja terminou.", ephemeral=True)
+                await fire_interaction.response.send_message("O duelo já terminou.", ephemeral=True)
                 return
             self.winner_id = fire_interaction.user.id
             self.stop()
@@ -66,12 +66,12 @@ class Duelo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="duelo", aliases=["draw"], help="Desafie outro usuario para um duelo de reflexo.")
+    @commands.command(name="duelo", aliases=["draw"], help="Desafie outro usuário para um duelo de reflexo.")
     async def duelo(self, ctx: commands.Context, membro: discord.Member):
         if membro.bot:
-            return await ctx.reply("Voce nao pode duelar com bots.")
+            return await ctx.reply("Você não pode duelar com bots.")
         if membro.id == ctx.author.id:
-            return await ctx.reply("Voce nao pode duelar consigo mesmo.")
+            return await ctx.reply("Você não pode duelar consigo mesmo.")
 
         view = DuelView(ctx.author.id, membro.id)
         message = await ctx.reply(f"{membro.mention}, {ctx.author.mention} quer um duelo. Clique para aceitar.", view=view)

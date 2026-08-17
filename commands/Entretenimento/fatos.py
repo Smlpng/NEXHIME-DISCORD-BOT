@@ -11,7 +11,7 @@ class Fatos(commands.Cog):
     "Os golfinhos têm nomes para os outros golfinhos.",
     "Você sabia que o maior animal terrestre é o elefante africano?",
     "O sol é 400 vezes maior que a lua, mas também está 400 vezes mais distante da Terra, por isso parecem ter o mesmo tamanho no céu.",
-    "O som viaja quatro vezes mais rápido na água do que no ar.",
+    "O som viajá quatro vezes mais rápido na água do que no ar.",
     "As girafas têm a língua roxa para evitar queimaduras ao comer folhas de árvores altas.",
     "A lua está se afastando da Terra cerca de 3,8 centímetros por ano.",
     "O polvo tem três corações, sendo dois para bombear sangue para as brânquias e um para o restante do corpo.",

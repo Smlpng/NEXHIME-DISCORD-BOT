@@ -76,7 +76,7 @@ class ParOuImparGameView(discord.ui.View):
             return "O duelo expirou antes do resultado. As apostas foram devolvidas."
         if self.parity_choice is None:
             return f"{self.challenger.mention} precisa escolher Par ou Impar para abrir a rodada."
-        return "Agora cada jogador escolhe um numero de 0 a 5. Quando os dois travarem a escolha, o resultado sai na hora."
+        return "Agora cada jogador escolhe um número de 0 a 5. Quando os dois travarem a escolha, o resultado sai na hora."
 
     def build_embed(self) -> discord.Embed:
         embed = discord.Embed(title="✌️ Par ou Impar", description=self._status_text(), color=RPG_PRIMARY_COLOR)
@@ -124,17 +124,17 @@ class ParOuImparGameView(discord.ui.View):
             await interaction.response.send_message("Somente o desafiante pode escolher a paridade.", ephemeral=True)
             return
         if self.parity_choice is not None:
-            await interaction.response.send_message("A paridade ja foi escolhida para esta rodada.", ephemeral=True)
+            await interaction.response.send_message("A paridade já foi escolhida para está rodada.", ephemeral=True)
             return
         self.parity_choice = value
         await self._sync_message(interaction)
 
     async def pick_number(self, interaction: discord.Interaction, number: int) -> None:
         if self.parity_choice is None:
-            await interaction.response.send_message("A rodada ainda nao teve a paridade definida.", ephemeral=True)
+            await interaction.response.send_message("A rodada ainda não teve a paridade definida.", ephemeral=True)
             return
         if interaction.user.id in self.player_numbers:
-            await interaction.response.send_message("Voce ja travou seu numero nesta rodada.", ephemeral=True)
+            await interaction.response.send_message("Você já travou seu número nestá rodada.", ephemeral=True)
             return
         self.player_numbers[interaction.user.id] = number
         if len(self.player_numbers) < 2:
@@ -194,7 +194,7 @@ class ParOuImparInviteView(discord.ui.View):
         target_hero = get_active_hero(self.target.id)
         if challenger_hero is None or target_hero is None:
             self.cog._release_users(self.challenger.id, self.target.id)
-            await interaction.response.edit_message(content="Um dos dois jogadores nao possui heroi ativo.", embed=None, view=None)
+            await interaction.response.edit_message(content="Um dos dois jogadores não possui herói ativo.", embed=None, view=None)
             return
 
         challenger_wallet = int(challenger_hero.get("nex", 0))
@@ -202,7 +202,7 @@ class ParOuImparInviteView(discord.ui.View):
         if challenger_wallet < self.bet_amount or target_wallet < self.bet_amount:
             self.cog._release_users(self.challenger.id, self.target.id)
             await interaction.response.edit_message(
-                content="Um dos jogadores nao tem saldo suficiente para pagar a aposta.",
+                content="Um dos jogadores não tem saldo suficiente para pagar a aposta.",
                 embed=None,
                 view=None,
             )
@@ -210,12 +210,12 @@ class ParOuImparInviteView(discord.ui.View):
 
         if not update_active_hero_resources(self.challenger.id, nex=-self.bet_amount):
             self.cog._release_users(self.challenger.id, self.target.id)
-            await interaction.response.edit_message(content="Nao foi possivel reservar a aposta do desafiante.", embed=None, view=None)
+            await interaction.response.edit_message(content="Não foi possível reservar a aposta do desafiante.", embed=None, view=None)
             return
         if not update_active_hero_resources(self.target.id, nex=-self.bet_amount):
             update_active_hero_resources(self.challenger.id, nex=self.bet_amount)
             self.cog._release_users(self.challenger.id, self.target.id)
-            await interaction.response.edit_message(content="Nao foi possivel reservar a aposta do oponente.", embed=None, view=None)
+            await interaction.response.edit_message(content="Não foi possível reservar a aposta do oponente.", embed=None, view=None)
             return
 
         game_view = ParOuImparGameView(self.cog, self.challenger, self.target, self.bet_amount)
@@ -266,10 +266,10 @@ class ParOuImpar(commands.Cog):
         await economy_profile_created(inte)
 
         if member.bot:
-            await inte.response.send_message("Voce nao pode desafiar bots.")
+            await inte.response.send_message("Você não pode desafiar bots.")
             return
         if member.id == inte.user.id:
-            await inte.response.send_message("Voce nao pode desafiar a si mesmo.")
+            await inte.response.send_message("Você não pode desafiar a si mesmo.")
             return
         if bet_amount <= 0:
             await inte.response.send_message("Informe uma aposta positiva. Ex: !parouimpar @user 500")
@@ -278,23 +278,23 @@ class ParOuImpar(commands.Cog):
         challenger_hero = get_active_hero(inte.user.id)
         target_hero = get_active_hero(member.id)
         if challenger_hero is None:
-            await inte.response.send_message("Nao consegui localizar seu heroi ativo.")
+            await inte.response.send_message("Não consegui localizar seu herói ativo.")
             return
         if target_hero is None:
-            await inte.response.send_message(f"{member.display_name} ainda nao possui heroi ativo.")
+            await inte.response.send_message(f"{member.display_name} ainda não possui herói ativo.")
             return
         if int(challenger_hero.get("nex", 0)) < bet_amount:
             await inte.response.send_message(
-                f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(challenger_hero.get('nex', 0))} nex."
+                f"Você não tem nex suficiente. Carteira atual: {_format_nex(challenger_hero.get('nex', 0))} nex."
             )
             return
         if int(target_hero.get("nex", 0)) < bet_amount:
             await inte.response.send_message(
-                f"{member.display_name} nao tem saldo suficiente para cobrir a aposta agora."
+                f"{member.display_name} não tem saldo suficiente para cobrir a aposta agora."
             )
             return
         if not self._reserve_users(inte.user.id, member.id):
-            await inte.response.send_message("Um dos dois jogadores ja esta ocupado em outro minigame multiplayer.")
+            await inte.response.send_message("Um dos dois jogadores já está ocupado em outro minigame multiplayer.")
             return
 
         view = ParOuImparInviteView(self, inte.user, member, bet_amount)

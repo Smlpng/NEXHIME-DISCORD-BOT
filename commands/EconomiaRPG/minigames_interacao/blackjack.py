@@ -62,7 +62,7 @@ class BlackjackView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message("Apenas quem abriu esta mesa pode jogar a mao atual.", ephemeral=True)
+            await interaction.response.send_message("Apenas quem abriu está mesa pode jogar a mao atual.", ephemeral=True)
             return False
         return True
 
@@ -75,20 +75,20 @@ class BlackjackView(discord.ui.View):
     def _status_text(self) -> str:
         if self.finish_reason == "blackjack":
             lucro = self.final_payout - self.bet_amount
-            return f"Blackjack natural. Voce recebeu {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
+            return f"Blackjack natural. Você recebeu {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
         if self.finish_reason == "win":
             lucro = self.final_payout - self.bet_amount
-            return f"Voce venceu a mesa e recebeu {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
+            return f"Você venceu a mesa e recebeu {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
         if self.finish_reason == "push":
             return "Empate com o dealer. Sua aposta foi devolvida."
         if self.finish_reason == "loss":
-            return "A casa venceu esta rodada."
+            return "A casa venceu está rodada."
         if self.finish_reason == "timeout":
             if self.final_payout > 0:
                 lucro = self.final_payout - self.bet_amount
-                return f"Tempo esgotado. A rodada foi encerrada e voce ficou com {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
+                return f"Tempo esgotado. A rodada foi encerrada e você ficou com {_format_nex(self.final_payout)} nex ({lucro:+,}).".replace(",", ".")
             return "Tempo esgotado. A casa ficou com a aposta."
-        return "Tente chegar o mais perto possivel de 21 sem estourar."
+        return "Tente chegar o mais perto possível de 21 sem estourar."
 
     def build_embed(self) -> discord.Embed:
         player_value = _hand_value(self.player_hand)
@@ -206,20 +206,20 @@ class Blackjack(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            await inte.response.send_message("Nao consegui localizar seu heroi ativo para iniciar o blackjack.")
+            await inte.response.send_message("Não consegui localizar seu herói ativo para iniciar o blackjack.")
             return
         if inte.user.id in self.active_games:
-            await inte.response.send_message("Voce ja tem uma mesa de blackjack aberta.")
+            await inte.response.send_message("Você já tem uma mesa de blackjack aberta.")
             return
         if bet_amount <= 0:
             await inte.response.send_message("Informe uma aposta positiva. Ex: !blackjack 500")
             return
         wallet = int(hero.get("nex", 0))
         if wallet < bet_amount:
-            await inte.response.send_message(f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
+            await inte.response.send_message(f"Você não tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
             return
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            await inte.response.send_message("Nao foi possivel reservar sua aposta. Tente novamente.")
+            await inte.response.send_message("Não foi possível reservar sua aposta. Tente novamente.")
             return
 
         view = BlackjackView(self, inte.user.id, bet_amount)
@@ -236,12 +236,12 @@ class Blackjack(commands.Cog):
 
     async def restart_game(self, interaction: discord.Interaction, bet_amount: int) -> None:
         if interaction.user.id in self.active_games:
-            await interaction.response.send_message("Voce ja tem uma mesa em andamento.", ephemeral=True)
+            await interaction.response.send_message("Você já tem uma mesa em andamento.", ephemeral=True)
             return
         hero = get_active_hero(interaction.user.id)
         wallet = int(hero.get("nex", 0)) if hero else 0
         if hero is None:
-            await interaction.response.send_message("Nao consegui localizar seu heroi ativo.", ephemeral=True)
+            await interaction.response.send_message("Não consegui localizar seu herói ativo.", ephemeral=True)
             return
         if wallet < bet_amount:
             await interaction.response.send_message(
@@ -250,7 +250,7 @@ class Blackjack(commands.Cog):
             )
             return
         if not update_active_hero_resources(interaction.user.id, nex=-bet_amount):
-            await interaction.response.send_message("Nao foi possivel reservar a nova aposta.", ephemeral=True)
+            await interaction.response.send_message("Não foi possível reservar a nova aposta.", ephemeral=True)
             return
 
         view = BlackjackView(self, interaction.user.id, bet_amount)

@@ -13,9 +13,9 @@ class MassRole(commands.Cog):
 
     async def _run_massrole(self, ctx: commands.Context, mode: str, cargo: discord.Role, filtro: discord.Role | None):
         if ctx.guild.me.top_role <= cargo:
-            return await ctx.reply("Eu nao consigo gerenciar esse cargo por causa da hierarquia.")
+            return await ctx.reply("Eu não consigo gerenciar esse cargo por causa da hierarquia.")
         if ctx.author.top_role <= cargo:
-            return await ctx.reply("Voce nao pode aplicar em massa um cargo igual ou acima do seu.")
+            return await ctx.reply("Você não pode aplicar em massa um cargo igual ou acima do seu.")
 
         affected = 0
         failed = 0

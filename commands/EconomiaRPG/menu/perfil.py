@@ -29,14 +29,14 @@ class Perfil(commands.Cog):
 
     @commands.command(name="perfil", aliases=["profile"])
     async def perfil(self, ctx, membro: discord.Member | None = None):
-        """Mostra um resumo completo do heroi e da economia."""
+        """Mostra um resumo completo do herói e da economia."""
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
 
         alvo = membro or inte.user
         hero = get_active_hero(alvo.id)
         if hero is None:
-            return await inte.response.send_message("Esse usuario nao possui heroi ativo no momento.")
+            return await inte.response.send_message("Esse usuário não possui herói ativo no momento.")
 
         advancements = get_advancements(alvo.id) or {"kills": 0, "upgrades": 0, "nex_spent": 0}
         quest_log = get_active_quest_log(alvo.id) or {"active": {}, "completed": []}
@@ -49,8 +49,8 @@ class Perfil(commands.Cog):
         embed.add_field(name="Classe", value=CLASS_NAMES.get(hero.get("class"), str(hero.get("class"))), inline=True)
         embed.add_field(name="Nivel", value=str(hero.get("level", 0)), inline=True)
         embed.add_field(name="XP", value=str(hero.get("xp", 0)), inline=True)
-        embed.add_field(name="Raca", value=str(hero.get("race") or "Nao definida"), inline=True)
-        embed.add_field(name="Tribo", value=str(hero.get("tribe") or "Nao definida"), inline=True)
+        embed.add_field(name="Raca", value=str(hero.get("race") or "Não definida"), inline=True)
+        embed.add_field(name="Tribo", value=str(hero.get("tribe") or "Não definida"), inline=True)
         embed.add_field(name="Zona", value=resolve_zone_name(hero.get("zone_id")), inline=True)
         embed.add_field(name="Carteira", value=f"{hero.get('nex', 0)} nex", inline=True)
         embed.add_field(name="Banco", value=f"{bank_balance} nex", inline=True)
@@ -64,7 +64,7 @@ class Perfil(commands.Cog):
             minutes, _ = divmod(remainder, 60)
             embed.set_footer(text=f"Daily disponivel em {hours}h {minutes}m.")
         else:
-            embed.set_footer(text="Seu daily ja pode ser resgatado.")
+            embed.set_footer(text="Seu daily já pode ser resgatado.")
         await inte.response.send_message(embed=embed)
 
 

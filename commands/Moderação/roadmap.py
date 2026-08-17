@@ -30,7 +30,7 @@ class Roadmap(commands.Cog):
             name="✅ ~~ Fase 1.1 (Moderação extra) ~~ `v0.1.1`| **Concluído**",
             value="• Novos comandos de moderação adicionados:\n"
                   "• `[n!]` **slowmode**\n"
-                  "• `[n!]` **limpar_usuario**\n"
+                  "• `[n!]` **limpar_usuário**\n"
                   "• `[n!]` **nickname**\n"
                   "• `[n!]` **reset_nick**\n"
                   "• `[n!]` **modlog**\n"
@@ -103,7 +103,7 @@ class Roadmap(commands.Cog):
         embed.add_field(
             name="✅~~  Fase 4 ( 🍅 TOMATADAS 🍅 ) ~~ `v0.4`| **Concluído**",
             value="• Sistema de arremessar tomates adicionado:\n"
-                  "• Reaja com 🍅 para arremessar tomates\n"
+                  "• Reajá com 🍅 para arremessar tomates\n"
                   "• `[n!]` **tomatadas_rank**\n"
                   "• `[n!]` **reset_classe**\n",
             inline=False

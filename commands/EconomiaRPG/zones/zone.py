@@ -9,7 +9,7 @@ class Zone(commands.Cog):
 
     @commands.command(name='zone')
     async def zone(self, ctx):
-        """Mostra informacoes da zona atual."""
+        """Mostra informações da zona atual."""
         inte = CommandContextAdapter(ctx)
         if not await hero_created(inte):
             return

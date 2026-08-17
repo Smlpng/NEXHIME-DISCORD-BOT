@@ -32,13 +32,13 @@ def validate_amount_range(amount: int, *, field_name: str, minimum: int, maximum
 def validate_wallet_balance(user_id: int, amount: int, *, context: str = "essa operacao") -> ValidationResult:
     hero = get_active_hero(user_id)
     if hero is None:
-        return ValidationResult(False, "Nao consegui localizar seu heroi ativo.")
+        return ValidationResult(False, "Não consegui localizar seu herói ativo.")
 
     wallet = int(hero.get("nex", 0))
     if wallet < amount:
         return ValidationResult(
             False,
-            f"Voce nao tem nex suficiente para {context}. Carteira atual: {format_nex(wallet)} nex.",
+            f"Você não tem nex suficiente para {context}. Carteira atual: {format_nex(wallet)} nex.",
         )
     return ValidationResult(True)
 

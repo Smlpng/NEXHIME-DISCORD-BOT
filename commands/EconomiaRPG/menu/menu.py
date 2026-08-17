@@ -122,7 +122,7 @@ class Stats(commands.Cog):
             ),
             inline=False,
         )
-        embed.set_footer(text="Use banco, depositar, sacar, transferir e loja para gerenciar sua economia.")
+        embed.set_footer(text="Use banco, depositar, sacar, transferir e lojá para gerenciar sua economia.")
         return embed
 
     def load_inventory_page(self, data, inte):
@@ -153,7 +153,7 @@ class Stats(commands.Cog):
         
     @commands.command(name="menu")
     async def menu(self, ctx):
-        """Mostra o menu do perfil e do heroi."""
+        """Mostra o menu do perfil e do herói."""
         inte = CommandContextAdapter(ctx)
         ensure_profile(inte.user.id)
         data = get_active_hero(inte.user.id)

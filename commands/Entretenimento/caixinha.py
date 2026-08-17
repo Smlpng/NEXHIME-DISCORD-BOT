@@ -5,7 +5,7 @@ from discord.ext import commands
 
 
 REWARDS = [
-    ("Comum", "🪨", "Uma pedra misteriosa que provavelmente nao serve para nada."),
+    ("Comum", "🪨", "Uma pedra misteriosa que provavelmente não serve para nada."),
     ("Incomum", "🧭", "Uma bussola quebrada que ainda tenta apontar para aventura."),
     ("Raro", "💍", "Um anel estranho com simbolos antigos."),
     ("Epico", "🗡️", "Uma arma lendaria de procedencia duvidosa."),

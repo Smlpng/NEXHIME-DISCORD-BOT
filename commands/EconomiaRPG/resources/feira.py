@@ -47,13 +47,13 @@ class Feira(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa de um heroi ativo para comprar na feira.")
+            return await inte.response.send_message("Você precisa de um herói ativo para comprar na feira.")
         offer = _daily_offer()
         if int(hero.get("nex", 0)) < offer["cost"]:
-            return await inte.response.send_message("Voce nao tem nex suficiente para a oferta do dia.")
+            return await inte.response.send_message("Você não tem nex suficiente para a oferta do dia.")
         success = update_active_hero_resources(inte.user.id, nex=-offer["cost"], **offer["rewards"])
         if not success:
-            return await inte.response.send_message("Nao foi possivel concluir a compra da feira.")
+            return await inte.response.send_message("Não foi possível concluir a compra da feira.")
         await inte.response.send_message(f"Compra concluida na feira: **{offer['name']}**.")
 
 

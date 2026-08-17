@@ -12,8 +12,8 @@ async def create_hero(inte):
             original_message = await inte.original_response()
             await original_message.edit(
                 embed=Embed(
-                    title="Heroi ja existente",
-                    description="Voce ja escolheu a classe do seu heroi.",
+                    title="Herói já existente",
+                    description="Você já escolheu a classe do seu herói.",
                     color=0x1E90FF,
                 ),
                 view=None,
@@ -23,7 +23,7 @@ async def create_hero(inte):
         ensure_profile(interaction.user.id)
         set_active_hero_class(interaction.user.id, id)
 
-        embed = Embed(title=f"Classe de {interaction.user}", description="Heroi criado com _sucesso_!", color=0x1E90FF)
+        embed = Embed(title=f"Classe de {interaction.user}", description="Herói criado com _sucesso_!", color=0x1E90FF)
         embed.add_field(name="Classe:", value=class_name)
         embed.set_image(url=class_images[class_name])
         original_message = await inte.original_response() # inte not interaction to get the last message
@@ -38,7 +38,7 @@ async def create_hero(inte):
     
     ensure_profile(inte.user.id)
     if has_selected_class(inte.user.id):
-        await inte.response.send_message("Voce ja escolheu a classe do seu heroi.")
+        await inte.response.send_message("Você já escolheu a classe do seu herói.")
         return
 
     # sends a message and waits for an answer via buttons.

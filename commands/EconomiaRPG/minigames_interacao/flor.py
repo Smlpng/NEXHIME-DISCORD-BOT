@@ -44,7 +44,7 @@ class Flor(commands.Cog):
         ensure_profile(ctx.author.id)
         profile = get_active_hero(ctx.author.id)
         if profile is None:
-            return await ctx.reply("Nao consegui localizar seu perfil de flores.", mention_author=False)
+            return await ctx.reply("Não consegui localizar seu perfil de flores.", mention_author=False)
 
         bag_name = str(profile.get("flower_bag", "Bolsa de flores basica"))
         capacity = int(profile.get("flower_capacity", 100))

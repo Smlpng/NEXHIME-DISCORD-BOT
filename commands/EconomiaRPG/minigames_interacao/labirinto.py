@@ -64,13 +64,13 @@ class MazeView(discord.ui.View):
             return
         if chosen_path != self.safe_paths[self.level]:
             self.finished = True
-            return await interaction.response.edit_message(embed=self._embed("Voce caiu numa armadilha e perdeu a aposta."), view=None)
+            return await interaction.response.edit_message(embed=self._embed("Você caiu numa armadilha e perdeu a aposta."), view=None)
         self.level += 1
         if self.level >= 4:
             self.finished = True
             payout = self._payout()
             update_active_hero_resources(self.user_id, nex=payout)
-            return await interaction.response.edit_message(embed=self._embed(f"Voce escapou do labirinto e recebeu {_format_nex(payout)} nex."), view=None)
+            return await interaction.response.edit_message(embed=self._embed(f"Você escapou do labirinto e recebeu {_format_nex(payout)} nex."), view=None)
         await interaction.response.edit_message(embed=self._embed("Caminho certo. Continue avancando ou saque agora."), view=self)
 
     async def cashout(self, interaction: discord.Interaction):
@@ -79,7 +79,7 @@ class MazeView(discord.ui.View):
         self.finished = True
         payout = self.bet_amount if self.level == 0 else self._payout()
         update_active_hero_resources(self.user_id, nex=payout)
-        await interaction.response.edit_message(embed=self._embed(f"Voce sacou {_format_nex(payout)} nex e saiu do labirinto."), view=None)
+        await interaction.response.edit_message(embed=self._embed(f"Você sacou {_format_nex(payout)} nex e saiu do labirinto."), view=None)
 
     async def on_timeout(self):
         if self.finished:
@@ -89,7 +89,7 @@ class MazeView(discord.ui.View):
         update_active_hero_resources(self.user_id, nex=payout)
         if self.message is not None:
             try:
-                await self.message.edit(embed=self._embed(f"Tempo esgotado. O saque automatico fechou em {_format_nex(payout)} nex."), view=None)
+                await self.message.edit(embed=self._embed(f"Tempo esgotado. O saque automático fechou em {_format_nex(payout)} nex."), view=None)
             except discord.HTTPException:
                 pass
 
@@ -104,12 +104,12 @@ class Labirinto(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo para entrar no labirinto.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo para entrar no labirinto.")
         bet_validation = validate_bet_amount(inte.user.id, bet_amount, context="entrar no labirinto")
         if not bet_validation.ok:
             return await inte.response.send_message(bet_validation.message)
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            return await inte.response.send_message("Nao foi possivel reservar sua aposta.")
+            return await inte.response.send_message("Não foi possível reservar sua aposta.")
 
         view = MazeView(inte.user.id, bet_amount)
         message = await inte.response.send_message(embed=view._embed("Escolha um caminho para entrar no labirinto."), view=view)

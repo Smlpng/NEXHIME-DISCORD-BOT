@@ -20,7 +20,7 @@ class Pvp(commands.Cog):
         
         view = View()
         
-        embed = Embed(title="PVP", description=f"{inte.user.name} esta desafiando alguem para uma batalha", color=0x3498db)
+        embed = Embed(title="PVP", description=f"{inte.user.name} está desafiando alguem para uma batalha", color=0x3498db)
         embed.add_field(name="Como jogar", value="Clique no botao Aceitar")
         
         play_button = Button(label="Aceitar", style=ButtonStyle.primary)

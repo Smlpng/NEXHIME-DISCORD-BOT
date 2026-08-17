@@ -7,7 +7,7 @@ RULES = [
 	{
 		"channel_id": "1481067975456067674",
 		"keywords": ["parceria", "parcerias", "Parceria", "Parcerias"],
-		"response": "📌 <@&1484553936970059897>, novo pedido de parceria, verifique se o usuario tem os requisitos.",
+		"response": "📌 <@&1484553936970059897>, novo pedido de parceria, verifique se o usuário tem os requisitos.",
 	},
 ]
 

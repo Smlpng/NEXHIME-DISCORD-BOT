@@ -140,7 +140,7 @@ class Forge(commands.Cog):
         else:
             embed = Embed(title="Forja", description="Melhoria", color=0x3498db)
             embed.set_image(url=self.image)
-            embed.add_field(name=f"{item_object.name} ja esta no nivel maximo", value="", inline=False)
+            embed.add_field(name=f"{item_object.name} já está no nível máximo", value="", inline=False)
         
         
         

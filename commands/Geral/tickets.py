@@ -29,7 +29,7 @@ class TicketOpenView(discord.ui.View):
 
         existing = discord.utils.get(guild.text_channels, name=f"ticket-{interaction.user.id}")
         if existing is not None:
-            return await interaction.response.send_message(f"Voce ja possui um ticket aberto: {existing.mention}", ephemeral=True)
+            return await interaction.response.send_message(f"Você já possui um ticket aberto: {existing.mention}", ephemeral=True)
 
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
@@ -74,7 +74,7 @@ class Tickets(commands.Cog):
         await ctx.reply("Fechando ticket...")
         await ctx.channel.delete(reason=f"Ticket fechado por {ctx.author}")
 
-    @commands.command(name="ticketadd", help="Adiciona um usuario ao ticket atual.")
+    @commands.command(name="ticketadd", help="Adiciona um usuário ao ticket atual.")
     @commands.has_permissions(manage_channels=True)
     async def ticketadd(self, ctx: commands.Context, membro: discord.Member):
         if not self._is_ticket_channel(ctx.channel):
@@ -86,7 +86,7 @@ class Tickets(commands.Cog):
         await ctx.channel.set_permissions(membro, overwrite=overwrite, reason=f"Ticket add por {ctx.author}")
         await ctx.reply(f"{membro.mention} foi adicionado ao ticket.")
 
-    @commands.command(name="ticketremove", help="Remove um usuario do ticket atual.")
+    @commands.command(name="ticketremove", help="Remove um usuário do ticket atual.")
     @commands.has_permissions(manage_channels=True)
     async def ticketremove(self, ctx: commands.Context, membro: discord.Member):
         if not self._is_ticket_channel(ctx.channel):

@@ -34,22 +34,22 @@ class Roleta(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="roleta", aliases=["roulette"], help="Aposte numa cor ou numero. Ex: !roleta 500 vermelho")
+    @commands.command(name="roleta", aliases=["roulette"], help="Aposte numa cor ou número. Ex: !roleta 500 vermelho")
     async def roleta(self, ctx: commands.Context, bet_amount: int, *, aposta: str):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
 
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo para usar a roleta.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo para usar a roleta.")
         if bet_amount <= 0:
             return await inte.response.send_message("Informe uma aposta positiva. Ex: !roleta 500 vermelho")
 
         wallet = int(hero.get("nex", 0))
         if wallet < bet_amount:
-            return await inte.response.send_message(f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
+            return await inte.response.send_message(f"Você não tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            return await inte.response.send_message("Nao foi possivel reservar sua aposta.")
+            return await inte.response.send_message("Não foi possível reservar sua aposta.")
 
         aposta_normalizada = aposta.strip().lower()
         result_number = random.randint(0, 12)
@@ -61,14 +61,14 @@ class Roleta(commands.Cog):
             guessed_number = int(aposta_normalizada)
             if guessed_number == result_number:
                 payout = bet_amount * 10
-                result_text = f"Acerto total no numero {result_number}."
+                result_text = f"Acerto total no número {result_number}."
         elif aposta_normalizada in {"vermelho", "preto", "verde"}:
             if aposta_normalizada == result_color:
                 payout = bet_amount * (12 if result_color == "verde" else 2)
                 result_text = f"A cor sorteada foi {result_color}."
         else:
             update_active_hero_resources(inte.user.id, nex=bet_amount)
-            return await inte.response.send_message("Aposta invalida. Use vermelho, preto, verde ou um numero de 0 a 12.")
+            return await inte.response.send_message("Aposta invalida. Use vermelho, preto, verde ou um número de 0 a 12.")
 
         if payout > 0:
             update_active_hero_resources(inte.user.id, nex=payout)

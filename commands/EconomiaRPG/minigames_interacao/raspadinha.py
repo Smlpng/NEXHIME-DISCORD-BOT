@@ -78,7 +78,7 @@ class ScratchView(discord.ui.View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message("Apenas quem comprou esta raspadinha pode raspar os bilhetes.", ephemeral=True)
+            await interaction.response.send_message("Apenas quem comprou está raspadinha pode raspar os bilhetes.", ephemeral=True)
             return False
         return True
 
@@ -106,8 +106,8 @@ class ScratchView(discord.ui.View):
         if self.finish_reason == "timeout":
             lucro = self.final_payout - self.bet_amount
             if self.final_payout > 0:
-                return f"A raspadinha expirou e foi revelada automaticamente: {_format_nex(self.final_payout)} nex ({lucro:+,} nex).".replace(",", ".")
-            return "A raspadinha expirou e foi revelada automaticamente sem premio."
+                return f"A raspadinha expirou e foi revelada automáticamente: {_format_nex(self.final_payout)} nex ({lucro:+,} nex).".replace(",", ".")
+            return "A raspadinha expirou e foi revelada automáticamente sem premio."
         return "Clique nos 6 botoes abaixo para raspar sua cartela e revelar os simbolos."
 
     def build_embed(self) -> discord.Embed:
@@ -117,7 +117,7 @@ class ScratchView(discord.ui.View):
         embed.add_field(name="Raspados", value=f"{len(self.revealed_cards)}/{SCRATCH_SIZE}", inline=True)
         embed.add_field(name="Carteira", value=f"{_format_nex(self._wallet_balance())} nex", inline=True)
         embed.add_field(name="Status", value=self._status_text(), inline=False)
-        embed.set_footer(text=f"Partida #{self.session_id} | 6 iguais pagam muito, 3+ iguais ja premiam.")
+        embed.set_footer(text=f"Partida #{self.session_id} | 6 iguais pagam muito, 3+ iguais já premiam.")
         return embed
 
     def _rebuild_items(self) -> None:
@@ -165,9 +165,9 @@ class ScratchView(discord.ui.View):
     async def reveal_card(self, interaction: discord.Interaction, index: int) -> None:
         if self.finished or index in self.revealed_cards:
             if interaction.response.is_done():
-                await interaction.followup.send("Esse bilhete ja foi raspado.", ephemeral=True)
+                await interaction.followup.send("Esse bilhete já foi raspado.", ephemeral=True)
             else:
-                await interaction.response.send_message("Esse bilhete ja foi raspado.", ephemeral=True)
+                await interaction.response.send_message("Esse bilhete já foi raspado.", ephemeral=True)
             return
 
         self.revealed_cards.add(index)
@@ -224,20 +224,20 @@ class Raspadinha(commands.Cog):
 
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo para comprar a raspadinha.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo para comprar a raspadinha.")
         if inte.user.id in self.active_games:
-            return await inte.response.send_message("Voce ja tem uma raspadinha aberta. Termine a atual antes de comprar outra.")
+            return await inte.response.send_message("Você já tem uma raspadinha aberta. Termine a atual antes de comprar outra.")
         if bet_amount <= 0:
             return await inte.response.send_message("Informe uma aposta positiva. Ex: !raspadinha 750")
 
         wallet = int(hero.get("nex", 0))
         if wallet < bet_amount:
             return await inte.response.send_message(
-                f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex."
+                f"Você não tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex."
             )
 
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            return await inte.response.send_message("Nao foi possivel debitar sua aposta. Tente novamente.")
+            return await inte.response.send_message("Não foi possível debitar sua aposta. Tente novamente.")
 
         view = ScratchView(self, inte.user.id, bet_amount)
         self.active_games[inte.user.id] = view
@@ -246,13 +246,13 @@ class Raspadinha(commands.Cog):
 
     async def restart_game(self, interaction: discord.Interaction, bet_amount: int) -> None:
         if interaction.user.id in self.active_games:
-            await interaction.response.send_message("Voce ja tem uma raspadinha em andamento.", ephemeral=True)
+            await interaction.response.send_message("Você já tem uma raspadinha em andamento.", ephemeral=True)
             return
 
         hero = get_active_hero(interaction.user.id)
         wallet = int(hero.get("nex", 0)) if hero else 0
         if hero is None:
-            await interaction.response.send_message("Nao consegui localizar seu heroi ativo.", ephemeral=True)
+            await interaction.response.send_message("Não consegui localizar seu herói ativo.", ephemeral=True)
             return
         if wallet < bet_amount:
             await interaction.response.send_message(
@@ -261,7 +261,7 @@ class Raspadinha(commands.Cog):
             )
             return
         if not update_active_hero_resources(interaction.user.id, nex=-bet_amount):
-            await interaction.response.send_message("Nao foi possivel debitar a nova aposta.", ephemeral=True)
+            await interaction.response.send_message("Não foi possível debitar a nova aposta.", ephemeral=True)
             return
 
         view = ScratchView(self, interaction.user.id, bet_amount)

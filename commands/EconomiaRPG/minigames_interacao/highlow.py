@@ -30,14 +30,14 @@ class HighLow(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="highlow", aliases=["maioroumenor"], help="Adivinhe se a proxima carta sera maior ou menor. Ex: !highlow 500 maior")
+    @commands.command(name="highlow", aliases=["maioroumenor"], help="Adivinhe se a próxima carta sera maior ou menor. Ex: !highlow 500 maior")
     async def highlow(self, ctx: commands.Context, bet_amount: int, palpite: str):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
 
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo para jogar highlow.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo para jogar highlow.")
         if bet_amount <= 0:
             return await inte.response.send_message("Informe uma aposta positiva. Ex: !highlow 500 maior")
 
@@ -47,9 +47,9 @@ class HighLow(commands.Cog):
 
         wallet = int(hero.get("nex", 0))
         if wallet < bet_amount:
-            return await inte.response.send_message(f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
+            return await inte.response.send_message(f"Você não tem nex suficiente. Carteira atual: {_format_nex(wallet)} nex.")
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            return await inte.response.send_message("Nao foi possivel reservar sua aposta.")
+            return await inte.response.send_message("Não foi possível reservar sua aposta.")
 
         first_card = random.choice(CARD_VALUES)
         second_card = random.choice(CARD_VALUES)
@@ -61,7 +61,7 @@ class HighLow(commands.Cog):
             is_higher = second_card > first_card
             win = (guess == "maior" and is_higher) or (guess == "menor" and not is_higher)
             payout = int(round(bet_amount * 1.9)) if win else 0
-            result_text = "Voce acertou o movimento da proxima carta." if win else "A carta virou contra o seu palpite."
+            result_text = "Você acertou o movimento da próxima carta." if win else "A carta virou contra o seu palpite."
 
         if payout > 0:
             update_active_hero_resources(inte.user.id, nex=payout)

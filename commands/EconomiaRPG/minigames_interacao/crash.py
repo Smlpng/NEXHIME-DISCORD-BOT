@@ -24,15 +24,15 @@ class Crash(commands.Cog):
 
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo para jogar crash.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo para jogar crash.")
         if bet_amount <= 0:
             return await inte.response.send_message("Informe uma aposta positiva.")
         if cashout_multiplier < 1.1 or cashout_multiplier > 10:
             return await inte.response.send_message("Escolha um multiplicador entre 1.1x e 10x.")
         if int(hero.get("nex", 0)) < bet_amount:
-            return await inte.response.send_message(f"Voce nao tem nex suficiente. Carteira atual: {_format_nex(hero['nex'])} nex.")
+            return await inte.response.send_message(f"Você não tem nex suficiente. Carteira atual: {_format_nex(hero['nex'])} nex.")
         if not update_active_hero_resources(inte.user.id, nex=-bet_amount):
-            return await inte.response.send_message("Nao foi possivel reservar sua aposta.")
+            return await inte.response.send_message("Não foi possível reservar sua aposta.")
 
         crash_point = round(random.uniform(1.0, 6.0), 2)
         payout = 0
@@ -40,7 +40,7 @@ class Crash(commands.Cog):
         if crash_point >= cashout_multiplier:
             payout = int(round(bet_amount * cashout_multiplier))
             update_active_hero_resources(inte.user.id, nex=payout)
-            result_text = "Voce conseguiu sacar antes da queda."
+            result_text = "Você conseguiu sacar antes da queda."
         else:
             result_text = "O grafico explodiu antes do seu saque."
 

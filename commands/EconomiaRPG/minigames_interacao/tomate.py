@@ -41,7 +41,7 @@ class Tomate(commands.Cog):
         ensure_profile(ctx.author.id)
         profile = get_active_hero(ctx.author.id)
         if profile is None:
-            return await ctx.reply("Nao consegui localizar seu perfil de tomates.", mention_author=False)
+            return await ctx.reply("Não consegui localizar seu perfil de tomates.", mention_author=False)
 
         bag_name = str(profile.get("tomato_bag", "Bolsa basica"))
         capacity = int(profile.get("tomato_capacity", 100))

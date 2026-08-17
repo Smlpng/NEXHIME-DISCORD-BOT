@@ -39,7 +39,7 @@ class Work(commands.Cog):
 		hero = get_active_hero(inte.user.id)
 		if hero is None:
 			return await inte.response.send_message(
-				"Seu perfil economico foi criado, mas voce ainda precisa ter um heroi para ganhar nex."
+				"Seu perfil economico foi criado, mas você ainda precisa ter um herói para ganhar nex."
 			)
 
 		now = time.time()
@@ -47,7 +47,7 @@ class Work(commands.Cog):
 		if available_at > now:
 			remaining = self._format_cooldown(int(available_at - now))
 			return await inte.response.send_message(
-				f"Voce precisa esperar {remaining} para usar esse comando novamente.",
+				f"Você precisa esperar {remaining} para usar esse comando novamente.",
 				ephemeral=True,
 			)
 
@@ -82,8 +82,8 @@ class Work(commands.Cog):
 		outcomes = [
 			"{user} saiu distribuindo charme pela cidade e conseguiu {nex} nex em gorjetas.",
 			"{user} entrou no salao mais caro do reino, fez contatos e voltou com {nex} nex.",
-			"{user} apostou no carisma, roubou a cena na festa e faturou {nex} nex.",
-			"{user} improvisou um numero provocante na taverna e ganhou {nex} nex.",
+			"{user} apostou no carisma, roubou a cena na festá e faturou {nex} nex.",
+			"{user} improvisou um número provocante na taverna e ganhou {nex} nex.",
 		]
 		await self._run_job_command(
 			ctx,

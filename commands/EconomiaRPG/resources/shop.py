@@ -23,7 +23,7 @@ LOJA_FILE = Path("DataBase") / "loja.json"
 
 
 def _load_loja() -> dict:
-    """Carrega a loja do JSON.
+    """Carrega a lojá do JSON.
 
     Estrutura esperada:
     {
@@ -90,7 +90,7 @@ def _build_shop_embed(loja: dict, *, only_segment: str | None = None) -> Embed:
     embed = Embed(title="Loja", description="Itens disponíveis:", color=RPG_PRIMARY_COLOR)
     if not loja:
         embed.add_field(
-            name="Loja vazia",
+            name="Lojá vazia",
             value=(
                 "Não encontrei itens em `DataBase/loja.json`.\n"
                 "Edite o arquivo seguindo a estrutura esperada e tente novamente."
@@ -119,7 +119,7 @@ def _build_shop_embed(loja: dict, *, only_segment: str | None = None) -> Embed:
             )
         else:
             embed.add_field(
-                name="Loja vazia",
+                name="Lojá vazia",
                 value="Não encontrei itens válidos no arquivo da loja.",
                 inline=False,
             )
@@ -149,7 +149,7 @@ def _build_shop_home_embed(loja: dict) -> Embed:
     )
     if not loja:
         embed.add_field(
-            name="Loja vazia",
+            name="Lojá vazia",
             value=(
                 "Não encontrei itens em `DataBase/loja.json`.\n"
                 "Edite o arquivo seguindo a estrutura esperada e tente novamente."
@@ -189,7 +189,7 @@ class _SectionButton(Button):
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self._owner_user_id:
             await interaction.response.send_message(
-                "Apenas quem abriu esta loja pode trocar de seção.",
+                "Apenas quem abriu está lojá pode trocar de seção.",
                 ephemeral=True,
             )
             return
@@ -225,7 +225,7 @@ class Shop(commands.Cog):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
         if get_active_hero(inte.user.id) is None:
-            return await inte.response.send_message("Seu perfil economico foi criado, mas voce precisa criar um heroi antes de comprar recursos para o inventario dele.")
+            return await inte.response.send_message("Seu perfil economico foi criado, mas você precisa criar um herói antes de comprar recursos para o inventario dele.")
 
         raw = (args or "").strip()
         if not raw:
@@ -242,7 +242,7 @@ class Shop(commands.Cog):
             return await inte.response.send_message("Informe o item. Ex: comprar Madeira 2")
 
         if amount <= 0:
-            await inte.response.send_message(f"A quantidade {amount} nao e suportada. O minimo e 1.")
+            await inte.response.send_message(f"A quantidade {amount} não e suportada. O mínimo e 1.")
             return
 
         loja = _load_loja()
@@ -272,7 +272,7 @@ class Shop(commands.Cog):
 
         price = unit_price * amount
         if price > user_nex:
-            await inte.response.send_message(f"Voce nao tem nex suficiente. Saldo atual: {user_nex} nex.")
+            await inte.response.send_message(f"Você não tem nex suficiente. Saldo atual: {user_nex} nex.")
             return
 
         if is_title:
@@ -304,13 +304,13 @@ class Shop(commands.Cog):
                 try:
                     new_capacity = int(payload.get("capacity"))
                 except (TypeError, ValueError):
-                    await inte.response.send_message("A capacidade desta bolsa está inválida no loja.json.")
+                    await inte.response.send_message("A capacidade destá bolsa está inválida no loja.json.")
                     return
 
                 current_tomatoes = int(data.get("tomato", 0))
                 if current_tomatoes > new_capacity:
                     await inte.response.send_message(
-                        f"Voce esta com {current_tomatoes} tomates e a nova bolsa suporta apenas {new_capacity}. Use tomates antes de trocar de bolsa."
+                        f"Você está com {current_tomatoes} tomates e a nova bolsa suporta apenas {new_capacity}. Use tomates antes de trocar de bolsa."
                     )
                     return
 
@@ -347,7 +347,7 @@ class Shop(commands.Cog):
                     current_capacity = int(data.get("tomato_capacity", current_tomatoes))
                     if current_tomatoes + tomato_amount > current_capacity:
                         await inte.response.send_message(
-                            f"Sua bolsa comporta ate {current_capacity} tomates e voce esta com {current_tomatoes}."
+                            f"Sua bolsa comporta ate {current_capacity} tomates e você está com {current_tomatoes}."
                         )
                     else:
                         await inte.response.send_message("A compra foi bloqueada para evitar saldo negativo ou recurso inválido.")

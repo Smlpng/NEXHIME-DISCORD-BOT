@@ -48,14 +48,14 @@ class Contrato(commands.Cog):
         await economy_profile_created(inte)
         hero = get_active_hero(inte.user.id)
         if hero is None:
-            return await inte.response.send_message("Voce precisa de um heroi ativo para assumir contratos.")
+            return await inte.response.send_message("Você precisa de um herói ativo para assumir contratos.")
 
         db = _load()
         now_ts = int(time.time())
         last_ts = int(db.get(str(inte.user.id), 0) or 0)
         if last_ts + COOLDOWN_SECONDS > now_ts:
             return await inte.response.send_message(
-                f"Voce ja concluiu um contrato recentemente. Tente novamente <t:{last_ts + COOLDOWN_SECONDS}:R>.",
+                f"Você já concluiu um contrato recentemente. Tente novamente <t:{last_ts + COOLDOWN_SECONDS}:R>.",
                 ephemeral=True,
             )
 

@@ -32,7 +32,7 @@ class Quotes(commands.Cog):
         _save(data)
         await ctx.reply("Citação salva.")
 
-    @commands.command(name="remover_citação", aliases=["delete_quote"], help="Remove uma citação pelo índice (veja o comando ver_citação).")
+    @commands.command(name="remover_citação", aliases=["delete_quote"], help="Remove uma citação pelo índice (vejá o comando ver_citação).")
     @commands.has_permissions(manage_messages=True)
     async def delquote(self, ctx: commands.Context, indice: int):
         data = _load()

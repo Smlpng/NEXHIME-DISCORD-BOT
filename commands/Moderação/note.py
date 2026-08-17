@@ -54,7 +54,7 @@ class Note(commands.Cog):
         data = _load()
         notes = data.get(str(ctx.guild.id), {}).get(str(membro.id), [])
         if not notes:
-            return await ctx.reply("Esse membro nao possui notas internas.")
+            return await ctx.reply("Esse membro não possui notas internas.")
         description = "\n\n".join(
             f"**{index}.** <t:{note['timestamp']}:f> por <@{note['by']}>\n{note['text']}"
             for index, note in enumerate(notes, start=1)
@@ -68,7 +68,7 @@ class Note(commands.Cog):
         data = _load()
         guild_notes = data.get(str(ctx.guild.id), {})
         if str(membro.id) not in guild_notes:
-            return await ctx.reply("Esse membro nao possui notas internas.")
+            return await ctx.reply("Esse membro não possui notas internas.")
         guild_notes.pop(str(membro.id), None)
         _save(data)
         await ctx.reply(f"Notas internas de {membro.mention} removidas.")

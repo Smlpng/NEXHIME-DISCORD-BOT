@@ -29,8 +29,8 @@ class WelcomeNovo(commands.Cog):
 				"E aí, macaco! 🐵 Aqui é o seu novo cantinho na selva digital 🌴\n"
 				"Divirta-se, faça amizades e explore tudo com a gente!\n\n"
 				"🍌 Pegue sua banana, relaxe e aproveite o servidor,\n"
-				"mas antes veja as <#1454463743466668092> e <#1456859390706716867>\n"
-				"E esteja pronto pra se divertir!"
+				"mas antes vejá as <#1454463743466668092> e <#1456859390706716867>\n"
+				"E estejá pronto pra se divertir!"
 			),
 			color=discord.Color.green(),
 		)
@@ -58,7 +58,7 @@ class WelcomeNovo(commands.Cog):
 
 	@commands.command(
 		name="testar_boas_vindas",
-		help="Testa a mensagem de boas-vindas no canal atual.",
+		help="Testá a mensagem de boas-vindas no canal atual.",
 	)
 	@commands.has_permissions(manage_guild=True)
 	async def testar_boas_vindas(self, ctx: commands.Context, membro: discord.Member | None = None):

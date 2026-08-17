@@ -8,7 +8,7 @@ class SetupCargos(commands.Cog):
     @commands.command(
         name="setup_cargos",
         aliases=["setupe cargo", "gerarcargos"],
-        help="Cria automaticamente os cargos tematizados do RPG Primordial com cores personalizadas."
+        help="Cria automáticamente os cargos tematizados do RPG Primordial com cores personalizadas."
     )
     @commands.has_permissions(administrator=True)
     async def setup_cargos(self, ctx: commands.Context):

@@ -32,30 +32,30 @@ class Roubar(commands.Cog):
     @commands.command(
         name="roubar",
         aliases=["assaltar", "furtar"],
-        help="Tenta roubar nex da carteira de outro jogador. Ex: !roubar @usuario",
+        help="Tenta roubar nex da carteira de outro jogador. Ex: !roubar @usuário",
     )
     async def roubar(self, ctx: commands.Context, member: discord.Member):
         inte = CommandContextAdapter(ctx)
         await economy_profile_created(inte)
 
         if member.bot:
-            return await inte.response.send_message("Voce nao pode roubar bots.")
+            return await inte.response.send_message("Você não pode roubar bots.")
         if member.id == inte.user.id:
-            return await inte.response.send_message("Voce nao pode roubar a si mesmo.")
+            return await inte.response.send_message("Você não pode roubar a si mesmo.")
 
         attacker = get_active_hero(inte.user.id)
         target = get_active_hero(member.id)
         if attacker is None:
-            return await inte.response.send_message("Nao consegui localizar seu heroi ativo.")
+            return await inte.response.send_message("Não consegui localizar seu herói ativo.")
         if target is None:
-            return await inte.response.send_message(f"{member.display_name} ainda nao tem um heroi ativo.")
+            return await inte.response.send_message(f"{member.display_name} ainda não tem um herói ativo.")
 
         now = time.time()
         available_at = self.cooldowns.get(inte.user.id, 0)
         if available_at > now:
             remaining = self._format_cooldown(int(available_at - now))
             return await inte.response.send_message(
-                f"Voce precisa esperar {remaining} para tentar outro roubo.",
+                f"Você precisa esperar {remaining} para tentar outro roubo.",
                 ephemeral=True,
             )
 
@@ -63,7 +63,7 @@ class Roubar(commands.Cog):
         target_wallet = int(target.get("nex", 0))
         if target_wallet < 50:
             return await inte.response.send_message(
-                f"{member.display_name} esta com pouco nex na carteira para valer o risco."
+                f"{member.display_name} está com pouco nex na carteira para valer o risco."
             )
 
         self.cooldowns[inte.user.id] = now + self.cooldown_seconds

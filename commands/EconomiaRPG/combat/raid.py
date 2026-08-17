@@ -21,7 +21,7 @@ class Raid(commands.Cog):
         
         hero = load_hero(inte.user.id)
         if hero.level < 10:
-            return await inte.response.send_message("E necessario estar no nivel 10 para entrar em uma raid.")
+            return await inte.response.send_message("E necessario estar no nível 10 para entrar em uma raid.")
         
         view = View()
         
@@ -45,7 +45,7 @@ class Raid(commands.Cog):
         
         hero = load_hero(inte.user.id, name=inte.user.name)
         if hero.level < 10:
-            return await inte.response.send_message("E necessario estar no nivel 10 para entrar em uma raid.", ephemeral=True)
+            return await inte.response.send_message("E necessario estar no nível 10 para entrar em uma raid.", ephemeral=True)
         
         zone = get_zone(player_id)
         bonus = 1.75
