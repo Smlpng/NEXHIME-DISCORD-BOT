@@ -44,6 +44,8 @@ env/
 *.db
 *.sqlite
 *.sqlite3
+DataBase/*.json
+!DataBase/*_exemple.json
 
 # Logs
 *.log
