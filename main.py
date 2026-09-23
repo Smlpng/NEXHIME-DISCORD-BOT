@@ -9,6 +9,7 @@ from discord.ext import commands
 
 import config
 from database import db_manager
+from status import initialize_status
 
 # Configuração de Logging
 logging.basicConfig(
@@ -39,6 +40,7 @@ class MongoDiscordBot(commands.Bot):
 
         # Carrega automaticamente todos os comandos na pasta commands
         await self.load_all_command_extensions()
+        await initialize_status(self)
 
     async def load_all_command_extensions(self):
         commands_dir = pathlib.Path(__file__).parent / "commands"
