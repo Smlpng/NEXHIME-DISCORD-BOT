@@ -3,7 +3,7 @@ from discord.ext import commands
 import re
 
 def get_prefixes_from_client(client: commands.Bot, guild: discord.Guild | None):
-    default_prefix = getattr(client, "default_prefix", "n!")
+    default_prefix = getattr(client, "default_prefix", "cb!")
     prefixes = getattr(client, "prefix_cache", None)
     if prefixes is None:
         prefixes = getattr(client, "prefixes_cache", {}) or {}
